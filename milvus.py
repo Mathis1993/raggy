@@ -1,14 +1,57 @@
 import os
+import random
 
 from dotenv import load_dotenv
-from pymilvus import connections
+from pymilvus import (
+    connections,
+    FieldSchema,
+    CollectionSchema,
+    DataType,
+    Collection,
+)
+
+
+def connect_to_milvus():
+    load_dotenv()
+    host = os.getenv("MILVUS_HOST")
+    port = os.getenv("MILVUS_PORT")
+    connections.connect(alias="default", host=host, port=port)
+
 
 if __name__ == "__main__":
-    load_dotenv()
-    # con_string = f"http://{os.getenv('MILVUS_USERNAME', 'root')}:{os.getenv('MILUVS_PASSWORD', 'Milvus')}@{os.getenv('MILVUS_HOST', 'localhost')}:{os.getenv('MILVUS_PORT',19530)}"
-    con = connections.connect(
-        alias="default",
-        host=f"{os.getenv('MILVUS_HOST', 'localhost'):{os.getenv('MILVUS_PORT',19530)}}",
-        token=f"{os.getenv('MILVUS_USERNAME', 'root')}:{os.getenv('MILVUS_PASSWORD', 'Milvus')}"
-    )
-    print(con)
+    connect_to_milvus()
+
+    fields = [
+        FieldSchema(name="pk", dtype=DataType.INT64, is_primary=True, auto_id=False),
+        FieldSchema(name="random", dtype=DataType.DOUBLE),
+        FieldSchema(name="embeddings", dtype=DataType.FLOAT_VECTOR, dim=8)
+    ]
+    schema = CollectionSchema(fields, "hello_milvus is the simplest demo to introduce the APIs")
+    hello_milvus = Collection("hello_milvus", schema)
+
+    entities = [
+        [i for i in range(3000)],  # field pk
+        [float(random.randrange(-20, -10)) for _ in range(3000)],  # field random
+        [[random.random() for _ in range(8)] for _ in range(3000)],  # field embeddings
+    ]
+    insert_result = hello_milvus.insert(entities)
+    # After final entity is inserted, it is best to call flush to have no growing segments left in memory
+    hello_milvus.flush()
+
+    index = {
+        "index_type": "IVF_FLAT",
+        "metric_type": "L2",
+        "params": {"nlist": 128},
+    }
+    hello_milvus.create_index("embeddings", index)
+
+    hello_milvus.load()
+    vectors_to_search = entities[-1][-2:]
+    search_params = {
+        "metric_type": "L2",
+        "params": {"nprobe": 10},
+    }
+    result = hello_milvus.search(vectors_to_search, "embeddings", search_params, limit=3, output_fields=["random"])
+    print(result)
+
+
