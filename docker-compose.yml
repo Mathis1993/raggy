@@ -1,7 +1,7 @@
 # For CPU users
 # For GPU users: https://github.com/milvus-io/milvus/releases/download/v2.3.5/milvus-standalone-docker-compose-gpu.yml
 
-version: '3.8'
+version: '3.5'
 
 services:
   etcd:
