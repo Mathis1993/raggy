@@ -1,0 +1,17 @@
+# All files listed here will be ignored by git
+.idea
+.docker
+.env
+
+# Mac
+.DS_Store
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Ngrok
+ngrok
+
+# ssh
+.ssh/
