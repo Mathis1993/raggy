@@ -45,9 +45,6 @@ class DocumentModelViewSet(ViewSet):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.client = OpenAI(
-            api_key=settings.OPENAI_API_KEY
-        )
 
     def list(self, request):
         documents = Document.objects.all()
