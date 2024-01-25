@@ -1,6 +1,10 @@
 <script>
-    import {Card} from 'flowbite-svelte';
+    import {Breadcrumb, BreadcrumbItem, Card} from 'flowbite-svelte';
 </script>
+
+<Breadcrumb class="mb-2" aria-label="Default breadcrumb example">
+    <BreadcrumbItem href="/" home>Home</BreadcrumbItem>
+</Breadcrumb>
 
 <Card class="max-w-full">
     <h5 class="mb-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white"> Dashboard</h5>
