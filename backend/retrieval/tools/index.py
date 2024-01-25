@@ -7,7 +7,7 @@ from llama_index.vector_stores import ChromaVectorStore
 import chromadb
 
 
-class DocumentEmbedder:
+class DocumentIndex:
     def __init__(self, model_path: str = "sentence-transformers/all-MiniLM-L6-v2", collection_name: str = "test"):
         self.collection_name = collection_name
         self.embedding_model = LangchainEmbedding(HuggingFaceEmbeddings(model_name=model_path))
@@ -22,16 +22,22 @@ class DocumentEmbedder:
         return storage_context
 
     def _build_service_context(self):
-        return ServiceContext.from_defaults(embed_model=self.embedding_model)
+        return ServiceContext.from_defaults(embed_model=self.embedding_model, chunk_size=128, chunk_overlap=15)
 
-    def embed(self, texts: List[str]):
-        if not isinstance(texts, list):
-            raise ValueError("Texts must be a list of strings")
+    def embed_texts(self, texts: List[str]):
+        for text in texts:
+            self.embed_text(text)
 
-        docs = [Document(text=text) for text in texts]
+    def embed_text(self, text: str):
+        doc = Document(text=text)
         index = VectorStoreIndex(
             storage_context=self.storage_context,
             service_context=self.service_context
         )
-        for doc in docs:
-            index.insert(doc)
+        index.insert(doc)
+
+    def get_index(self):
+        return VectorStoreIndex(
+            storage_context=self.storage_context,
+            service_context=self.service_context
+        )
