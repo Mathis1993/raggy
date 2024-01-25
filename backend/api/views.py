@@ -1,11 +1,15 @@
 from django.conf import settings
 from django.http import JsonResponse
-
 from openai import OpenAI
-from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
+
+from api.serializer import QuestionSerializer
+from questions.models import Question
 
 
-class QuestionAnswerView(APIView):
+class QuestionModelViewSet(ViewSet):
+
+    model = Question
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -13,8 +17,17 @@ class QuestionAnswerView(APIView):
             api_key=settings.OPENAI_API_KEY
         )
 
-    def post(self, request):
+    def list(self, request):
+        questions = Question.objects.all()
+        return JsonResponse({"questions": QuestionSerializer(questions, many=True).data})
+
+    def create(self, request):
         question_by_user = request.data.get("question")
+
+        question = Question.objects.create(
+            question=question_by_user,
+            answer="",
+        )
 
         if not question_by_user:
             print("No question provided")
@@ -31,7 +44,10 @@ class QuestionAnswerView(APIView):
             ],
             model="gpt-3.5-turbo",
         )
+        answer = str(chat_completion.choices[0].message.content)
+        question.answer = answer
+        question.save()
 
-        print("GPT answered: " + str(chat_completion.choices[0].message.content))
+        print("GPT answered: " + answer)
 
-        return JsonResponse({"answer": str(chat_completion.choices[0].message.content)})
+        return JsonResponse({"answer": answer})
