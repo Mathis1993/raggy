@@ -36,6 +36,7 @@
     <NavUl class="md:order-1">
         <NavLi href="/">Home</NavLi>
         <NavLi href="/questions">Questions</NavLi>
+        <NavLi href="/documents">Documents</NavLi>
     </NavUl>
 
 </Navbar>

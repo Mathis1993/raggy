@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {Button, Card, Search, Spinner} from 'flowbite-svelte';
+    import {Breadcrumb, BreadcrumbItem, Button, Card, Search, Spinner} from 'flowbite-svelte';
 
     const QUESTION_API_ENDPOINT: string = 'http://localhost:8000/api/questions/';
 
@@ -30,6 +30,11 @@
     }
 
 </script>
+
+<Breadcrumb class="mb-2" aria-label="Default breadcrumb example">
+    <BreadcrumbItem href="/" home>Home</BreadcrumbItem>
+    <BreadcrumbItem href="/questions">Questions</BreadcrumbItem>
+</Breadcrumb>
 
 <Card class="max-w-full">
     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Ask a new question</h5>

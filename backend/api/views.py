@@ -21,6 +21,10 @@ class QuestionModelViewSet(ViewSet):
         questions = Question.objects.all()
         return JsonResponse({"questions": QuestionSerializer(questions, many=True).data})
 
+    def retrieve(self, request, pk=None):
+        question = Question.objects.get(pk=pk)
+        return JsonResponse({"question": QuestionSerializer(question).data})
+
     def create(self, request):
         question_by_user = request.data.get("question")
 
