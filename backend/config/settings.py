@@ -47,7 +47,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     # own apps
+    "generation",
     "questions",
+    "retrieval",
 ]
 
 MIDDLEWARE = [
