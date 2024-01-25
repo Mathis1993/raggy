@@ -34,10 +34,7 @@ class QuestionModelViewSet(ViewSet):
         )
 
         if not question_by_user:
-            print("No question provided")
             return JsonResponse({"error": "No question provided"})
-
-        print("Asking GPT: " +question_by_user)
 
         chat_completion = self.client.chat.completions.create(
             messages=[
@@ -51,7 +48,4 @@ class QuestionModelViewSet(ViewSet):
         answer = str(chat_completion.choices[0].message.content)
         question.answer = answer
         question.save()
-
-        print("GPT answered: " + answer)
-
         return JsonResponse({"answer": answer})
