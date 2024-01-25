@@ -1,8 +1,14 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
-from backend.api.views import QuestionAnswerView
+from api.views import QuestionModelViewSet
+
+
+router = DefaultRouter()
+router.register(r"questions", QuestionModelViewSet, basename="question")
+
 
 app_name = "api"
 urlpatterns = [
-    path("questions/create", QuestionAnswerView.as_view(), name="create-question")
+    path("", include(router.urls)),
 ]
