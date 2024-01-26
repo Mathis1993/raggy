@@ -1,27 +1,26 @@
 <script lang="ts">
     import {Breadcrumb, BreadcrumbItem, Button, Card, Search, Spinner} from 'flowbite-svelte';
 
-    const QUESTION_API_ENDPOINT: string = 'http://localhost:8000/api/questions/';
+    const DOCUMENT_API_ENDPOINT: string = 'http://localhost:8000/api/documents/';
 
-    let question: string = '';
-    let answer: string = null;
+    let document_url: string = '';
     let submitted: boolean = false;
 
     async function handleSubmit(request: Event) {
         request.preventDefault();
         submitted = true;
-        const response = await fetch(QUESTION_API_ENDPOINT, {
+        const response = await fetch(DOCUMENT_API_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({'question': question})
+            body: JSON.stringify({'document_url': document_url})
         });
 
         if (response.ok) {
             let apiResponse = await response.json();
             console.log(apiResponse);
-            answer = apiResponse["question"].answer;
+            // Handle the response data
         } else {
             console.error('Error in API response');
         }
@@ -32,14 +31,14 @@
 
 <Breadcrumb class="mb-2" aria-label="Default breadcrumb example">
     <BreadcrumbItem href="/" home>Home</BreadcrumbItem>
-    <BreadcrumbItem href="/questions">Questions</BreadcrumbItem>
+    <BreadcrumbItem href="/documents">Documents</BreadcrumbItem>
 </Breadcrumb>
 
 <Card class="max-w-full">
-    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Ask a new question</h5>
+    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Add a new document URL</h5>
     <div class="mt-4">
         <form on:submit={handleSubmit}>
-            <Search bind:value={question} name="question">
+            <Search bind:value={document_url} name="document_url">
                 <Button type="submit">Submit</Button>
             </Search>
         </form>
@@ -48,12 +47,6 @@
     <div class="mt-4">
         {#if submitted}
             <Spinner/>
-        {/if}
-
-        {#if answer}
-            <div class="response">
-                <p>{answer}</p>
-            </div>
         {/if}
     </div>
 </Card>
