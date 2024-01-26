@@ -3,7 +3,7 @@
     import {CalendarWeekSolid} from "flowbite-svelte-icons";
 
     export let data;
-    let question: [] = data.question;
+    let question: Question = data.question;
 </script>
 
 <Breadcrumb class="mb-2" aria-label="Default breadcrumb example">

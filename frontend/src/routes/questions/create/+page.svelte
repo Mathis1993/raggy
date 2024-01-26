@@ -21,8 +21,7 @@
         if (response.ok) {
             let apiResponse = await response.json();
             console.log(apiResponse);
-            answer = apiResponse['answer'];
-            // Handle the response data
+            answer = apiResponse["question"].answer;
         } else {
             console.error('Error in API response');
         }
