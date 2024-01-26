@@ -4,13 +4,27 @@
         BreadcrumbItem,
         Button,
         Card,
-        Table, TableBody, TableBodyCell, TableBodyRow,
+        Table,
+        TableBody,
+        TableBodyCell,
+        TableBodyRow,
         TableHead,
-        TableHeadCell,
-        Timeline,
-        TimelineItem
+        TableHeadCell
     } from "flowbite-svelte";
-    import {CalendarWeekSolid} from "flowbite-svelte-icons";
+    import {Document} from "postcss";
+
+    export let data;
+    let documents: [ContextDocument] = data.documents;
+
+    async function deleteDocument(documentId: number) {
+        const response = await fetch('http://localhost:8000/api/documents/' + documentId + '/', {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            console.error('Failed to delete document', response.status);
+        }
+        location.reload();
+    }
 </script>
 
 <Breadcrumb class="mb-2" aria-label="Default breadcrumb example">
@@ -28,43 +42,26 @@
 
     <Table hoverable={true}>
         <TableHead>
-            <TableHeadCell>Product name</TableHeadCell>
-            <TableHeadCell>Color</TableHeadCell>
-            <TableHeadCell>Category</TableHeadCell>
-            <TableHeadCell>Price</TableHeadCell>
+            <TableHeadCell>Document Name</TableHeadCell>
+            <TableHeadCell>URL</TableHeadCell>
+            <TableHeadCell>Created At</TableHeadCell>
             <TableHeadCell>
-                <span class="sr-only">Edit</span>
+                <span class="sr-only">Details</span>
             </TableHeadCell>
         </TableHead>
         <TableBody class="divide-y">
-            <TableBodyRow>
-                <TableBodyCell>Apple MacBook Pro 17"</TableBodyCell>
-                <TableBodyCell>Sliver</TableBodyCell>
-                <TableBodyCell>Laptop</TableBodyCell>
-                <TableBodyCell>$2999</TableBodyCell>
-                <TableBodyCell>
-                    <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
-                </TableBodyCell>
-            </TableBodyRow>
-            <TableBodyRow>
-                <TableBodyCell>Microsoft Surface Pro</TableBodyCell>
-                <TableBodyCell>White</TableBodyCell>
-                <TableBodyCell>Laptop PC</TableBodyCell>
-                <TableBodyCell>$1999</TableBodyCell>
-                <TableBodyCell>
-                    <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
-                </TableBodyCell>
-            </TableBodyRow>
-            <TableBodyRow>
-                <TableBodyCell>Magic Mouse 2</TableBodyCell>
-                <TableBodyCell>Black</TableBodyCell>
-                <TableBodyCell>Accessories</TableBodyCell>
-                <TableBodyCell>$99</TableBodyCell>
-                <TableBodyCell>
-                    <a href="/tables" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
-                </TableBodyCell>
-            </TableBodyRow>
+            {#each documents as document}
+                <TableBodyRow>
+                    <TableBodyCell>{document.name}</TableBodyCell>
+                    <TableBodyCell>{document.url}</TableBodyCell>
+                    <TableBodyCell>{document.created_at}</TableBodyCell>
+                    <TableBodyCell>
+                        <a href="/documents/{document.id}/" class="font-medium text-primary-600 hover:underline dark:text-primary-500">View</a>
+                    </TableBodyCell>
+                    <TableBodyCell>
+                        <Button on:click={() => deleteDocument(document.id)} variant="danger">Delete</Button>                    </TableBodyCell>
+                </TableBodyRow>
+            {/each}
         </TableBody>
     </Table>
-
 </Card>
