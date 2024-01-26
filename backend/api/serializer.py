@@ -13,4 +13,4 @@ class QuestionSerializer(serializers.ModelSerializer):
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
-        fields = "__all__"
+        fields = ["id", "name", "url", "created_at"]
