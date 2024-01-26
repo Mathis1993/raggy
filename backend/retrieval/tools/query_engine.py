@@ -1,16 +1,16 @@
 from llama_index import ServiceContext
-from openai import OpenAI
+from llama_index.llms import OpenAI
 
 from retrieval.tools.index import DocumentIndex
 
 
 class QueryEngine:
 
-    def __init__(self, model: str = "text-davinci-002", temperature: float = 0.1):
+    def __init__(self, model: str = "gpt-3.5-turbo", temperature: float = 0.1):
         self.temperature = temperature
         self.model = model
         self.service_context = self._build_service_context()
-        self.index = DocumentIndex().get_index()
+        self.index = DocumentIndex().index
 
     def _build_service_context(self):
         return ServiceContext.from_defaults(
