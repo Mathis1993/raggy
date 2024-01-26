@@ -1,13 +1,16 @@
-import requests
-from django.conf import settings
+import json
+import logging
+
 from django.http import JsonResponse
-from openai import OpenAI
+from llama_index.readers import BeautifulSoupWebReader
 from rest_framework.viewsets import ViewSet
 
 from api.serializer import QuestionSerializer, DocumentSerializer
 from questions.models import Question
 from retrieval.models import Document
 from retrieval.tools.query_engine import QueryEngine
+
+logger = logging.getLogger(__name__)
 
 
 class QuestionModelViewSet(ViewSet):
@@ -18,7 +21,7 @@ class QuestionModelViewSet(ViewSet):
         super().__init__(**kwargs)
 
     def list(self, request):
-        questions = Question.objects.all()
+        questions = Question.objects.all().order_by("-created_at")[0:5]
         return JsonResponse({"questions": QuestionSerializer(questions, many=True).data})
 
     def retrieve(self, request, pk=None):
@@ -37,29 +40,42 @@ class QuestionModelViewSet(ViewSet):
         answer = query_engine.query(question_by_user)
         question.answer = answer
         question.save()
-        return JsonResponse({"answer": answer})
+        return JsonResponse({"question": QuestionSerializer(question).data})
 
 
 class DocumentModelViewSet(ViewSet):
-    model = Question
+    model = Document
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def list(self, request):
-        documents = Document.objects.all()
+        documents = self.model.objects.all()
         return JsonResponse({"documents": DocumentSerializer(documents, many=True).data})
 
     def retrieve(self, request, pk=None):
-        document = Document.objects.get(pk=pk)
+        document = self.model.objects.get(pk=pk)
+        return JsonResponse({"document": DocumentSerializer(document).data})
+
+    def delete(self, request, pk=None):
+        document = self.model.objects.get(pk=pk)
+        document.delete()
         return JsonResponse({"document": DocumentSerializer(document).data})
 
     def create(self, request):
-        requested_url = request.data.get("url")
-        html_text = requests.get(requested_url).text
-        document = Document.objects.create(
+        requested_url = request.data.get("document_url")
+
+        # make sure the url is valid
+        if not "http" in requested_url:
+            requested_url = "https://" + requested_url
+
+        document = BeautifulSoupWebReader().load_data([requested_url])[0]
+        logger.info(f"Extracted text from url: {document.text}")
+        document = self.model.objects.create(
             name=requested_url,
+            doc_id=document.get_doc_id(),
             url=requested_url,
-            text=html_text,
+            text=document.text,
         )
+        logger.info(f"Created document: {document}")
         return JsonResponse({"document": DocumentSerializer(document).data})
