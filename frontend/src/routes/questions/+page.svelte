@@ -13,9 +13,7 @@
 
     /** @type {import('./$types').PageData} */
     export let data;
-
-    let questions: [] = data.questions;
-
+    let questions: [Question] = data.questions;
 </script>
 
 <Breadcrumb class="mb-2" aria-label="Default breadcrumb example">
