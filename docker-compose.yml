@@ -1,9 +1,21 @@
-# For CPU users
-# For GPU users: https://github.com/milvus-io/milvus/releases/download/v2.3.5/milvus-standalone-docker-compose-gpu.yml
 
 version: '3.5'
 
 services:
+  postgres:
+    image: postgres:16.1
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./.docker/postgres_data:/var/lib/postgresql/data
+
+  # Milvus Vector db - etcd, minio and standalone containers
+  # For CPU users
+  # For GPU users: https://github.com/milvus-io/milvus/releases/download/v2.3.5/milvus-standalone-docker-compose-gpu.yml
   etcd:
     container_name: milvus-etcd
     image: quay.io/coreos/etcd:v3.5.5
@@ -66,3 +78,4 @@ services:
 networks:
   default:
     name: milvus
+  overlay:
