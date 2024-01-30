@@ -23,9 +23,15 @@ class MessageSerializer(serializers.Serializer):
         fields = "__all__"
 
 
-class ConversationSerializer(serializers.Serializer):
+class ConversationDetailSerializer(serializers.Serializer):
     messages = MessageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Conversation
         fields = "__all__"
+
+
+class ConversationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Conversation
+        fields = ["id", "name", "created_at"]
