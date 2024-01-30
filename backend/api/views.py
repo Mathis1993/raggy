@@ -1,46 +1,51 @@
-import json
 import logging
 
 from django.http import JsonResponse
 from llama_index.readers import BeautifulSoupWebReader
-from rest_framework.viewsets import ViewSet
+from rest_framework.generics import get_object_or_404
+from rest_framework.viewsets import ViewSet, ModelViewSet
 
-from api.serializer import QuestionSerializer, DocumentSerializer
-from questions.models import Question
+from api.serializer import DocumentSerializer, ConversationSerializer, ConversationDetailSerializer, \
+    MessageSerializer
+from conversations.models import Conversation
+from conversations.tasks import task_handle_user_message
 from retrieval.models import Document
-from retrieval.tools.query_engine import QueryEngine
 
 logger = logging.getLogger(__name__)
 
 
-class QuestionModelViewSet(ViewSet):
+class ConversationModelViewSet(ModelViewSet):
+    model = Conversation
+    # TODO: add permissions, e.g. IsAuthenticated
+    permission_classes = []
 
-    model = Question
+    def get_queryset(self):
+        # TODO: filter by user
+        return self.model.objects.all()
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return ConversationDetailSerializer
+        return ConversationSerializer
 
-    def list(self, request):
-        questions = Question.objects.all().order_by("-created_at")[0:5]
-        return JsonResponse({"questions": QuestionSerializer(questions, many=True).data})
 
-    def retrieve(self, request, pk=None):
-        question = Question.objects.get(pk=pk)
-        return JsonResponse({"question": QuestionSerializer(question).data})
+class MessageModelViewSet(ModelViewSet):
+    model = Conversation
+    permission_classes = []
+    serializer_class = MessageSerializer
 
-    def create(self, request):
-        question_by_user = request.data.get("question")
+    def get_queryset(self):
+        conversation_id = self.kwargs["conversation_id"]
+        # TODO: filter by user
+        conversation = get_object_or_404(Conversation, id=conversation_id)
+        return conversation.messages.all()
 
-        question = Question.objects.create(question=question_by_user)
-
-        if not question_by_user:
-            return JsonResponse({"error": "No question provided"})
-
-        query_engine = QueryEngine()
-        answer = query_engine.query(question_by_user)
-        question.answer = answer
-        question.save()
-        return JsonResponse({"question": QuestionSerializer(question).data})
+    def create(self, request, *args, **kwargs):
+        conversation_id, message = self.kwargs["conversation_id"], self.kwargs["message"]
+        conversation = get_object_or_404(Conversation, id=conversation_id)
+        text = request.data.get("text")
+        task_handle_user_message(conversation, text)
+        return JsonResponse({"message": "Message received"})
 
 
 class DocumentModelViewSet(ViewSet):
