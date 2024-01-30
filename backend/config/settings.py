@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     "corsheaders",
     # own apps
     "conversations",
-    "questions",
     "retrieval",
 ]
 
