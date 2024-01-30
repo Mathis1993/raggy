@@ -19,13 +19,12 @@ class ConversationEngine:
     """
 
     def __init__(self, conversation_history: List[ChatMessage] = None, model: str = "gpt-3.5-turbo", temperature: float = 0.1):
-        self.chat_history = conversation_history
         self.model = model
         self.temperature = temperature
 
         self.vector_index = DocumentIndex().index
-        self.conversation_agent = self._build_chat_agent()
-        self.conversation_engine = self._build_chat_context_engine()
+        self.conversation_agent = self._build_chat_agent(conversation_history)
+        self.conversation_engine = self._build_chat_context_engine(conversation_history)
 
     def _build_service_context(self) -> ServiceContext:
         return ServiceContext.from_defaults(
@@ -35,23 +34,23 @@ class ConversationEngine:
             )
         )
 
-    def _build_chat_agent(self, **kwargs) -> ReActAgent:
+    def _build_chat_agent(self, conversation_history: List[ChatMessage], **kwargs) -> ReActAgent:
         query_engine = self.vector_index.as_query_engine()
         query_engine_tool = QueryEngineTool.from_defaults(query_engine=query_engine)
         chat_agent = ReActAgent.from_tools(
             tools=[query_engine_tool],
             llm=self._build_service_context().llm,
-            chat_history=self.chat_history,
+            chat_history=conversation_history,
             verbose=True,
             **kwargs,
         )
 
         return chat_agent
 
-    def _build_chat_context_engine(self) -> CondensePlusContextChatEngine:
+    def _build_chat_context_engine(self, conversation_history: List[ChatMessage]) -> CondensePlusContextChatEngine:
         memory = ChatMemoryBuffer.from_defaults(
             token_limit=3900,
-            chat_history=self.chat_history,
+            chat_history=conversation_history,
         )
         chat_engine = self.vector_index.as_chat_engine(
             chat_mode="condense_plus_context",
