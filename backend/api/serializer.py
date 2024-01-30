@@ -1,14 +1,7 @@
 from rest_framework import serializers
 
 from conversations.models import Conversation, Message
-from questions.models import Question
 from retrieval.models import Document
-
-
-class QuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        fields = "__all__"
 
 
 class DocumentSerializer(serializers.ModelSerializer):
@@ -18,6 +11,11 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 
 class MessageSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    is_user_message = serializers.BooleanField(read_only=True)
+    text = serializers.CharField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True, format="%Y-%m-%d %H:%M")
+
     class Meta:
         model = Message
         fields = "__all__"
@@ -25,10 +23,13 @@ class MessageSerializer(serializers.Serializer):
 
 class ConversationDetailSerializer(serializers.Serializer):
     messages = MessageSerializer(many=True, read_only=True)
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Conversation
-        fields = "__all__"
+        fields = ["id", "name", "created_at", "messages"]
 
 
 class ConversationSerializer(serializers.ModelSerializer):
