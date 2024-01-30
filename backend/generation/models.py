@@ -28,3 +28,19 @@ class Message(models.Model):
 
     def __str__(self):
         return self.text
+
+    @classmethod
+    def create_user_message(cls, conversation: Conversation, text: str) -> "Message":
+        return cls.objects.create(
+            conversation=conversation,
+            text=text,
+            is_user_message=True,
+        )
+
+    @classmethod
+    def create_assistant_message(cls, conversation: Conversation, text: str) -> "Message":
+        return cls.objects.create(
+            conversation=conversation,
+            text=text,
+            is_user_message=False,
+        )
