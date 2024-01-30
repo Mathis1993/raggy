@@ -3,7 +3,7 @@ from typing import List
 from django.shortcuts import get_object_or_404
 from llama_index.core.llms.types import ChatResponse, ChatMessage, MessageRole
 
-from conversations.conversation_engine import ConversationEngine
+from conversations.engine import ConversationEngine
 from conversations.models import Conversation, Message
 
 
