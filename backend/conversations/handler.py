@@ -21,16 +21,9 @@ class ConversationHandler:
         )
 
     def handle_message(self, user_message: str):
-        Message.create_user_message(
-            conversation=self.conversation,
-            text=user_message,
-        )
+        self.conversation.add_user_message(user_message)
         assistant_response: ChatResponse = self.conversation_engine.query(user_message)
-        response_msg_obj = Message.create_assistant_message(
-            conversation=self.conversation,
-            text=assistant_response.response,
-        )
-
+        response_msg_obj = self.conversation.add_assistant_message(assistant_response.response)
         return response_msg_obj
 
     def _get_conversation_history(self) -> List[ChatMessage]:
