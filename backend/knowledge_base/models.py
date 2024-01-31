@@ -10,8 +10,6 @@ from llama_index.text_splitter import SentenceSplitter
 from core.models import TrackCreation
 from knowledge_base.vector_store import initialize_milvus_store
 
-EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-
 
 class Document(TrackCreation):
     class Meta:
@@ -46,7 +44,7 @@ class Document(TrackCreation):
         document.metadata["user_id"] = self.user_id
         document.metadata["postgres_doc_id"] = self.pk
 
-        embedding = LangchainEmbedding(HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL))
+        embedding = LangchainEmbedding(HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL))
 
         pipeline = IngestionPipeline(
             transformations=[
