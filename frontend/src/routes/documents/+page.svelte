@@ -52,8 +52,8 @@
         <TableBody class="divide-y">
             {#each documents as document}
                 <TableBodyRow>
-                    <TableBodyCell>{document.name}</TableBodyCell>
-                    <TableBodyCell>{document.url}</TableBodyCell>
+                    <TableBodyCell>{document.title}</TableBodyCell>
+                    <TableBodyCell>{document.identifier}</TableBodyCell>
                     <TableBodyCell>{document.created_at}</TableBodyCell>
                     <TableBodyCell>
                         <a href="/documents/{document.id}/" class="font-medium text-primary-600 hover:underline dark:text-primary-500">View</a>
