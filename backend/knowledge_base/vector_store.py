@@ -12,7 +12,7 @@ DOC_ID_FIELD = "postgres_doc_id"
 ALIAS = "default"
 
 
-def initialize_milvus_store(uri: str):
+def initialize_milvus_store(uri: str, load_collection: bool = False):
     # Connect to the Milvus server
     connections.connect(alias=ALIAS, uri=uri)
 
