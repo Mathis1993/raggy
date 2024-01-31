@@ -41,7 +41,7 @@ class Document(TrackCreation):
 
         documents = BeautifulSoupWebReader().load_data([url])
         if len(documents) == 0:
-            raise ValueError("No documents found.")
+            raise ValueError(f"Content extraction from url {url} failed.")
         document = documents[0]
         document.metadata["user_id"] = self.user_id
         document.metadata["postgres_doc_id"] = self.pk
