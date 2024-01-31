@@ -1,19 +1,14 @@
 import http
 import logging
 
-from django.conf import settings
 from django.db import IntegrityError
 from django.http import JsonResponse
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from llama_index import ServiceContext, StorageContext, VectorStoreIndex
-from llama_index.embeddings import LangchainEmbedding
 from rest_framework.viewsets import ViewSet
 
 from api.serializer import QuestionSerializer, DocumentSerializer
-from knowledge_base.models import Document, EMBEDDING_MODEL
-from knowledge_base.vector_store import initialize_milvus_store
+from knowledge_base.models import Document
+from knowledge_base.vector_store import get_query_engine_for_user
 from questions.models import Question
-from retrieval.tools.query_engine import QueryEngine
 
 logger = logging.getLogger(__name__)
 
@@ -43,12 +38,8 @@ class QuestionModelViewSet(ViewSet):
 
         # query_engine = QueryEngine()
         # answer = query_engine.query(question_by_user)
-        milvus_store = initialize_milvus_store(uri=f"http://{settings.MILVUS_HOST}:{settings.MILVUS_PORT}", load_collection=True)
-        embedding = LangchainEmbedding(HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL))
-        service_context = ServiceContext.from_defaults(embed_model=embedding)
-        storage_context = StorageContext.from_defaults(vector_store=milvus_store)
-        index = VectorStoreIndex.from_vector_store(vector_store=milvus_store, storage_context=storage_context, service_context=service_context)
-        query_engine = index.as_query_engine()
+        # ToDo(ME-31.01.24): Extract user_id from request
+        query_engine = get_query_engine_for_user(user_id=1)
         answer = query_engine.query(question_by_user)
         question.answer = answer
         question.save()
