@@ -14,6 +14,12 @@ class Conversation(models.Model):
     def get_message_history(self):
         return self.messages.order_by("created_at")[:10]
 
+    def add_user_message(self, text: str):
+        return Message.create_user_message(conversation=self, text=text)
+
+    def add_assistant_message(self, text: str):
+        return Message.create_assistant_message(conversation=self, text=text)
+
 
 class Message(models.Model):
     conversation = models.ForeignKey(
