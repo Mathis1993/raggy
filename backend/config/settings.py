@@ -47,8 +47,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     # own apps
+    "api",
+    "core",
     "conversations",
-    "retrieval",
+    "knowledge_base",
 ]
 
 MIDDLEWARE = [
@@ -176,3 +178,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+
+# Milvus
+MILVUS_HOST = os.environ.get("MILVUS_HOST", "localhost")
+MILVUS_PORT = os.environ.get("MILVUS_PORT", 19350)
+
+# LLMs
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"

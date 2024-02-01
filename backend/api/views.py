@@ -1,15 +1,17 @@
+import http
 import logging
 
+from django.db import IntegrityError
 from django.http import JsonResponse
-from llama_index.readers import BeautifulSoupWebReader
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ViewSet, ModelViewSet
 
-from api.serializer import DocumentSerializer, ConversationSerializer, ConversationDetailSerializer, \
+from api.serializer import ConversationSerializer, ConversationDetailSerializer, \
     MessageSerializer
+from api.serializer import DocumentSerializer
 from conversations.models import Conversation
 from conversations.tasks import task_handle_user_message
-from retrieval.models import Document
+from knowledge_base.models import Document
 
 logger = logging.getLogger(__name__)
 
@@ -74,13 +76,16 @@ class DocumentModelViewSet(ViewSet):
         if not "http" in requested_url:
             requested_url = "https://" + requested_url
 
-        document = BeautifulSoupWebReader().load_data([requested_url])[0]
-        logger.info(f"Extracted text from url: {document.text}")
-        document = self.model.objects.create(
-            name=requested_url,
-            doc_id=document.get_doc_id(),
-            url=requested_url,
-            text=document.text,
-        )
+        # ToDo(ME-31.01.24): Extract user_id from request
+        user_id = 1
+        try:
+            document = Document.objects.create(user_id=user_id, identifier=requested_url)
+            document.ingest(url=requested_url)
+        except IntegrityError as e:
+            logger.error(f"Could not ingest document: {e}")
+            return JsonResponse({"error": f"Document with url {requested_url} seems to exist already"}, status=http.HTTPStatus.BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Could not ingest document: {e}")
+            return JsonResponse({"error": str(e)}, status=http.HTTPStatus.INTERNAL_SERVER_ERROR)
         logger.info(f"Created document: {document}")
         return JsonResponse({"document": DocumentSerializer(document).data})
