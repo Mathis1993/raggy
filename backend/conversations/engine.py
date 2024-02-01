@@ -9,8 +9,7 @@ from llama_index.memory import ChatMemoryBuffer
 from llama_index.tools import QueryEngineTool
 from llama_index.vector_stores import MetadataFilters, ExactMatchFilter
 
-from knowledge_base.vector_store import get_query_engine_for_user, get_index
-from retrieval.tools.index import DocumentIndex
+from knowledge_base.vector_store import get_index
 
 
 class ConversationEngine:
@@ -27,8 +26,6 @@ class ConversationEngine:
         self.vector_index = get_index()
         self.conversation_agent = self._build_chat_agent(conversation_history)
         self.conversation_engine = self._build_chat_context_engine(conversation_history)
-
-        query_engine = get_query_engine_for_user(user_id=1)
 
     def _build_service_context(self) -> ServiceContext:
         return ServiceContext.from_defaults(

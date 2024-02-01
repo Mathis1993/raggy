@@ -47,10 +47,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     # own apps
+    "api",
     "core",
     "conversations",
     "knowledge_base",
-    "retrieval",
 ]
 
 MIDDLEWARE = [

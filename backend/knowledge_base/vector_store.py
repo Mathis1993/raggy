@@ -56,7 +56,11 @@ def create_milvus_collection():
     ]
 
     # Create the collection schema
-    schema = CollectionSchema(fields=fields, description=f"Collection for storing {COLLECTION} document embeddings and metadata", enable_dynamic_field=True)
+    schema = CollectionSchema(
+        fields=fields,
+        description=f"Collection for storing {COLLECTION} document embeddings and metadata",
+        enable_dynamic_field=True
+    )
 
     # Create the collection
     collection = Collection(name=COLLECTION, schema=schema)
@@ -76,8 +80,15 @@ def create_milvus_collection():
 
 
 def get_index():
-    milvus_store = initialize_milvus_store(uri=f"http://{settings.MILVUS_HOST}:{settings.MILVUS_PORT}", load_collection=True)
+    milvus_store = initialize_milvus_store(
+        uri=f"http://{settings.MILVUS_HOST}:{settings.MILVUS_PORT}",
+        load_collection=True
+    )
     embedding = LangchainEmbedding(HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL))
     service_context = ServiceContext.from_defaults(embed_model=embedding)
     storage_context = StorageContext.from_defaults(vector_store=milvus_store)
-    return VectorStoreIndex.from_vector_store(vector_store=milvus_store, storage_context=storage_context, service_context=service_context)
+    return VectorStoreIndex.from_vector_store(
+        vector_store=milvus_store,
+        storage_context=storage_context,
+        service_context=service_context
+    )
