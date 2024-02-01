@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
 from conversations.models import Conversation, Message
-from retrieval.models import Document
+from knowledge_base.models import Document
 
 
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
-        fields = ["id", "name", "url", "created_at"]
+        fields = ["id", "title", "identifier", "created_at"]
 
 
 class MessageSerializer(serializers.Serializer):
