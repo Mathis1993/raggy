@@ -60,6 +60,7 @@ class Document(TrackCreation):
                 TitleExtractor(),  # Uses OpenAI if no llm is provided
                 embedding,
             ],
+            # TODO: Can we use the vector_store parameter of the pipeline here?
         )
         nodes = pipeline.run(documents=[document])
         logger.info(f"Extracted {len(nodes)} nodes from document.")
