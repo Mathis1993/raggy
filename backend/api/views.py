@@ -48,19 +48,6 @@ class MessageModelViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         conversation_id, message = self.kwargs["conversation_id"], self.kwargs["message"]
         conversation = get_object_or_404(Conversation, id=conversation_id)
-
-        # if not question_by_user:
-        #     return JsonResponse({"error": "No question provided"})
-        #
-        #     # query_engine = QueryEngine()
-        #     # answer = query_engine.query(question_by_user)
-        #     # ToDo(ME-31.01.24): Extract user_id from request
-        # query_engine = get_query_engine_for_user(user_id=1)
-        # answer = query_engine.query(question_by_user)
-        # question.answer = answer
-        # question.save()
-        # return JsonResponse({"question": QuestionSerializer(question).data})
-
         text = request.data.get("text")
         task_handle_user_message(conversation, text)
         return JsonResponse({"message": "Message received"})

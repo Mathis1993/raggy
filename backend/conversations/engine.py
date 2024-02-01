@@ -7,7 +7,9 @@ from llama_index.core.llms.types import ChatMessage, ChatResponse
 from llama_index.llms import OpenAI
 from llama_index.memory import ChatMemoryBuffer
 from llama_index.tools import QueryEngineTool
+from llama_index.vector_stores import MetadataFilters, ExactMatchFilter
 
+from knowledge_base.vector_store import get_query_engine_for_user, get_index
 from retrieval.tools.index import DocumentIndex
 
 
@@ -22,9 +24,11 @@ class ConversationEngine:
         self.model = model
         self.temperature = temperature
 
-        self.vector_index = DocumentIndex().index
+        self.vector_index = get_index()
         self.conversation_agent = self._build_chat_agent(conversation_history)
         self.conversation_engine = self._build_chat_context_engine(conversation_history)
+
+        query_engine = get_query_engine_for_user(user_id=1)
 
     def _build_service_context(self) -> ServiceContext:
         return ServiceContext.from_defaults(
@@ -48,6 +52,8 @@ class ConversationEngine:
         return chat_agent
 
     def _build_chat_context_engine(self, conversation_history: List[ChatMessage]) -> CondensePlusContextChatEngine:
+        # TODO: get user_id from request
+        user_id = 1,
         memory = ChatMemoryBuffer.from_defaults(
             token_limit=3900,
             chat_history=conversation_history,
@@ -56,6 +62,14 @@ class ConversationEngine:
             chat_mode="condense_plus_context",
             service_context=self._build_service_context(),
             memory=memory,
+            filters=MetadataFilters(
+                filters=[
+                    ExactMatchFilter(
+                        key="user_id",
+                        value=user_id,
+                    )
+                ]
+            ),
         )
         return chat_engine
 

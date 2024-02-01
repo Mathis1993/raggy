@@ -81,18 +81,3 @@ def get_index():
     service_context = ServiceContext.from_defaults(embed_model=embedding)
     storage_context = StorageContext.from_defaults(vector_store=milvus_store)
     return VectorStoreIndex.from_vector_store(vector_store=milvus_store, storage_context=storage_context, service_context=service_context)
-
-
-def get_query_engine_for_user(user_id: int):
-    index = get_index()
-    query_engine = index.as_query_engine(
-        filters=MetadataFilters(
-            filters=[
-                ExactMatchFilter(
-                    key="user_id",
-                    value=user_id,
-                )
-            ]
-        ),
-    )
-    return query_engine
