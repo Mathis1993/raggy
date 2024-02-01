@@ -5,10 +5,13 @@
     let conversations: [Conversation] = data.conversations;
 </script>
 
-<h2 class="py-4 text-2xl font-semibold text-gray-800 dark:text-gray-200">Conversations</h2>
-
-<Card class="grid grid-cols-4 h-[calc(100vh-25vh)] max-w-full p-0 sm:p-0">
-    <div class="col-span-1 p-2 bg-gray-700 rounded text-white">
+<Card class="grid grid-cols-4 max-w-full h-[calc(100vh-7vh)] p-0 sm:p-0">
+    <div class="p-4 col-span-1 bg-gray-700 rounded text-white">
+        <a href="/conversations/">
+            <h2 class="flex text-2xl font-bold tracking-tight text-gray-50 pb-2 m-2">
+                Conversations
+            </h2>
+        </a>
         <ul>
             {#each conversations as conversation}
                 <Card class="flex items-center bg-gray-700 text-white hover:bg-gray-500 border-gray-500 hover:border-gray-50000 shadow-gray-700">
