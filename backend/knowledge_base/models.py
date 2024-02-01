@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.db import models
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -9,6 +11,8 @@ from llama_index.text_splitter import SentenceSplitter
 
 from core.models import TrackCreation
 from knowledge_base.vector_store import initialize_milvus_store
+
+logger = logging.getLogger(__name__)
 
 
 class Document(TrackCreation):
@@ -53,14 +57,16 @@ class Document(TrackCreation):
         pipeline = IngestionPipeline(
             transformations=[
                 SentenceSplitter(),
-                TitleExtractor(),
+                TitleExtractor(),  # Uses OpenAI if no llm is provided
                 embedding,
             ],
         )
         nodes = pipeline.run(documents=[document])
+        logger.info(f"Extracted {len(nodes)} nodes from document.")
         milvus_store.add([n for n in nodes if n.embedding is not None])
 
         self.doc_id = document.doc_id
         self.content = document.text
+        self.type = Document.Type.WEBSITE
         if len(nodes) > 0:
             self.title = nodes[0].metadata["document_title"]
