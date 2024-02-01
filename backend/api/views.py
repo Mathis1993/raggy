@@ -6,15 +6,12 @@ from django.http import JsonResponse
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ViewSet, ModelViewSet
 
-from api.serializer import DocumentSerializer, ConversationSerializer, ConversationDetailSerializer, \
+from api.serializer import ConversationSerializer, ConversationDetailSerializer, \
     MessageSerializer
+from api.serializer import DocumentSerializer
 from conversations.models import Conversation
 from conversations.tasks import task_handle_user_message
-from retrieval.models import Document
-from api.serializer import QuestionSerializer, DocumentSerializer
 from knowledge_base.models import Document
-from knowledge_base.vector_store import get_query_engine_for_user
-from questions.models import Question
 
 logger = logging.getLogger(__name__)
 

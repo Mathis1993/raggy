@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from conversations.models import Conversation, Message
-from retrieval.models import Document
+from knowledge_base.models import Document
 
 
 class DocumentSerializer(serializers.ModelSerializer):
