@@ -30,13 +30,8 @@
 
 </script>
 
-<Breadcrumb class="mb-2" aria-label="Default breadcrumb example">
-    <BreadcrumbItem href="/" home>Home</BreadcrumbItem>
-    <BreadcrumbItem href="/conversations">conversations</BreadcrumbItem>
-</Breadcrumb>
-
-<Card class="max-w-full">
-    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Ask a new conversation</h5>
+<Card class="col-span-3 max-w-full">
+    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Start a new conversation</h5>
     <div class="mt-4">
         <form on:submit={handleSubmit}>
             <Search bind:value={conversation} name="conversation">

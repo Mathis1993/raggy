@@ -12,11 +12,10 @@
         NavLi,
         NavUl
     } from 'flowbite-svelte';
-    import {IconSolid} from "flowbite-svelte-icons";
 </script>
 
 
-<Navbar>
+<Navbar class="h-[calc(100vh-93vh)]">
     <NavBrand href="/">
         <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">Raggy</span>
         <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
