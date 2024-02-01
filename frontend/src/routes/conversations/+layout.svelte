@@ -14,7 +14,7 @@
         </a>
         <ul>
             {#each conversations as conversation}
-                <Card class="flex items-center bg-gray-700 text-white hover:bg-gray-500 border-gray-500 hover:border-gray-50000 shadow-gray-700">
+                <Card class="flex max-w-full items-center bg-gray-700 text-white hover:bg-gray-500 border-gray-500 hover:border-gray-50000 shadow-gray-700">
                     <a href={`/conversations/${conversation.id}`}
                        class="flex items-center text-gray-700 dark:text-gray-200">
                         <span class="text-white">{conversation.name}</span>
