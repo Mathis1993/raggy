@@ -33,7 +33,8 @@ def initialize_milvus_store(uri: str, load_collection: bool = False):
     )
 
     # Ensure collection is loaded
-    milvus_store.collection.load()
+    if load_collection:
+        milvus_store.collection.load()
 
     return milvus_store
 
