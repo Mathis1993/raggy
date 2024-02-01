@@ -8,7 +8,7 @@ from pymilvus import Collection, CollectionSchema, FieldSchema, DataType, connec
 
 from config import settings
 
-logger = logging.getLogger("knowledge_base.vector_store")
+logger = logging.getLogger(__name__)
 
 COLLECTION = "raggy"
 VECTOR_DIM = 384
@@ -65,6 +65,7 @@ def create_milvus_collection():
 
     # Create the index
     index_params = {
+        # ToDo(ME-01.02.24): What is the best index type for us? https://milvus.io/docs/index.md
         "index_type": "IVF_FLAT",
         "metric_type": "L2",
         "params": {"nlist": 128},
@@ -80,6 +81,7 @@ def get_index():
     service_context = ServiceContext.from_defaults(embed_model=embedding)
     storage_context = StorageContext.from_defaults(vector_store=milvus_store)
     return VectorStoreIndex.from_vector_store(vector_store=milvus_store, storage_context=storage_context, service_context=service_context)
+
 
 def get_query_engine_for_user(user_id: int):
     index = get_index()
