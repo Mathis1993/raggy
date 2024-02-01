@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentIndex:
-    def __init__(self, embedding_model_path: str = "sentence-transformers/all-MiniLM-L6-v2", collection_name: str = "test2"):
+    def __init__(self, embedding_model_path: str = "sentence-transformers/all-MiniLM-L6-v2", collection_name: str = "test3"):
         self.collection_name = collection_name
         self.embedding_model_path = embedding_model_path
         self.index = self._build_index()
@@ -21,7 +21,7 @@ class DocumentIndex:
         milvus_store = MilvusVectorStore(
             uri="http://localhost:19530",
             collection_name=self.collection_name,
-            dim=1536,
+            dim=384,
             doc_id_field="id",
         )
         print(milvus_store.collection_name)
@@ -58,4 +58,5 @@ class DocumentIndex:
         storage_context = self._build_storage_context()
         return VectorStoreIndex.from_vector_store(
             vector_store=storage_context.vector_store,
+            service_context=self._build_service_context(),
         )
