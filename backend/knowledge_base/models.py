@@ -14,6 +14,7 @@ from knowledge_base.vector_store import initialize_milvus_store
 class Document(TrackCreation):
     class Meta:
         db_table = "knowledge_base_documents"
+        unique_together = ("user_id", "identifier")
 
     class Type(models.TextChoices):
         WEBSITE = "website"
@@ -21,7 +22,7 @@ class Document(TrackCreation):
         PLAIN_TEXT = "plain_text"
 
     user_id = models.IntegerField()
-    identifier = models.CharField(max_length=2048, unique=True)
+    identifier = models.CharField(max_length=2048)
     doc_id = models.CharField(max_length=2048, null=True)
     type = models.CharField(choices=Type.choices, max_length=255)
     title = models.CharField(max_length=1024, null=True)
