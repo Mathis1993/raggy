@@ -75,7 +75,8 @@ class DocumentModelViewSet(ViewSet):
         # ToDo(ME-31.01.24): Extract user_id from request
         user_id = 1
         try:
-            document = Document.objects.create(user_id=user_id, identifier=requested_url).ingest(requested_url)
+            document = Document.objects.create(user_id=user_id, identifier=requested_url)
+            document.ingest(url=requested_url)
         except IntegrityError as e:
             logger.error(f"Could not ingest document: {e}")
             return JsonResponse({"error": f"Document with url {requested_url} seems to exist already"}, status=http.HTTPStatus.BAD_REQUEST)
