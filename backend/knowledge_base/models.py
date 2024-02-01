@@ -28,6 +28,9 @@ class Document(TrackCreation):
     title = models.CharField(max_length=1024, null=True)
     content = models.TextField(null=True)
 
+    def __str__(self):
+        return f"{self.identifier} ({self.type})"
+
     def ingest(self, url: str):
         if not self.pk:
             raise ValueError("Document must be saved before ingestion.")
