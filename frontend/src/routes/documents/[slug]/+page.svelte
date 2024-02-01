@@ -8,8 +8,8 @@
 
 <Breadcrumb class="mb-2" aria-label="Default breadcrumb example">
     <BreadcrumbItem href="/" home>Home</BreadcrumbItem>
-    <BreadcrumbItem href="/questions">Documents</BreadcrumbItem>
-    <BreadcrumbItem href="/questions">Document ({document.id})</BreadcrumbItem>
+    <BreadcrumbItem href="/conversations">Documents</BreadcrumbItem>
+    <BreadcrumbItem href="/conversations">Document ({document.id})</BreadcrumbItem>
 </Breadcrumb>
 
 <Card class="max-w-full">
