@@ -1,121 +1,121 @@
-<mxfile host="app.diagrams.net" modified="2024-01-29T19:28:46.131Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="YpACXagd-QxEReb498oX" version="23.0.2" type="device">
+<mxfile host="app.diagrams.net" modified="2024-02-01T19:46:43.072Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="0mlu6W2g-wHtRPerVJlt" version="23.0.2" type="device">
   <diagram name="Page-1" id="r8FY33RvVtjF2X61W2zx">
-    <mxGraphModel dx="1401" dy="2028" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1291" dy="1988" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RXtlOFpf3LFGIGF0yc4--1" target="RXtlOFpf3LFGIGF0yc4--2">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="RXtlOFpf3LFGIGF0yc4--1" target="RXtlOFpf3LFGIGF0yc4--2" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--28" value="creates&amp;nbsp;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="RXtlOFpf3LFGIGF0yc4--27">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--28" value="creates&amp;nbsp;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="RXtlOFpf3LFGIGF0yc4--27" vertex="1" connectable="0">
           <mxGeometry x="-0.2441" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="RXtlOFpf3LFGIGF0yc4--1" target="RXtlOFpf3LFGIGF0yc4--30">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="RXtlOFpf3LFGIGF0yc4--1" target="RXtlOFpf3LFGIGF0yc4--30" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--45" value="can have" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="RXtlOFpf3LFGIGF0yc4--31">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--45" value="can have" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="RXtlOFpf3LFGIGF0yc4--31" vertex="1" connectable="0">
           <mxGeometry x="-0.059" y="3" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--1" value="User" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--1" value="User" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="250" y="330" width="120" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RXtlOFpf3LFGIGF0yc4--2" target="RXtlOFpf3LFGIGF0yc4--16">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="RXtlOFpf3LFGIGF0yc4--2" target="RXtlOFpf3LFGIGF0yc4--16" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--18" value="Documents are embedded and stored in vectordatabase&lt;br&gt;Input: &lt;br&gt;* Embeddings&lt;br&gt;* doc_id (would match Document.id, do we need to set this)&lt;br&gt;* Metadata: user_id" style="edgeLabel;html=1;align=left;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="RXtlOFpf3LFGIGF0yc4--17">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--18" value="Documents are embedded and stored in vectordatabase&lt;br&gt;Input: &lt;br&gt;* Embeddings&lt;br&gt;* doc_id (would match Document.id, do we need to set this)&lt;br&gt;* Metadata: user_id" style="edgeLabel;html=1;align=left;verticalAlign=middle;resizable=0;points=[];" parent="RXtlOFpf3LFGIGF0yc4--17" vertex="1" connectable="0">
           <mxGeometry x="0.0825" relative="1" as="geometry">
             <mxPoint x="90" y="-57" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--20" value="linked to" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="RXtlOFpf3LFGIGF0yc4--17">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--20" value="linked to" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="RXtlOFpf3LFGIGF0yc4--17" vertex="1" connectable="0">
           <mxGeometry x="0.0977" y="3" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RXtlOFpf3LFGIGF0yc4--2" target="RXtlOFpf3LFGIGF0yc4--9">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="RXtlOFpf3LFGIGF0yc4--2" target="RXtlOFpf3LFGIGF0yc4--9" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--26" value="may have" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="RXtlOFpf3LFGIGF0yc4--25">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--26" value="may have" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="RXtlOFpf3LFGIGF0yc4--25" vertex="1" connectable="0">
           <mxGeometry x="-0.3083" y="-2" relative="1" as="geometry">
             <mxPoint x="9" y="-2" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--2" value="Document" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--2" value="Document" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="250" y="120" width="120" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--5" value="user_id" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--5" value="user_id" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="250" y="170" width="120" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--6" value="created_at" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--6" value="created_at" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="250" y="190" width="120" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--7" value="text" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--7" value="text" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="250" y="210" width="120" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--9" value="File" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--9" value="File" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="460" y="120" width="120" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--10" value="doc_id" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--10" value="doc_id" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="460" y="170" width="120" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--11" value="type" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--11" value="type" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="460" y="190" width="120" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--14" value="file_path" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--14" value="file_path" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="460" y="210" width="120" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--16" value="VectorDatabase" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--16" value="VectorDatabase" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="260" y="-40" width="100" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--19" value="Setup of VDB:&lt;br&gt;- Collection Name&lt;br&gt;- URI&lt;br&gt;- Dimension&lt;br&gt;- tbd: overlap, retrieval algorithm, etc." style="edgeLabel;html=1;align=left;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--19" value="Setup of VDB:&lt;br&gt;- Collection Name&lt;br&gt;- URI&lt;br&gt;- Dimension&lt;br&gt;- tbd: overlap, retrieval algorithm, etc." style="edgeLabel;html=1;align=left;verticalAlign=middle;resizable=0;points=[];" parent="1" vertex="1" connectable="0">
           <mxGeometry x="209.99999999999977" y="-100.000303030303" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--22" value="&lt;b&gt;on&lt;/b&gt; &lt;b&gt;create&lt;/b&gt;: &lt;br&gt;- extract raw content into text&lt;br&gt;- ingestion pipeline for chunking e.g.&lt;br&gt;- embed content and store in VDB&lt;br&gt;- create File object and store file on disk" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
-          <mxGeometry x="80" y="120" width="150" height="40" as="geometry" />
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--22" value="&lt;b&gt;on&lt;/b&gt; &lt;b&gt;create&lt;/b&gt;: &lt;br&gt;- extract raw content into text&lt;br&gt;- ingestion pipeline for chunking e.g.&lt;br&gt;- embed content and store in VDB&lt;br&gt;- create File object and store file on disk" style="text;html=1;strokeColor=#005700;fillColor=#008a00;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" parent="1" vertex="1">
+          <mxGeometry x="80" y="-10" width="150" height="160" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--23" value="&lt;b&gt;on&lt;/b&gt; &lt;b&gt;delete&lt;/b&gt;: &lt;br&gt;- remove embedding from VDB by filtering nodes by doc_id&lt;br&gt;- delete file from disk and delete File object" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--23" value="&lt;b&gt;on&lt;/b&gt; &lt;b&gt;delete&lt;/b&gt;: &lt;br&gt;- remove embedding from VDB by filtering nodes by doc_id&lt;br&gt;- delete file from disk and delete File object" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="80" y="240" width="150" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="RXtlOFpf3LFGIGF0yc4--30" target="RXtlOFpf3LFGIGF0yc4--33">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="RXtlOFpf3LFGIGF0yc4--30" target="RXtlOFpf3LFGIGF0yc4--33" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--35" value="contains" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="RXtlOFpf3LFGIGF0yc4--34">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--35" value="contains" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="RXtlOFpf3LFGIGF0yc4--34" vertex="1" connectable="0">
           <mxGeometry x="-0.261" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--30" value="Conversation" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--30" value="Conversation" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="250" y="480" width="120" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--33" value="Message" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--33" value="Message" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="460" y="480" width="120" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--39" value="conversation_id" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--39" value="conversation_id" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="460" y="530" width="120" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--40" value="is_user?" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--40" value="is_user?" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="460" y="550" width="120" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--43" value="user_id" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--43" value="user_id" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="250" y="530" width="120" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--44" value="&lt;b&gt;get_context_data() &lt;/b&gt;as a join of previous messages" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--44" value="&lt;b&gt;get_context_data() &lt;/b&gt;as a join of previous messages" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="240" y="550" width="150" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--46" value="text" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--46" value="text" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="460" y="570" width="120" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--47" value="Example Workflow:&lt;br&gt;&lt;br&gt;1. User opens a new chat -&amp;gt; create a new &lt;i&gt;Conversation&lt;/i&gt;&lt;br&gt;2. User writes the question &quot;What is syntinels?&quot; -&amp;gt; Create a new &lt;i&gt;Message&lt;/i&gt;&lt;br&gt;3. Build index from QueryEngine (which uses VDB)&lt;br&gt;4. Build a history of conversation using the model method (e.g.)&lt;br&gt;5. Build&amp;nbsp;ReactAgent for Chat with&amp;nbsp;ReActChatFormatter and a list of ChatMessages as history&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;using QueryEngine&lt;/span&gt;&lt;br&gt;5. Query ReactAgent with a message (which is embedded using its already defined service context)&lt;br&gt;6. Store response as Message for Conversation&lt;br&gt;7. Return conversation to the user&lt;br&gt;&lt;br&gt;Chat low level:&lt;br&gt;https://docs.llamaindex.ai/en/stable/module_guides/deploying/chat_engines/usage_pattern.html#low-level-composition-api&lt;br&gt;&lt;br&gt;&lt;br&gt;Things to consider: Asynchronous generation (and retry in frontend until result appears)" style="rounded=0;whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--47" value="Example Workflow:&lt;br&gt;&lt;br&gt;1. User opens a new chat -&amp;gt; create a new &lt;i&gt;Conversation&lt;/i&gt;&lt;br&gt;2. User writes the question &quot;What is syntinels?&quot; -&amp;gt; Create a new &lt;i&gt;Message&lt;/i&gt;&lt;br&gt;3. Build index from QueryEngine (which uses VDB)&lt;br&gt;4. Build a history of conversation using the model method (e.g.)&lt;br&gt;5. Build&amp;nbsp;ReactAgent for Chat with&amp;nbsp;ReActChatFormatter and a list of ChatMessages as history&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;using QueryEngine&lt;/span&gt;&lt;br&gt;5. Query ReactAgent with a message (which is embedded using its already defined service context)&lt;br&gt;6. Store response as Message for Conversation&lt;br&gt;7. Return conversation to the user&lt;br&gt;&lt;br&gt;Chat low level:&lt;br&gt;https://docs.llamaindex.ai/en/stable/module_guides/deploying/chat_engines/usage_pattern.html#low-level-composition-api&lt;br&gt;&lt;br&gt;&lt;br&gt;Things to consider: Asynchronous generation (and retry in frontend until result appears)" style="rounded=0;whiteSpace=wrap;html=1;align=left;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="640" y="280" width="360" height="280" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--48" value="Data Ingestion Workflow:&lt;br&gt;&lt;br&gt;1. User requests a new website via API&lt;br&gt;2. Backend creates a Document object (database)&lt;br&gt;3. Scrape website and extract text using a LlamaIndexLoader -&amp;gt; Document (LlamaIndex)&lt;br&gt;4. Create data ingestion pipeline using e.g. Chunker and TitleExtractor -&amp;gt; List of Nodes&lt;br&gt;5. Enrich metadata of nodes with user_id and document_id&lt;br&gt;6. Store nodes in VDB (can be probably done in Pipeline)&lt;br&gt;7. Update Document (database) model&lt;br&gt;&lt;br&gt;Thinks to consider: Data deletion workflow for removing documents and nodes" style="rounded=0;whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--48" value="Data Ingestion Workflow:&lt;br&gt;&lt;br&gt;1. User requests a new website via API&lt;br&gt;2. Backend creates a Document object (database)&lt;br&gt;3. Scrape website and extract text using a LlamaIndexLoader -&amp;gt; Document (LlamaIndex)&lt;br&gt;4. Create data ingestion pipeline using e.g. Chunker and TitleExtractor -&amp;gt; List of Nodes&lt;br&gt;5. Enrich metadata of nodes with user_id and document_id&lt;br&gt;6. Store nodes in VDB (can be probably done in Pipeline)&lt;br&gt;7. Update Document (database) model&lt;br&gt;&lt;br&gt;Thinks to consider: Data deletion workflow for removing documents and nodes" style="rounded=0;whiteSpace=wrap;html=1;align=left;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="510" y="-240" width="360" height="210" as="geometry" />
         </mxCell>
-        <mxCell id="RXtlOFpf3LFGIGF0yc4--49" value="Data Retrieval Workflow:&lt;br&gt;&lt;br&gt;1. Input is user_id&lt;br&gt;....&lt;br&gt;2. Output is index object limited to nodes having the same user_id&lt;br&gt;3. index object is prepared for ChatEngine&lt;br&gt;&lt;br&gt;Multi Tenancy Guide:&lt;br&gt;https://docs.llamaindex.ai/en/stable/examples/multi_tenancy/multi_tenancy_rag.html" style="rounded=0;whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
+        <mxCell id="RXtlOFpf3LFGIGF0yc4--49" value="Data Retrieval Workflow:&lt;br&gt;&lt;br&gt;1. Input is user_id&lt;br&gt;....&lt;br&gt;2. Output is index object limited to nodes having the same user_id&lt;br&gt;3. index object is prepared for ChatEngine&lt;br&gt;&lt;br&gt;Multi Tenancy Guide:&lt;br&gt;https://docs.llamaindex.ai/en/stable/examples/multi_tenancy/multi_tenancy_rag.html" style="rounded=0;whiteSpace=wrap;html=1;align=left;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="750" y="20" width="350" height="160" as="geometry" />
         </mxCell>
       </root>
