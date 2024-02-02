@@ -9,7 +9,7 @@ class Conversation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return self.name or f"Conversation {self.id}"
 
     def get_message_history(self):
         return self.messages.order_by("created_at")[:10]

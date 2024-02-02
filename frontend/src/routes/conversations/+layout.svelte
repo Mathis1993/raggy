@@ -2,7 +2,7 @@
     import {Card} from "flowbite-svelte";
 
     export let data;
-    let conversations: [Conversation] = data.conversations;
+    let conversations: Conversation[] = data.conversations;
 </script>
 
 <Card class="grid grid-cols-4 max-w-full h-[calc(100vh-7vh)] p-0 sm:p-0">
@@ -14,8 +14,8 @@
         </a>
         <ul>
             {#each conversations as conversation}
-                <Card class="flex max-w-full items-center bg-gray-700 text-white hover:bg-gray-500 border-gray-500 hover:border-gray-50000 shadow-gray-700">
-                    <a href={`/conversations/${conversation.id}`}
+                <Card class="flex max-w-full justify-center items-center bg-gray-700 text-white hover:bg-gray-500 border-gray-500 hover:border-gray-50000 shadow-gray-700">
+                    <a data-sveltekit-reload href={`/conversations/${conversation.id}`}
                        class="flex items-center text-gray-700 dark:text-gray-200">
                         <span class="text-white">{conversation.name}</span>
                     </a>

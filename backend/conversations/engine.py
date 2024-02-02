@@ -59,14 +59,14 @@ class ConversationEngine:
             chat_mode="condense_plus_context",
             service_context=self._build_service_context(),
             memory=memory,
-            filters=MetadataFilters(
-                filters=[
-                    ExactMatchFilter(
-                        key="user_id",
-                        value=user_id,
-                    )
-                ]
-            ),
+            # filters=MetadataFilters(
+            #     filters=[
+            #         ExactMatchFilter(
+            #             key="user_id",
+            #             value=user_id,
+            #         )
+            #     ]
+            # ),
         )
         return chat_engine
 
