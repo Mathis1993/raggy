@@ -1,10 +1,17 @@
+export async function load({ params, fetch }) {
+    let conversationId = params.slug;
+    try {
+        const response = await fetch(`http://localhost:8000/api/conversations/${conversationId}/`);
 
+        if (!response.ok) {
+            console.error('Failed to fetch conversation:', response.status);
+            return { status: response.status, error: new Error('Conversation not found') };
+        }
 
-export async function load({ params }: { params: any }) {
-    console.log("Making request to http://localhost:8000/api/conversations");
-    let conversationId: number = params.slug
-    const response = await fetch('http://localhost:8000/api/conversations/' + conversationId + '/');
-    const conversation = await response.json();
-    console.log(conversation)
-    return {"conversation": conversation}
+        const conversation = await response.json();
+        return { conversation };
+    } catch (error) {
+        console.error('Error fetching conversation:', error);
+        return { status: 500, error };
+    }
 }

@@ -1,4 +1,5 @@
 import http
+import json
 import logging
 
 from django.db import IntegrityError
@@ -43,10 +44,11 @@ class MessageModelViewSet(ModelViewSet):
         return conversation.messages.all()
 
     def create(self, request, *args, **kwargs):
-        conversation_id, message = self.kwargs["conversation_id"], self.kwargs["message"]
-        conversation = get_object_or_404(Conversation, id=conversation_id)
-        text = request.data.get("text")
-        task_handle_user_message(conversation, text)
+        data = json.loads(request.body.decode("utf-8"))
+        print(data)
+        conversation_id, message = data["conversation_id"], data["message"]
+        conversation = get_object_or_404(Conversation, id=int(conversation_id))
+        task_handle_user_message(conversation.id, message)
         return JsonResponse({"message": "Message received"})
 
 
