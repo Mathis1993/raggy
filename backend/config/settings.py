@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "core",
     "conversations",
     "knowledge_base",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -176,6 +177,8 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Authentication
+AUTH_USER_MODEL = "users.User"
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
