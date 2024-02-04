@@ -1,5 +1,6 @@
 <script lang="ts">
     import {Breadcrumb, BreadcrumbItem, Button, Card, Search, Spinner} from 'flowbite-svelte';
+    import {goto} from "$app/navigation";
 
     const DOCUMENT_API_ENDPOINT: string = 'http://localhost:8000/api/documents/';
 
@@ -25,16 +26,13 @@
             console.error('Error in API response');
         }
         submitted = false;
+        goto('/documents')
     }
 
 </script>
 
-<Breadcrumb class="mb-2" aria-label="Default breadcrumb example">
-    <BreadcrumbItem href="/" home>Home</BreadcrumbItem>
-    <BreadcrumbItem href="/documents">Documents</BreadcrumbItem>
-</Breadcrumb>
 
-<Card class="max-w-full">
+<Card class="max-w-full w-full">
     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Add a new document URL</h5>
     <div class="mt-4">
         <form on:submit={handleSubmit}>

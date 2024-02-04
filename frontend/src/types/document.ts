@@ -1,6 +1,7 @@
 type ContextDocument = {
     id: number;
-    name: string;
+    title: string;
+    identifier: string;
     url: string;
     created_at: string;
 }
