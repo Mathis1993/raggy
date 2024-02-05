@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 class ConversationModelViewSet(ModelViewSet):
     model = Conversation
     # TODO: add permissions, e.g. IsAuthenticated
-    permission_classes = []
 
     def get_queryset(self):
         # TODO: filter by user
@@ -33,7 +32,6 @@ class ConversationModelViewSet(ModelViewSet):
 
 class MessageModelViewSet(ModelViewSet):
     model = Conversation
-    permission_classes = []
     serializer_class = MessageSerializer
 
     def get_queryset(self):
