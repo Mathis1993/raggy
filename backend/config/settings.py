@@ -31,8 +31,14 @@ SECRET_KEY = "django-insecure-+rpsn5x81y%)aa%t^$7)uhual@k^x&d&zi-ax0hf(qnda%&lv+
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# ToDo(ME-05.02.24):
+# CORS_ALLOW_ALL_ORIGINS = False
+# ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+# CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+# CORS_ORIGIN_WHITELIST = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
 
 # Application definition
 
@@ -153,6 +159,17 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+# REST_FRAMEWORK
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",  # Enforce authentication on all drf views
+    ]
+}
 
 
 # Internationalization
