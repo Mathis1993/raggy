@@ -1,6 +1,6 @@
 <script lang="ts">
     import {Avatar, Breadcrumb, BreadcrumbItem, Card} from "flowbite-svelte";
-    import ChatBubble from "../../../components/ChatBubble.svelte";
+    import ChatBubble from "../../../../components/ChatBubble.svelte";
     import {onMount} from "svelte";
 
     export let data;
@@ -16,7 +16,7 @@
     async function handleSubmit(event) {
         event.preventDefault();
         const message = event.target.elements.message.value;
-        const response = await fetch('http://localhost:8000/api/conversations/' + conversation.id + "/messages/", {
+        const response = await fetch('http://127.0.0.1:8000/api/conversations/' + conversation.id + "/messages/", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
