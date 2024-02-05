@@ -1,7 +1,7 @@
 <script lang="ts">
     import {Breadcrumb, BreadcrumbItem, Button, Card, Search, Spinner} from 'flowbite-svelte';
 
-    const CONVERSATION_API_ENDPOINT: string = 'http://localhost:8000/api/questions/';
+    const CONVERSATION_API_ENDPOINT: string = 'http://127.0.0.1:8000/api/questions/';
 
     let conversation: string = '';
     let answer: string = null;
@@ -15,6 +15,7 @@
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify({'conversation': conversation})
         });
 

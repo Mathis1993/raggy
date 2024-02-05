@@ -17,7 +17,7 @@
     let documents: [ContextDocument] = data.documents;
 
     async function deleteDocument(documentId: number) {
-        const response = await fetch('http://localhost:8000/api/documents/' + documentId + '/', {
+        const response = await fetch('http://127.0.0.1:8000/api/documents/' + documentId + '/', {
             method: 'DELETE',
         });
         if (!response.ok) {

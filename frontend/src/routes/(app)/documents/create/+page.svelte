@@ -1,7 +1,7 @@
 <script lang="ts">
     import {Breadcrumb, BreadcrumbItem, Button, Card, Search, Spinner} from 'flowbite-svelte';
 
-    const DOCUMENT_API_ENDPOINT: string = 'http://localhost:8000/api/documents/';
+    const DOCUMENT_API_ENDPOINT: string = 'http://127.0.0.1:8000/api/documents/';
 
     let document_url: string = '';
     let submitted: boolean = false;
