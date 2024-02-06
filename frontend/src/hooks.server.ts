@@ -2,8 +2,6 @@ import { redirect } from '@sveltejs/kit';
 
 const unProtectedRoutes = ['/login', '/signup', '/logout'];
 export const handle = async ({ event, resolve }) => {
-	console.log("hook");
-	console.log(event.url.pathname);
 	const sessionId = event.cookies.get('sessionid');
 	const isAuthenticated = sessionId !== undefined;
 	// ToDo: Check expiration date of the sessionid cookie
