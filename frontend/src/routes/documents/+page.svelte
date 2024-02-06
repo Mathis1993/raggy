@@ -48,7 +48,7 @@
 
     let documentDetails: any = null;
     async function handleView(documentId: number) {
-        if (documentId !== null) {
+        if (documentId != null) {
             documentDetails = await retrieveDocument(documentId);
         }
     }
