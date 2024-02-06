@@ -1,25 +1,35 @@
 <script lang="ts">
-    import {
-        Activity,
-        ActivityItem,
-        Breadcrumb,
-        BreadcrumbItem,
-        Button,
-        Card,
-        Timeline,
-        TimelineItem
-    } from 'flowbite-svelte';
-    import {CalendarWeekSolid} from "flowbite-svelte-icons";
+    import {Button} from 'flowbite-svelte';
+    import {goto, invalidateAll} from "$app/navigation";
 
-    /** @type {import('./$types').PageData} */
-    export let data;
-    let conversations: [Conversation] = data.conversations;
+    let createConversation = async () => {
+        console.log('Creating conversation');
+        try {
+            const response = await fetch('http://localhost:8000/api/conversations/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            if (!response.ok) {
+                console.error('Failed to create conversation');
+                return;
+            }
+
+            console.log('Conversation created');
+
+            const data = await response.json();
+            await goto(`/conversations/${data.id}`, {replaceState: true});
+            await invalidateAll();
+        } catch (error) {
+            console.error('Failed to create conversation', error);
+        }
+    }
 </script>
 
-<div class="col-span-3 flex items-center justify-center">
-    <div class=" my-2">
-        <Button href="/conversations/create">Start Conversation</Button>
-    </div>
+<div class="flex items-center justify-center">
+    <Button data-sveltekit-reload on:click={createConversation} color="primary" size="lg">Create conversation</Button>
 </div>
 
 
