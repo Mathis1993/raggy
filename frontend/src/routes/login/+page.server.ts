@@ -2,6 +2,7 @@ import { parse } from 'cookie';
 import { redirect } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageLoad} */
+// Get the csrf token and set it as a cookie
 export async function load({ cookies }) {
 	const response = await fetch('http://127.0.0.1:8000/users/csrf/', {credentials: 'include'});
 	const setCookieHeader = response.headers.get('set-cookie');
@@ -18,13 +19,14 @@ export async function load({ cookies }) {
 }
 
 export const actions = {
+	// Log in setting the sessionid cookie
 	post: async ({ cookies, request }) => {
 		const data = await request.formData();
 		const email = data.get('email') as string;
 		const password = data.get('password') as string;
 
 		const csrfToken = cookies.get('csrftoken') as string;
-		console.log('csrfToken', csrfToken);
+		const sessionId = cookies.get('sessionid') as string;
 
 		const headers: Record<string, string> = {
 			'Content-Type': 'application/x-www-form-urlencoded',
@@ -33,8 +35,10 @@ export const actions = {
 		if (csrfToken) {
 			headers['Cookie'] = `csrftoken=${csrfToken}`;
 		}
+		if (csrfToken && sessionId) {
+			headers['Cookie'] += `; sessionid=${sessionId}`;
+		}
 
-		// const body = JSON.stringify({ email: email, password: password, csrfmiddlewaretoken: csrfToken });
 		const body = new URLSearchParams({
 			email: email,
 			password: password,
