@@ -20,6 +20,28 @@ export async function createMessage(messageText: string, conversation: Conversat
     return await response.json();
 }
 
+
+export async function createConversation() {
+    try {
+        const response = await fetch('http://localhost:8000/api/conversations/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (!response.ok) {
+            console.error('Failed to create conversation');
+            return;
+        }
+
+        const data = await response.json();
+        await goto(`/conversations/${data.id}`, {replaceState: true});
+    } catch (error) {
+        console.error('Failed to create conversation', error);
+    }
+}
+
 export async function deleteConversation(conversationId: number) {
     try {
         const response = await fetch(CONVERSATION_API_URL + conversationId, {
@@ -35,7 +57,7 @@ export async function deleteConversation(conversationId: number) {
     } catch (error) {
         console.error('Failed to delete conversation', error);
     }
-    console.log('Redirecting to /conversations/');
-    await goto(`/conversations/`, {replaceState: true});
+    await goto(`/conversations/`);
+    // invalidate page data of layout.svelte
     await invalidateAll();
 }

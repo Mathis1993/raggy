@@ -42,8 +42,15 @@ class Document(TrackCreation):
         self._ingest(url)
         self.save()
 
+    def delete_and_digest(self):
+        self._digest()
+        self.delete()
+
     def _ingest(self, url: str):
-        milvus_store = initialize_milvus_store(uri=f"http://{settings.MILVUS_HOST}:{settings.MILVUS_PORT}", load_collection=False)
+        milvus_store = initialize_milvus_store(
+            uri=f"http://{settings.MILVUS_HOST}:{settings.MILVUS_PORT}",
+            load_collection=False
+        )
 
         documents = BeautifulSoupWebReader().load_data([url])
         if len(documents) == 0:
@@ -71,3 +78,13 @@ class Document(TrackCreation):
         self.type = Document.Type.WEBSITE
         if len(nodes) > 0:
             self.title = nodes[0].metadata["document_title"]
+
+    def _digest(self):
+        milvus_store = initialize_milvus_store(
+            uri=f"http://{settings.MILVUS_HOST}:{settings.MILVUS_PORT}",
+            load_collection=False
+        )
+        # TODO: Currently, we cannot just use the .delete() method of the milvus store as it does
+        #  some weird string concatenation with the ref_doc_id. So, we implement this on our own.
+        milvus_store.milvusclient.delete(collection_name=milvus_store.collection_name, pks=[self.pk])
+        logger.debug(f"Successfully deleted embedding with postgres_doc_id: {self.pk}")
