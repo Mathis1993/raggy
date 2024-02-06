@@ -27,13 +27,8 @@
     }
 </script>
 
-<Breadcrumb class="mb-2" aria-label="Default breadcrumb example">
-    <BreadcrumbItem href="/" home>Home</BreadcrumbItem>
-    <BreadcrumbItem href="/conversations">Documents</BreadcrumbItem>
-</Breadcrumb>
-
-<Card class="max-w-full">
-    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"> Your Uploaded Documents</h5>
+<Card class="max-w-full w-full">
+    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"> Uploaded Documents</h5>
     <p class="font-normal text-gray-700 dark:text-gray-400 leading-tight"> This is a list of your uploaded documents </p>
 
     <div class="flex justify-end my-2">

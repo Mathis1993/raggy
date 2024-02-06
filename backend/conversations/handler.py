@@ -22,8 +22,10 @@ class ConversationHandler:
 
     def handle_message(self, user_message: str):
         self.conversation.add_user_message(user_message)
+        self.conversation.mark_as_running()
         assistant_response: ChatResponse = self.conversation_engine.query(user_message)
         response_msg_obj = self.conversation.add_assistant_message(assistant_response.response)
+        self.conversation.mark_as_completed()
         return response_msg_obj
 
     def _get_conversation_history(self) -> List[ChatMessage]:

@@ -1,9 +1,11 @@
 import http
+import json
 import logging
 
 from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet, ModelViewSet
 
 from api.serializer import ConversationSerializer, ConversationDetailSerializer, \
@@ -43,11 +45,11 @@ class MessageModelViewSet(ModelViewSet):
         return conversation.messages.all()
 
     def create(self, request, *args, **kwargs):
-        conversation_id, message = self.kwargs["conversation_id"], self.kwargs["message"]
-        conversation = get_object_or_404(Conversation, id=conversation_id)
-        text = request.data.get("text")
-        task_handle_user_message(conversation, text)
-        return JsonResponse({"message": "Message received"})
+        data = json.loads(request.body.decode("utf-8"))
+        conversation_id, message = data["conversation_id"], data["message"]
+        conversation = get_object_or_404(Conversation, id=int(conversation_id))
+        task_handle_user_message(conversation.id, message)
+        return Response(ConversationDetailSerializer(conversation).data)
 
 
 class DocumentModelViewSet(ViewSet):

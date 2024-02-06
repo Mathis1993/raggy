@@ -1,9 +1,20 @@
 <script lang="ts">
-    import {Avatar} from "flowbite-svelte";
+    import {Avatar, Button, Tooltip} from "flowbite-svelte";
+    import {FileCopyOutline} from "flowbite-svelte-icons";
 
     export let message: Message;
     let role = message.is_user_message ? 'user' : 'bot';
     let color = message.is_user_message ? 'bg-blue-100' : 'bg-gray-100';
+
+    async function copyToClipboard() {
+        try {
+            await navigator.clipboard.writeText(message.text);
+            console.log('Message copied to clipboard');
+        } catch (err) {
+            console.error('Failed to copy message: ', err);
+        }
+    }
+
 </script>
 
 <div class="flex items-start gap-2.5 my-2">
@@ -17,11 +28,19 @@
         </svg>
     {/if}
     <div class={`flex flex-col w-full leading-1.5 p-4 border-gray-200 rounded-e-xl rounded-es-xl dark:bg-gray-700 ${color}`}>
-        <div class="flex items-center space-x-2 rtl:space-x-reverse">
-            <span class="text-sm font-semibold text-gray-900 dark:text-white">
-                {role === 'user' ? 'User' : 'Assistant'}
-            </span>
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{message.created_at}</span>
+        <div class="flex items-center justify-between space-x-2 rtl:space-x-reverse">
+            <div class="flex items-center">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                   {role === 'user' ? 'User' : 'Assistant'}
+                </span>
+                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{message.created_at}</span>
+            </div>
+            {#if role !== 'user'}
+                <Button outline={true} on:click={copyToClipboard} class="!p-2 text-gray-500 border-gray-500" size="md">
+                    <FileCopyOutline class="w-4 h-4"/>
+                </Button>
+                <Tooltip>Copy</Tooltip>
+            {/if}
         </div>
         <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white"> {message.text} </p>
     </div>
