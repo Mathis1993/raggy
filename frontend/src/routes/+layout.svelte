@@ -26,8 +26,6 @@
     $: sidebarVisible = width >= breakPoint;
     $: activeUrl = $page.url.pathname;
 
-    console.log($page.url.pathname);
-
     export let data;
     $: conversations = $page.data.conversations || [];
     $: loadingConversations = !conversations.length;
