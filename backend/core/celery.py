@@ -14,7 +14,7 @@ if os.getenv("ENVIRONMENT", "development") == "production":
     redis_backend_use_ssl = {"ssl_cert_reqs": ssl.CERT_NONE}
 
 app = Celery(
-    "raggy",
+    "app",
     broker_use_ssl=broker_use_ssl,
     redis_backend_use_ssl=redis_backend_use_ssl,
 )
