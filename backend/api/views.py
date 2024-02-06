@@ -52,24 +52,21 @@ class MessageModelViewSet(ModelViewSet):
         return Response(ConversationDetailSerializer(conversation).data)
 
 
-class DocumentModelViewSet(ViewSet):
+class DocumentModelViewSet(ModelViewSet):
     model = Document
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def list(self, request):
-        documents = self.model.objects.all()
-        return JsonResponse({"documents": DocumentSerializer(documents, many=True).data})
+    def get_queryset(self):
+        # TODO: filter by user
+        return self.model.objects.all()
 
-    def retrieve(self, request, pk=None):
-        document = self.model.objects.get(pk=pk)
-        return JsonResponse({"document": DocumentSerializer(document).data})
-
-    def delete(self, request, pk=None):
-        document = self.model.objects.get(pk=pk)
-        document.delete()
-        return JsonResponse({"document": DocumentSerializer(document).data})
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            # TODO: Add a serializer for the detail view
+            return DocumentSerializer
+        return DocumentSerializer
 
     def create(self, request):
         requested_url = request.data.get("document_url")
