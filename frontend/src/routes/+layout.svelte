@@ -1,20 +1,22 @@
 <script lang="ts">
     import '../app.pcss';
     import {
-        Avatar, Button,
+        Avatar,
+        Button,
         Drawer,
         Dropdown,
         DropdownDivider,
         DropdownHeader,
         DropdownItem,
         Navbar,
-        NavBrand, NavHamburger,
+        NavBrand,
+        NavHamburger,
         Sidebar,
         SidebarGroup,
         SidebarItem,
-        SidebarWrapper
+        SidebarWrapper,
     } from 'flowbite-svelte';
-    import {BookSolid, AngleLeftSolid, AngleRightSolid, BarsSolid} from "flowbite-svelte-icons";
+    import {BookSolid} from "flowbite-svelte-icons";
     import {onMount} from "svelte";
     import {page} from "$app/stores";
     import {goto, invalidateAll} from "$app/navigation";
@@ -22,7 +24,6 @@
 
     let breakPoint: number = 1024;
     let width: number = 72;
-    let backdrop: boolean = false;
     let activateClickOutside = true;
     let drawerHidden: boolean = false;
 
@@ -59,7 +60,7 @@
 
     let transitionParams = {
         duration: 0,
-        disable: true
+        transitionType: 'fly',
     };
 
     let createConversation = async () => {
@@ -93,50 +94,8 @@
 <svelte:window bind:innerWidth={width}/>
 
 
-<Drawer
-        {backdrop}
-        bind:hidden={drawerHidden}
-        bind:activateClickOutside
-        width="w-72"
-        class="inset-y-[calc(100vh-93vh)] h-full bg-gray-700"
-        id="sidebar"
-        {transitionParams}
->
-    <Sidebar class="w-full">
-        <SidebarWrapper class="bg-gray-700 p-0">
-            <SidebarGroup class="text-white">
-                <SidebarItem class="text-white hover:bg-gray-500"
-                             data-sveltekit-reload  label="Start New" on:click={createConversation}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                         class="h-6 w-6">
-                        <path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-linecap="round" stroke-linejoin="round"
-                              stroke-width="2"></path>
-                    </svg>
-                </SidebarItem>
+<header class="flex-none w-full mx-auto bg-white dark:bg-slate-950">
 
-                {#each conversations as conversation}
-                    <SidebarItem class="text-white hover:bg-gray-500"
-                                 label={conversation.name || "Start Conversation..." } data-sveltekit-reload
-                                 href={`/conversations/${conversation.id}`} on:click={toggleSide}
-                                 active={activeUrl === `conversations/`}>
-                    </SidebarItem>
-                {/each}
-
-            </SidebarGroup>
-
-            <SidebarGroup border>
-                <SidebarItem class="text-white hover:bg-gray-500" label="Documents" href="/documents">
-                    <svelte:fragment slot="icon">
-                        <BookSolid
-                                class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
-                    </svelte:fragment>
-                </SidebarItem>
-            </SidebarGroup>
-        </SidebarWrapper>
-    </Sidebar>
-</Drawer>
-
-<div class="flex flex-col min-h-screen">
     <Navbar class="fixed flex items-center h-[calc(100vh-93vh)] bg-gray-700 border-b border-gray-400">
         <Button
                 on:click={toggleDrawer}
@@ -166,8 +125,46 @@
             <DropdownItem>Sign out</DropdownItem>
         </Dropdown>
     </Navbar>
+</header>
 
-    <div class="flex flex-1 p-4 lg:ml-72 pt-[calc(100vh-90vh)] h-[calc(100vh-90vh)]">
-        <slot/>
-    </div>
+<div id="sidebar" class="overflow-y-auto z-50 p-4 dark:bg-gray-800 w-72 fixed start-0 inset-y-[calc(100vh-93vh)] h-full bg-gray-700">
+    <Sidebar class="w-full">
+        <SidebarWrapper class="bg-gray-700 p-0">
+            <SidebarGroup class="text-white">
+                <SidebarItem class="text-white hover:bg-gray-500"
+                             data-sveltekit-reload label="Start New" on:click={createConversation}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                         class="h-6 w-6">
+                        <path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-linecap="round" stroke-linejoin="round"
+                              stroke-width="2"></path>
+                    </svg>
+                </SidebarItem>
+
+                {#each conversations as conversation}
+                    <SidebarItem class="text-white hover:bg-gray-500"
+                                 label={conversation.name || "Start Conversation..." } data-sveltekit-reload
+                                 href={`/conversations/${conversation.id}`} on:click={toggleSide}
+                                 active={activeUrl === `conversations/`}>
+                    </SidebarItem>
+                {/each}
+
+            </SidebarGroup>
+
+            <SidebarGroup border>
+                <SidebarItem class="text-white hover:bg-gray-500" label="Documents" href="/documents">
+                    <svelte:fragment slot="icon">
+                        <BookSolid
+                                class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
+                    </svelte:fragment>
+                </SidebarItem>
+            </SidebarGroup>
+        </SidebarWrapper>
+    </Sidebar>
+</div>
+
+
+<div class="flex px-4 mx-auto w-full pt-[calc(100vh-90vh)] h-[calc(100vh-10vh)]">
+    <main class="lg:ml-72 w-full mx-auto">
+        <slot />
+    </main>
 </div>
