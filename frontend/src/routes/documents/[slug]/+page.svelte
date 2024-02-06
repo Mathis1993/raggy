@@ -6,13 +6,7 @@
     let document: ContextDocument = data.document;
 </script>
 
-<Breadcrumb class="mb-2" aria-label="Default breadcrumb example">
-    <BreadcrumbItem href="/" home>Home</BreadcrumbItem>
-    <BreadcrumbItem href="/conversations">Documents</BreadcrumbItem>
-    <BreadcrumbItem href="/conversations">Document ({document.id})</BreadcrumbItem>
-</Breadcrumb>
-
-<Card class="max-w-full">
+<Card class="max-w-full w-full">
     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"> {document.name} </h5>
 
     <TimelineItem title={document.name} date={document.created_at}>
