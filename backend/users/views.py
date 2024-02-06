@@ -1,7 +1,6 @@
 import http
-import json
 
-from django.contrib.auth import views as auth_views, authenticate, login
+from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.views import View
@@ -13,7 +12,7 @@ class CSRFTokenView(View):
         return JsonResponse({"message": "CSRF cookie set"})
 
 
-class LoginView(auth_views.LoginView):
+class LoginView(View):
     def post(self, request, *args, **kwargs):
         email = request.POST.get("email")
         password = request.POST.get("password")
