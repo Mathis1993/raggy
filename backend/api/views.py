@@ -68,7 +68,7 @@ class DocumentModelViewSet(ModelViewSet):
             return DocumentSerializer
         return DocumentSerializer
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         requested_url = request.data.get("document_url")
 
         # make sure the url is valid
@@ -87,4 +87,9 @@ class DocumentModelViewSet(ModelViewSet):
             logger.error(f"Could not ingest document: {e}")
             return JsonResponse({"error": str(e)}, status=http.HTTPStatus.INTERNAL_SERVER_ERROR)
         logger.info(f"Created document: {document}")
+        return JsonResponse({"document": DocumentSerializer(document).data})
+
+    def destroy(self, request, *args, **kwargs):
+        document = self.get_object()
+        document.delete_and_digest()
         return JsonResponse({"document": DocumentSerializer(document).data})
