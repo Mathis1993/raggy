@@ -1,4 +1,5 @@
 import {goto, invalidate} from "$app/navigation";
+import {Document} from "postcss";
 const DOCUMENT_API_ENDPOINT: string = 'http://localhost:8000/api/documents/';
 
 
@@ -8,7 +9,8 @@ export async function getDocuments() {
         console.error('Failed to fetch documents', response.status);
         return [];
     }
-    return await response.json();
+    const data = await response.json();
+    return {"documents": data}
 }
 
 
