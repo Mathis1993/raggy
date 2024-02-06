@@ -1,12 +1,11 @@
-import http
+import json
 import json
 import logging
 
-from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet, ModelViewSet
+from rest_framework.viewsets import ModelViewSet
 
 from api.serializer import ConversationSerializer, ConversationDetailSerializer, \
     MessageSerializer
@@ -14,6 +13,7 @@ from api.serializer import DocumentSerializer
 from conversations.models import Conversation
 from conversations.tasks import task_handle_user_message
 from knowledge_base.models import Document
+from knowledge_base.tasks import task_handle_document_ingestion
 
 logger = logging.getLogger(__name__)
 
@@ -77,16 +77,10 @@ class DocumentModelViewSet(ModelViewSet):
 
         # ToDo(ME-31.01.24): Extract user_id from request
         user_id = 1
-        try:
-            document = Document.objects.create(user_id=user_id, identifier=requested_url)
-            document.ingest(url=requested_url)
-        except IntegrityError as e:
-            logger.error(f"Could not ingest document: {e}")
-            return JsonResponse({"error": f"Document with url {requested_url} seems to exist already"}, status=http.HTTPStatus.BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Could not ingest document: {e}")
-            return JsonResponse({"error": str(e)}, status=http.HTTPStatus.INTERNAL_SERVER_ERROR)
-        logger.info(f"Created document: {document}")
+        document = Document.objects.create(
+            user_id=user_id, identifier=requested_url, status=Document.Status.PROCESSING
+        )
+        task_handle_document_ingestion.delay(document_id=document.id, url=requested_url)
         return JsonResponse({"document": DocumentSerializer(document).data})
 
     def destroy(self, request, *args, **kwargs):
