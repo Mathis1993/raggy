@@ -4,4 +4,5 @@ type ContextDocument = {
     identifier: string;
     url: string;
     created_at: string;
+    status: string;
 }
