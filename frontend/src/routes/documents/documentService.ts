@@ -37,9 +37,10 @@ export async function createDocument(document_url: string) {
     });
 
     if (response.ok) {
-        let apiResponse = await response.json();
-        console.log(apiResponse);
+        let createdDocument: ContextDocument = await response.json();
+        return createdDocument;
     } else {
         console.error('Error in API response');
+        return null;
     }
 }
