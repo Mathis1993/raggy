@@ -72,7 +72,7 @@ class DocumentModelViewSet(ModelViewSet):
         requested_url = request.data.get("document_url")
 
         # make sure the url is valid
-        if not "http" in requested_url:
+        if "http" not in requested_url:
             requested_url = "https://" + requested_url
 
         # ToDo(ME-31.01.24): Extract user_id from request
