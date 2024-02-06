@@ -9,7 +9,6 @@ export const handle = async ({ event, resolve }) => {
 		return redirect(303, '/login');
 	}
 
-	// ToDo: Delete cookies if logout request
 	// ToDo: Delete session from server in logout action
 	if (event.url.pathname === '/logout') {
 		event.cookies.delete('sessionid', { path: '/'});
