@@ -67,7 +67,7 @@
         <TableHead>
             <TableHeadCell>Document Name</TableHeadCell>
             <TableHeadCell>URL</TableHeadCell>
-            <TableHeadCell>Actions</TableHeadCell>
+            <TableHeadCell></TableHeadCell>
         </TableHead>
         <TableBody>
             {#each documents as document}
@@ -77,9 +77,6 @@
                     <TableBodyCell class="flex items-center justify-between">
                         <Button outline={true} on:click={async () => {detailModalVisible = true; await handleView(document.id);}} class="border-primary-400 hover:bg-primary-200">
                             <EyeOutline class="text-primary-600"/>
-                        </Button>
-                        <Button outline={true} on:click={() => {deleteModalVisible = true; documentToDelete = document.id;}} class="border-red-400 hover:bg-red-200">
-                            <TrashBinOutline class="text-red-600"/>
                         </Button>
                     </TableBodyCell>
                 </TableBodyRow>
@@ -112,7 +109,7 @@
         <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to remove this document?</h3>
         <Button on:click={handleDelete} color="red" class="me-2">Yes, I'm sure</Button>
-        <Button color="alternative">No, cancel</Button>
+        <Button color="alternative" on:click={() => {deleteModalVisible=false}}>No, cancel</Button>
     </div>
 </Modal>
 
@@ -121,7 +118,7 @@
         <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to remove this document?</h3>
         <Button on:click={handleDelete} color="red" class="me-2">Yes, I'm sure</Button>
-        <Button color="alternative">No, cancel</Button>
+        <Button color="alternative" on:click={() => {deleteModalVisible=false}}>No, cancel</Button>
     </div>
 </Modal>
 
@@ -144,7 +141,7 @@
 <!--                Edit-->
 <!--            </Button>-->
         </div>
-        <Button color="red">
+        <Button color="red" on:click={() => {deleteModalVisible = true; documentToDelete = documentDetails.id;}}>
             <svg aria-hidden="true" class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
             Delete
         </Button>
