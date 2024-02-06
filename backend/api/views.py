@@ -52,30 +52,27 @@ class MessageModelViewSet(ModelViewSet):
         return Response(ConversationDetailSerializer(conversation).data)
 
 
-class DocumentModelViewSet(ViewSet):
+class DocumentModelViewSet(ModelViewSet):
     model = Document
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def list(self, request):
-        documents = self.model.objects.all()
-        return JsonResponse({"documents": DocumentSerializer(documents, many=True).data})
+    def get_queryset(self):
+        # TODO: filter by user
+        return self.model.objects.all()
 
-    def retrieve(self, request, pk=None):
-        document = self.model.objects.get(pk=pk)
-        return JsonResponse({"document": DocumentSerializer(document).data})
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            # TODO: Add a serializer for the detail view
+            return DocumentSerializer
+        return DocumentSerializer
 
-    def delete(self, request, pk=None):
-        document = self.model.objects.get(pk=pk)
-        document.delete()
-        return JsonResponse({"document": DocumentSerializer(document).data})
-
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         requested_url = request.data.get("document_url")
 
         # make sure the url is valid
-        if not "http" in requested_url:
+        if "http" not in requested_url:
             requested_url = "https://" + requested_url
 
         # ToDo(ME-31.01.24): Extract user_id from request
@@ -90,4 +87,9 @@ class DocumentModelViewSet(ViewSet):
             logger.error(f"Could not ingest document: {e}")
             return JsonResponse({"error": str(e)}, status=http.HTTPStatus.INTERNAL_SERVER_ERROR)
         logger.info(f"Created document: {document}")
+        return JsonResponse({"document": DocumentSerializer(document).data})
+
+    def destroy(self, request, *args, **kwargs):
+        document = self.get_object()
+        document.delete_and_digest()
         return JsonResponse({"document": DocumentSerializer(document).data})
