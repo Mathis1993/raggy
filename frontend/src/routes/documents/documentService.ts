@@ -1,5 +1,3 @@
-import {goto, invalidate} from "$app/navigation";
-import {Document} from "postcss";
 const DOCUMENT_API_ENDPOINT: string = 'http://localhost:8000/api/documents/';
 
 
@@ -9,8 +7,13 @@ export async function getDocuments() {
         console.error('Failed to fetch documents', response.status);
         return [];
     }
-    const data = await response.json();
-    return {"documents": data}
+    return await response.json();
+}
+
+export async function retrieveDocument(documentId: number) {
+    const response = await fetch('http://localhost:8000/api/documents/' + documentId + '/');
+    const document: ContextDocument = await response.json();
+    return document;
 }
 
 
