@@ -1,5 +1,4 @@
 import { redirect } from '@sveltejs/kit';
-import { createEventDispatcher } from 'svelte';
 
 const unProtectedRoutes = ['/login', '/signup', '/logout'];
 export const handle = async ({ event, resolve }) => {
