@@ -1,7 +1,7 @@
 import { parse } from 'cookie';
 import { redirect } from '@sveltejs/kit';
 
-/** @type {import('./$types').PageLoad} */
+/** @type {import('../../../../.svelte-kit/types/src/routes').PageLoad} */
 // Get the csrf token and set it as a cookie
 export async function load({ cookies }) {
 	const response = await fetch('http://127.0.0.1:8000/users/csrf/', {credentials: 'include'});
