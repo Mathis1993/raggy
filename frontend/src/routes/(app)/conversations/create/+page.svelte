@@ -1,5 +1,6 @@
 <script lang="ts">
     import {Breadcrumb, BreadcrumbItem, Button, Card, Search, Spinner} from 'flowbite-svelte';
+    import { getCsrfToken } from '$lib/cookies';
 
     const CONVERSATION_API_ENDPOINT: string = 'http://127.0.0.1:8000/api/questions/';
 
@@ -13,7 +14,8 @@
         const response = await fetch(CONVERSATION_API_ENDPOINT, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken() ,
             },
             credentials: 'include',
             body: JSON.stringify({'conversation': conversation})

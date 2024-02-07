@@ -1,5 +1,6 @@
 <script lang="ts">
     import {Breadcrumb, BreadcrumbItem, Button, Card, Search, Spinner} from 'flowbite-svelte';
+    import { getCsrfToken } from '$lib/cookies';
 
     const DOCUMENT_API_ENDPOINT: string = 'http://127.0.0.1:8000/api/documents/';
 
@@ -9,11 +10,14 @@
     async function handleSubmit(request: Event) {
         request.preventDefault();
         submitted = true;
+        console.log('doc creation csrf token', getCsrfToken())
         const response = await fetch(DOCUMENT_API_ENDPOINT, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
             },
+            credentials: 'include',
             body: JSON.stringify({'document_url': document_url})
         });
 
