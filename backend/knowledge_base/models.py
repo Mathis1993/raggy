@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from llama_index.embeddings import LangchainEmbedding
-from llama_index.extractors import TitleExtractor
+from llama_index.extractors import TitleExtractor, KeywordExtractor
 from llama_index.ingestion import IngestionPipeline
 from llama_index.readers import BeautifulSoupWebReader
 from llama_index.text_splitter import SentenceSplitter
@@ -38,6 +38,9 @@ class Document(TrackCreation):
     title = models.CharField(max_length=1024, null=True)
     content = models.TextField(null=True)
     status = models.CharField(choices=Status.choices, max_length=255, default=Status.PROCESSING)
+
+    # Testing of metadata extraction
+    keywords = models.TextField(null=True)
 
     def __str__(self):
         return f"{self.identifier} ({self.type})"
@@ -76,7 +79,8 @@ class Document(TrackCreation):
         pipeline = IngestionPipeline(
             transformations=[
                 SentenceSplitter(),
-                TitleExtractor(),  # Uses OpenAI if no llm is provided
+                TitleExtractor(),
+                KeywordExtractor(),
                 embedding,
             ],
             # TODO: Can we use the vector_store parameter of the pipeline here?
@@ -90,6 +94,8 @@ class Document(TrackCreation):
         self.type = Document.Type.WEBSITE
         if len(nodes) > 0:
             self.title = nodes[0].metadata["document_title"]
+            keywords = ", ".join([node.metadata.get("excerpt_keywords", "") for node in nodes])
+            self.keywords = keywords
 
     @staticmethod
     def _extract_document_from_url(url: str):
