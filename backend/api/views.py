@@ -48,7 +48,9 @@ class MessageModelViewSet(ModelViewSet):
         data = json.loads(request.body.decode("utf-8"))
         conversation_id, message = data["conversation_id"], data["message"]
         conversation = get_object_or_404(Conversation, id=int(conversation_id))
-        task_handle_user_message(conversation.id, message)
+        conversation.mark_as_running()
+        conversation.add_user_message(message)
+        task_handle_user_message.delay(conversation.id, message)
         return Response(ConversationDetailSerializer(conversation).data)
 
 
