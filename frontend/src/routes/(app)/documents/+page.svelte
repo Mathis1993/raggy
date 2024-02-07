@@ -12,6 +12,7 @@
         TableHeadCell
     } from "flowbite-svelte";
     import {Document} from "postcss";
+    import { getCsrfToken } from '$lib/cookies';
 
     export let data;
     let documents: [ContextDocument] = data.documents;
@@ -19,6 +20,11 @@
     async function deleteDocument(documentId: number) {
         const response = await fetch('http://127.0.0.1:8000/api/documents/' + documentId + '/', {
             method: 'DELETE',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            }
         });
         if (!response.ok) {
             console.error('Failed to delete document', response.status);
