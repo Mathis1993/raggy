@@ -1,3 +1,5 @@
+import {invalidateAll} from "$app/navigation";
+
 const DOCUMENT_API_ENDPOINT: string = 'http://localhost:8000/api/documents/';
 
 

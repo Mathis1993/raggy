@@ -15,11 +15,12 @@
     } from "flowbite-svelte";
     import {invalidate, invalidateAll} from "$app/navigation";
     import {createDocument, deleteDocument, retrieveDocument} from "./documentService";
-    import {ExclamationCircleOutline, TrashBinOutline, EyeOutline} from "flowbite-svelte-icons";
+    import {ExclamationCircleOutline, EyeOutline, CheckCircleSolid, CloseCircleSolid} from "flowbite-svelte-icons";
     import {onDestroy, onMount} from "svelte";
+    import {page} from "$app/stores";
 
     export let data;
-    let documents: [ContextDocument] = data.documents;
+    $: documents = $page.data.documents || [];
 
     let createModalVisible: boolean = false;
     let deleteModalVisible: boolean = false;
@@ -95,20 +96,30 @@
         <TableHead>
             <TableHeadCell>Document Name</TableHeadCell>
             <TableHeadCell>URL</TableHeadCell>
+            <TableHeadCell>Type</TableHeadCell>
+            <TableHeadCell>Status</TableHeadCell>
             <TableHeadCell></TableHeadCell>
         </TableHead>
         <TableBody>
             {#each documents as document}
                 <TableBodyRow class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
                     <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
-                        {#if document.status === "processing"}
-                            <Spinner/>
-                        {:else}
-                            {document.title ? document.title.substring(0, 50) : 'No title'}
-                        {/if}
+                        {document.title ? document.title.substring(0, 50) : 'No title'}
                     </TableBodyCell>
                     <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
                         {document.identifier}
+                    </TableBodyCell>
+                    <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
+                        {document.type}
+                    </TableBodyCell>
+                    <TableBodyCell>
+                        {#if document.status === "processing"}
+                            <Spinner/>
+                        {:else if document.status === "completed"}
+                            <CheckCircleSolid class="text-green-700"/>
+                        {:else if document.status === "failed"}
+                            <CloseCircleSolid class="text-red-700"/>
+                        {/if}
                     </TableBodyCell>
                     <TableBodyCell class="flex items-center justify-between">
                         <Button outline={true}
@@ -173,6 +184,12 @@
         <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">{documentDetails ? documentDetails.identifier : 'Loading...'}</dd>
         <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Created At</dt>
         <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">{documentDetails ? documentDetails.created_at : 'Loading...'}</dd>
+        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Type</dt>
+        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">{documentDetails ? documentDetails.type : 'Loading...'}</dd>
+        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Status</dt>
+        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">{documentDetails ? documentDetails.status : 'Loading...'}</dd>
+        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Keywords</dt>
+        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">{documentDetails ? documentDetails.keywords : 'Loading...'}</dd>
     </dl>
     <div class="flex justify-between items-center">
         <div class="flex items-center space-x-3 sm:space-x-4">
