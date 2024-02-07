@@ -80,7 +80,13 @@ class DocumentModelViewSet(ModelViewSet):
         document = Document.objects.create(
             user_id=user_id, identifier=requested_url, status=Document.Status.PROCESSING
         )
-        task_handle_document_ingestion.delay(document_id=document.id, url=requested_url)
+        task = task_handle_document_ingestion.apply_async(
+            kwargs={"document_id": document.id, "url": requested_url}
+        )
+
+        # Log the task details
+        logger.info(task)
+
         return JsonResponse({"document": DocumentSerializer(document).data})
 
     def destroy(self, request, *args, **kwargs):
