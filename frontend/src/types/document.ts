@@ -5,4 +5,6 @@ type ContextDocument = {
     url: string;
     created_at: string;
     status: string;
+    type: string;
+    keywords: string;
 }
