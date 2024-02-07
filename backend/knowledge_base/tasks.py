@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task
-def task_handle_document_ingestion(document_id: int, url: str) -> None:
+def task_handle_document_ingestion(document_id: int, url: str) -> bool:
     try:
         document = Document.objects.get(id=document_id)
         document.ingest(url)
