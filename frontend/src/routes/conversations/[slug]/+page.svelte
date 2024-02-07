@@ -24,26 +24,11 @@
     }
 
     async function sendMessage(messageText: string) {
-        // TODO: replace this when its an async process in the backend which returns the message with the id
-        messages = [...messages, {
-            id: messages.length + 1,
-            text: messageText,
-            conversation: conversation,
-            is_user_message: true,
-            created_at: new Date().toISOString(),
-        }];
-        scrollToBottom()
-
-        conversation.status = "RUNNING";
-        await createMessage(messageContent, data.conversation);
-
-        // TOOD: replace this with actually fetching the conversation + messages from the backend
-        // reload the conversation to get the new message
-        await invalidateAll();
         messageContent = '';
-        messages = data.conversation.messages;
-        conversation = data.conversation;
-        scrollToBottom();
+        conversation = createMessage(messageContent, data.conversation);
+        messages = conversation.messages
+        scrollToBottom()
+        await invalidateAll();
     }
 
     function scrollToBottom() {
