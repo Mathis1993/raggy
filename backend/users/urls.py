@@ -8,7 +8,7 @@ app_name = "users"
 urlpatterns = [
     path("csrf/", views.CSRFTokenView.as_view(), name="csrf"),
     path("login/", views.LoginView.as_view(), name="login"),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("logout/", views.LogoutView.as_view(), name="logout"),
     # ToDo(ME-03.02.24): Signup
     # ToDo(ME-03.02.24): Password reset
     ]
