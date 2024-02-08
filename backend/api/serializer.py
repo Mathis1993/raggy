@@ -26,6 +26,7 @@ class ConversationDetailSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
+    status = serializers.CharField(read_only=True)
 
     class Meta:
         model = Conversation
