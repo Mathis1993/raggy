@@ -6,8 +6,12 @@ Django==5.0.1
 djangorestframework==3.14.0
 django-cors-headers==4.3.1
 django-extensions==3.2.3
-
 python-dotenv==1.0.1
+
+# Redis and Celery
+celery==5.3.6
+rq==1.15.1  # redis queue
+django_redis==5.4.0
 
 # Retrieval
 llama_index==0.9.37.post1
@@ -23,6 +27,6 @@ urllib3==2.1.0
 openai==1.9.0
 
 # Testing
-factory-boy==3.2.1
-pytest==7.3.1
-pytest-django==4.5.2
+factory-boy==3.3.0
+pytest==8.0.0
+pytest-django==4.8.0

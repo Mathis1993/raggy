@@ -13,6 +13,14 @@ services:
     volumes:
       - ./.docker/postgres_data:/var/lib/postgresql/data
 
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./.docker/redis_data:/data
+
   # Milvus Vector db - etcd, minio and standalone containers
   # For CPU users
   # For GPU users: https://github.com/milvus-io/milvus/releases/download/v2.3.5/milvus-standalone-docker-compose-gpu.yml
