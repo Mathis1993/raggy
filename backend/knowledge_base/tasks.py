@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task
-def task_handle_document_ingestion(document_id: int, url: str) -> bool:
+def task_handle_document_ingestion(document_id: int) -> bool:
     document = Document.objects.get(id=document_id)
     try:
-        document.ingest(url)
+        document.ingest()
     except IntegrityError as e:
         logger.error(f"Could not ingest document: {e}")
         document.mark_as_failed()

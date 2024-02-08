@@ -1,8 +1,10 @@
 import logging
+from pathlib import Path
 
 from django.conf import settings
 from django.db import models
 from langchain_community.embeddings import HuggingFaceEmbeddings
+from llama_index import download_loader
 from llama_index.embeddings import LangchainEmbedding
 from llama_index.extractors import TitleExtractor, KeywordExtractor
 from llama_index.ingestion import IngestionPipeline
@@ -39,17 +41,34 @@ class Document(TrackCreation):
     content = models.TextField(null=True)
     status = models.CharField(choices=Status.choices, max_length=255, default=Status.PROCESSING)
 
+    url = models.URLField(null=True, blank=True, default=None)
+    file = models.FileField(upload_to='documents/', null=True, blank=True, default=None)
+
     # Testing of metadata extraction
     keywords = models.TextField(null=True)
 
     def __str__(self):
         return f"{self.identifier} ({self.type})"
 
-    def ingest(self, url: str):
+    @classmethod
+    def create_from_url(cls, user_id: int, url: str):
+        document = cls.objects.create(user_id=user_id, identifier=url, type=cls.Type.WEBSITE, url=url)
+        return document
+
+    @classmethod
+    def create_from_file(cls, user_id: int, identifier: str, file: str):
+        document = cls.objects.create(
+            user_id=user_id,
+            identifier=identifier,
+            file=file,
+            type=cls.Type.PDF
+        )
+        return document
+
+    def ingest(self):
         if not self.pk:
             raise ValueError("Document must be saved before ingestion.")
-
-        self._ingest(url)
+        self._ingest()
         self.mark_as_completed(save=False)
         self.save()
 
@@ -65,12 +84,19 @@ class Document(TrackCreation):
     def mark_as_completed(self):
         self.status = Document.Status.COMPLETED
 
-    def _ingest(self, url: str):
+    def _ingest(self):
         milvus_store = initialize_milvus_store(
             uri=f"http://{settings.MILVUS_HOST}:{settings.MILVUS_PORT}",
             load_collection=False
         )
-        document = self._extract_document_from_url(url)
+
+        if self.type == Document.Type.WEBSITE:
+            document = self._extract_document_from_url()
+        elif self.type == Document.Type.PDF:
+            document = self._extract_document_from_file()
+        else:
+            raise ValueError(f"Document type {self.type} not supported.")
+
         document.metadata["user_id"] = self.user_id
         document.metadata["postgres_doc_id"] = self.pk
 
@@ -97,13 +123,21 @@ class Document(TrackCreation):
             keywords = ", ".join([node.metadata.get("excerpt_keywords", "") for node in nodes])
             self.keywords = keywords
 
-    @staticmethod
-    def _extract_document_from_url(url: str):
+    def _extract_document_from_url(self):
+        url = self.url
         documents = BeautifulSoupWebReader().load_data([url])
         if len(documents) == 0:
             raise ValueError(f"Content extraction from url {url} failed.")
         document = documents[0]
         return document
+
+    def _extract_document_from_pdf(self):
+        PDFReader = download_loader("PDFReader")
+        loader = PDFReader()
+        documents = loader.load_data(file=Path(self.file.path))
+        if len(documents) == 0:
+            raise ValueError(f"Content extraction from pdf {self.file} failed.")
+        return documents[0]
 
     def _digest(self):
         milvus_store = initialize_milvus_store(

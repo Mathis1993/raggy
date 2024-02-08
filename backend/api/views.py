@@ -3,7 +3,10 @@ import json
 import logging
 
 from django.http import JsonResponse
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -56,6 +59,7 @@ class MessageModelViewSet(ModelViewSet):
 
 class DocumentModelViewSet(ModelViewSet):
     model = Document
+    parser_classes = (MultiPartParser, FormParser)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -79,17 +83,21 @@ class DocumentModelViewSet(ModelViewSet):
 
         # ToDo(ME-31.01.24): Extract user_id from request
         user_id = 1
-        document = Document.objects.create(
-            user_id=user_id, identifier=requested_url, status=Document.Status.PROCESSING
-        )
-        task = task_handle_document_ingestion.apply_async(
-            kwargs={"document_id": document.id, "url": requested_url}
-        )
-
-        # Log the task details
-        logger.info(task)
-
+        document = Document.create_from_url(user_id, requested_url)
+        task_handle_document_ingestion.delay(document_id=document.id)
         return JsonResponse({"document": DocumentSerializer(document).data})
+
+    @action(detail=False, methods=['post'], url_path='upload')
+    def upload_file(self, request, *args, **kwargs):
+        file = request.FILES.get('file')
+        if not file:
+            return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Extract user_id from request (ToDo: Implement actual user extraction)
+        user_id = 1
+        document = Document.create_from_file(user_id=user_id, file=file, identifier=file.name)
+        task_handle_document_ingestion.delay(document_id=document.id)
+        return Response({"document": DocumentSerializer(document).data}, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
         document = self.get_object()
