@@ -15,6 +15,7 @@ from api.serializer import ConversationSerializer, ConversationDetailSerializer,
 from api.serializer import DocumentSerializer
 from conversations.models import Conversation
 from conversations.tasks import task_handle_user_message
+from core.utils.utils import validate_and_normalize_url
 from knowledge_base.models import Document
 from knowledge_base.tasks import task_handle_document_ingestion
 
@@ -77,9 +78,10 @@ class DocumentModelViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         requested_url = request.data.get("document_url")
 
-        # make sure the url is valid
-        if "http" not in requested_url:
-            requested_url = "https://" + requested_url
+        try:
+            requested_url = validate_and_normalize_url(requested_url)
+        except ValueError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # ToDo(ME-31.01.24): Extract user_id from request
         user_id = 1
