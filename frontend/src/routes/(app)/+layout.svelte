@@ -13,6 +13,29 @@
         NavUl
     } from 'flowbite-svelte';
     import {IconSolid} from "flowbite-svelte-icons";
+    import { goto } from '$app/navigation';
+    import { getCsrfToken } from '$lib/cookies';
+
+    async function handleLogout() {
+        const body = new URLSearchParams({
+            'csrfmiddlewaretoken': getCsrfToken(),
+        });
+        const response = await fetch('http://127.0.0.1:8000/users/logout/', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: body,
+        });
+
+        if (response.ok) {
+            await goto('/login')
+        } else {
+            const error = await response.json();
+            return { status: 'error', error };
+        }
+    }
 </script>
 
 
@@ -35,7 +58,7 @@
         <DropdownItem>Dashboard</DropdownItem>
         <DropdownItem>Settings</DropdownItem>
         <DropdownDivider />
-        <DropdownItem>Sign out</DropdownItem>
+        <DropdownItem on:click={handleLogout}>Sign out</DropdownItem>
     </Dropdown>
     <NavUl class="md:order-1">
         <NavLi href="/">Home</NavLi>
