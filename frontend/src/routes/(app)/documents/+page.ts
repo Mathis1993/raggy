@@ -1,5 +1,10 @@
+import {getDocuments} from "./documentService";
+
+// Only run client-side to ensure credentials are available for fetch function
+export const ssr = false;
+
 /** @type {import('./$types').PageLoad} */
-export async function load({ fetch }) {
-    const response = await fetch('http://127.0.0.1:8000/api/documents/', { credentials: 'include' });
-    return await response.json();
+export async function load({ params }: { params: any }) {
+    const documents = await getDocuments();
+    return {documents: documents};
 }

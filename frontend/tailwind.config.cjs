@@ -5,6 +5,12 @@ const config = {
 
 	darkMode: 'class',
 
+	variants: {
+		extend: {
+			display: ["group-hover"],
+		},
+	},
+
 	theme: {
 		extend: {
 			colors: {
