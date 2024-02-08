@@ -1,17 +1,17 @@
 <script lang="ts">
     import {
         Button,
-        Card,
+        Card, Fileupload, Helper,
         Input,
         Label,
         Modal,
-        Spinner,
+        Spinner, TabItem,
         Table,
         TableBody,
         TableBodyCell,
         TableBodyRow,
         TableHead,
-        TableHeadCell
+        TableHeadCell, Tabs
     } from "flowbite-svelte";
     import {invalidate, invalidateAll} from "$app/navigation";
     import {createDocument, deleteDocument, retrieveDocument} from "./documentService";
@@ -81,6 +81,31 @@
         }
     }
 
+    async function handleFileUpload() {
+        const fileInput = document.querySelector('#file');
+        const file = fileInput.files[0];
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('http://localhost:8000/api/documents/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                console.error('Failed to upload file', response);
+                return;
+            }
+
+            const data = await response.json();
+            console.log('File uploaded successfully', data);
+        } catch (error) {
+            console.error('Failed to upload file', error);
+        }
+    }
+
 </script>
 
 <Card class="max-w-full w-full">
@@ -136,20 +161,46 @@
 
 
 <Modal bind:open={createModalVisible} size="xs" autoclose={false} outsideclose class="w-full">
-    <form class="flex flex-col space-y-6" on:submit|preventDefault={() => handleCreate(document_url)}>
-        <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Add a new document</h3>
-        <Label class="space-y-2">
-            <span>URL</span>
-            <Input bind:value={document_url} type="url" name="url" placeholder="www.company.com" required/>
-        </Label>
-        <Button type="submit" class="w-full1" disabled={createProcessIsRunning}>
-            {#if createProcessIsRunning}
-                <Spinner/>
-            {:else}
-                Add
-            {/if}
-        </Button>
-    </form>
+    <Tabs style="full"
+          defaultClass="flex rounded-lg divide-x divide-gray-200 shadow dark:divide-gray-700">
+        <TabItem class="w-full" open>
+            <span slot="title">URLs</span>
+            <form class="flex flex-col space-y-6" on:submit|preventDefault={() => handleCreate(document_url)}>
+                <Label class="space-y-2">
+                    <span>URL</span>
+                    <Input bind:value={document_url} type="url" name="url" placeholder="www.company.com" required/>
+                </Label>
+                <Button type="submit" class="w-full1" disabled={createProcessIsRunning}>
+                    {#if createProcessIsRunning}
+                        <Spinner/>
+                    {:else}
+                        Add
+                    {/if}
+                </Button>
+            </form>
+        </TabItem>
+        <TabItem class="w-full">
+            <span slot="title">Files</span>
+            <form class="flex flex-col space-y-6" on:submit|preventDefault={() => handleFileUpload()}>
+                <Label for="file" class="pb-2">File Upload</Label>
+                <Fileupload id="file" class="mb-2"/>
+                <Helper> PDFs or .txt</Helper>
+                <Label class="space-y-2 mt-4">
+                    <span>Document Name</span>
+                    <Input bind:value={document_url} type="text" name="document_name" placeholder="optional"/>
+                </Label>
+                <Button type="submit" class="w-full1" disabled={uploadProcessIsRunning}>
+                    {#if uploadProcessIsRunning}
+                        <Spinner/>
+                    {:else}
+                        Add
+                    {/if}
+                </Button>
+            </form>
+        </TabItem>
+    </Tabs>
+
+
 </Modal>
 
 
