@@ -1,9 +1,6 @@
 from django.db import models
-from django.conf import settings
-from pathlib import Path
 
 from core.models import TrackCreation
-
 from core.utils.models import model_save
 from knowledge_base.utils.document_ingestion import DocumentIngestionService
 

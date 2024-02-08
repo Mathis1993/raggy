@@ -9,7 +9,6 @@ from llama_index.extractors import TitleExtractor, KeywordExtractor
 from llama_index.ingestion import IngestionPipeline
 from llama_index.node_parser import SentenceSplitter
 
-from knowledge_base.models import Document
 from knowledge_base.utils.document_extractor import DocumentExtractor
 from knowledge_base.vector_store import initialize_milvus_store
 
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class DocumentIngestionService:
 
-    def __init__(self, document: Document):
+    def __init__(self, document):
         self.document = document
         self.milvus_store = initialize_milvus_store(
                 uri=f"http://{settings.MILVUS_HOST}:{settings.MILVUS_PORT}",
@@ -27,6 +26,7 @@ class DocumentIngestionService:
 
     def ingest_document(self):
         """ Orchestrates the ingestion of a document, whether it's from a URL or a file."""
+        from knowledge_base.models import Document
         try:
             if self.document.type == Document.Type.WEBSITE:
                 llama_document: llama_index.Document = DocumentExtractor.extract_content_from_url(
