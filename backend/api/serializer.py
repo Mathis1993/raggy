@@ -7,7 +7,7 @@ from knowledge_base.models import Document
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
-        fields = ["id", "title", "identifier", "created_at", "status", "type", "keywords"]
+        fields = ["id", "title", "identifier", "created_at", "status", "type", "keywords", "file"]
 
 
 class MessageSerializer(serializers.Serializer):
