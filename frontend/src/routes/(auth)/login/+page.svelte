@@ -1,6 +1,33 @@
 <script lang="ts">
 	import { Register, Section } from 'flowbite-svelte-blocks';
 	import { Button, Input, Label, NavBrand } from 'flowbite-svelte';
+	import { getCsrfToken } from '$lib/cookies';
+	import { goto } from '$app/navigation';
+
+	async function handleSubmit(event) {
+		const form = event.target;
+		const formData = new FormData(form);
+		const body = new URLSearchParams({
+			'email': formData.get('email') as string,
+			'password': formData.get('password') as string,
+			'csrfmiddlewaretoken': getCsrfToken(),
+		});
+
+		const response = await fetch('http://127.0.0.1:8000/users/login/', {
+			method: 'POST',
+			credentials: 'include',
+			body: body,
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+		});
+
+		if (response.status != 200) {
+			const error = await response.json();
+			return { status: 'error', error };
+		}
+		await goto('/');
+	}
 
 </script>
 
@@ -15,7 +42,7 @@
 			</NavBrand>
 		</svelte:fragment>
 		<div class="p-6 space-y-4 md:space-y-6 sm:p-8">
-			<form class="flex flex-col space-y-6" method="POST" action="?/post">
+			<form class="flex flex-col space-y-6" method="POST" on:submit|preventDefault={handleSubmit}>
 				<h3 class="text-xl font-medium text-gray-900 dark:text-white p-0">Sign In</h3>
 				<Label class="space-y-2">
 					<span>Your email</span>
