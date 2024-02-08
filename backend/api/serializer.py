@@ -7,7 +7,7 @@ from knowledge_base.models import Document
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
-        fields = ["id", "title", "identifier", "created_at"]
+        fields = ["id", "title", "identifier", "created_at", "status", "type", "keywords"]
 
 
 class MessageSerializer(serializers.Serializer):
@@ -26,6 +26,7 @@ class ConversationDetailSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
+    status = serializers.CharField(read_only=True)
 
     class Meta:
         model = Conversation

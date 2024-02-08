@@ -1,67 +1,104 @@
 <script lang="ts">
-    import {Avatar, Breadcrumb, BreadcrumbItem, Card} from "flowbite-svelte";
+    import {Alert, Card, Spinner, Textarea, ToolbarButton} from "flowbite-svelte";
     import ChatBubble from "../../../../components/ChatBubble.svelte";
-    import {onMount} from "svelte";
+    import {onDestroy, onMount, tick} from "svelte";
+    import {createMessage, deleteConversation, retrieveConversation} from "../conversationService";
+    import {invalidateAll} from "$app/navigation";
+    import {PapperPlaneOutline} from "flowbite-svelte-icons";
+    import {retrieveDocument} from "../../documents/documentService";
 
     export let data;
-    let conversation: Conversation = data.conversation;
+    let conversation = data.conversation;
     let messages: Message[] = data.conversation.messages;
+    let messageContent = '';
+    let chatContainer: HTMLDivElement;
 
-    // auto scroll to bottom
-    let chatContainer: ChatBubble;
     onMount(() => {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        scrollToBottom();
     });
 
-    async function handleSubmit(event) {
-        event.preventDefault();
-        const message = event.target.elements.message.value;
-        const response = await fetch('http://127.0.0.1:8000/api/conversations/' + conversation.id + "/messages/", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({"message": message}),
-        });
-
-        if (!response.ok) {
-            console.error('Failed to send message', response);
-            return;
+    function handleKeyDown(event: KeyboardEvent) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
         }
-
-        event.target.elements.chat.value = '';
-        location.reload();
     }
+
+    async function sendMessage() {
+        let message: string = messageContent;
+        messageContent = '';  // clear the input field
+        let updatedConversation: Conversation = await createMessage(message, data.conversation);
+        conversation = updatedConversation
+        messages = updatedConversation.messages
+        await tick(); // wait for the new message to be rendered
+        scrollToBottom(); // scroll to the bottom
+        await invalidateAll();
+        await refreshDocuments(); // start the refresh logic
+    }
+
+    function scrollToBottom() {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    let refreshIntervalId: number;
+    onMount(() => {
+        refreshIntervalId = setInterval(refreshDocuments, 5000);
+    });
+
+    onDestroy(() => {
+        // Clear the interval when the component is destroyed
+        clearInterval(refreshIntervalId);
+    });
+
+    async function refreshDocuments() {
+        if (conversation.status === 'RUNNING') {
+            conversation = await retrieveConversation(conversation.id);
+            messages = conversation.messages;
+            await tick(); // wait for the new message to be rendered
+            scrollToBottom();
+        }
+    }
+
 </script>
 
 
-<div class="col-span-3">
-    <Card class="max-w-full">
-        <h5 class="mb-4 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"> {conversation.name }</h5>
-
-        <div class="max-w-full overflow-y-auto h-[calc(100vh-30vh)]" bind:this={chatContainer}>
+<div class="flex max-w-full flex-grow flex-col h-full">
+    <Card class="max-w-full h-full shadow-0">
+        <div class="flex justify-between items-center mb-4 ">
+            <h5 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"> {conversation.name || "Start Conversation..."}</h5>
+            <button on:click={() => deleteConversation(conversation.id)} class="text-white m-0">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor" class="h-6 w-6 text-red-500 hover:text-red-700">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="max-w-full h-[calc(100vh-35vh)] flex-grow overflow-auto" bind:this={chatContainer}>
             {#each messages as message}
                 <ChatBubble {message}/>
             {/each}
-
-            <form class="mt-4" on:submit|preventDefault={handleSubmit}>
-                <label for="chat" class="sr-only">Your message</label>
-                <div class="flex items-center px-3 py-2 rounded-lg dark:bg-gray-700">
-        <textarea id="message" rows="1"
-                  class="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Your message..."></textarea>
-                    <button type="submit"
-                            class="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600">
-                        <svg class="w-5 h-5 rotate-90 rtl:-rotate-90" aria-hidden="true"
-                             xmlns="http://www.w3.org/2000/svg"
-                             fill="currentColor" viewBox="0 0 18 20">
-                            <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z"/>
-                        </svg>
-                        <span class="sr-only">Send message</span>
-                    </button>
+            {#if conversation.status === 'RUNNING'}
+                <div class="flex items-center justify-center">
+                    <Spinner/>
                 </div>
-            </form>
-
+            {/if}
         </div>
+
+        <form class="mt-4" on:submit|preventDefault={() => sendMessage()}>
+            <label for="chat" class="sr-only">Your message</label>
+            <Alert color="dark" class="px-3 py-2">
+                <svelte:fragment slot="icon">
+                    <Textarea id="message" class="mx-4 text-md" rows="1" placeholder="Your message..."
+                              bind:value={messageContent}
+                              on:keydown={handleKeyDown}/>
+                    <ToolbarButton type="submit" color="blue"
+                                   class="rounded-full text-primary-600 dark:text-primary-500">
+                        <PapperPlaneOutline class="w-5 h-5 rotate-45"/>
+                        <span class="sr-only">Send message</span>
+                    </ToolbarButton>
+                </svelte:fragment>
+            </Alert>
+        </form>
     </Card>
 </div>

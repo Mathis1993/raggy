@@ -1,10 +1,11 @@
-import http
+import json
+import json
 import logging
 
-from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework.generics import get_object_or_404
-from rest_framework.viewsets import ViewSet, ModelViewSet
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
 from api.serializer import ConversationSerializer, ConversationDetailSerializer, \
     MessageSerializer
@@ -12,6 +13,7 @@ from api.serializer import DocumentSerializer
 from conversations.models import Conversation
 from conversations.tasks import task_handle_user_message
 from knowledge_base.models import Document
+from knowledge_base.tasks import task_handle_document_ingestion
 
 logger = logging.getLogger(__name__)
 
@@ -41,49 +43,53 @@ class MessageModelViewSet(ModelViewSet):
         return conversation.messages.all()
 
     def create(self, request, *args, **kwargs):
-        conversation_id, message = self.kwargs["conversation_id"], self.kwargs["message"]
-        conversation = get_object_or_404(Conversation, id=conversation_id)
-        text = request.data.get("text")
-        task_handle_user_message(conversation, text)
-        return JsonResponse({"message": "Message received"})
+        data = request.data
+        conversation_id, message = data["conversation_id"], data["message"]
+        conversation = get_object_or_404(Conversation, id=int(conversation_id))
+        conversation.mark_as_running()
+        conversation.add_user_message(message)
+        task_handle_user_message.delay(conversation.id, message)
+        return Response(ConversationDetailSerializer(conversation).data)
 
 
-class DocumentModelViewSet(ViewSet):
+class DocumentModelViewSet(ModelViewSet):
     model = Document
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def list(self, request):
-        documents = self.model.objects.all()
-        return JsonResponse({"documents": DocumentSerializer(documents, many=True).data})
+    def get_queryset(self):
+        # TODO: filter by user
+        return self.model.objects.all()
 
-    def retrieve(self, request, pk=None):
-        document = self.model.objects.get(pk=pk)
-        return JsonResponse({"document": DocumentSerializer(document).data})
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            # TODO: Add a serializer for the detail view
+            return DocumentSerializer
+        return DocumentSerializer
 
-    def delete(self, request, pk=None):
-        document = self.model.objects.get(pk=pk)
-        document.delete()
-        return JsonResponse({"document": DocumentSerializer(document).data})
-
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         requested_url = request.data.get("document_url")
 
         # make sure the url is valid
-        if not "http" in requested_url:
+        if "http" not in requested_url:
             requested_url = "https://" + requested_url
 
         # ToDo(ME-31.01.24): Extract user_id from request
         user_id = 1
-        try:
-            document = Document.objects.create(user_id=user_id, identifier=requested_url)
-            document.ingest(url=requested_url)
-        except IntegrityError as e:
-            logger.error(f"Could not ingest document: {e}")
-            return JsonResponse({"error": f"Document with url {requested_url} seems to exist already"}, status=http.HTTPStatus.BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Could not ingest document: {e}")
-            return JsonResponse({"error": str(e)}, status=http.HTTPStatus.INTERNAL_SERVER_ERROR)
-        logger.info(f"Created document: {document}")
+        document = Document.objects.create(
+            user_id=user_id, identifier=requested_url, status=Document.Status.PROCESSING
+        )
+        task = task_handle_document_ingestion.apply_async(
+            kwargs={"document_id": document.id, "url": requested_url}
+        )
+
+        # Log the task details
+        logger.info(task)
+
+        return JsonResponse({"document": DocumentSerializer(document).data})
+
+    def destroy(self, request, *args, **kwargs):
+        document = self.get_object()
+        document.delete_and_digest()
         return JsonResponse({"document": DocumentSerializer(document).data})

@@ -2,6 +2,8 @@ type Conversation = {
     id: number;
     name: string;
     created_at: string;
+    status: string;
+    messages: Message[];
 }
 
 type Message = {
