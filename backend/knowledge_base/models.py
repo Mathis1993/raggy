@@ -93,7 +93,7 @@ class Document(TrackCreation):
         if self.type == Document.Type.WEBSITE:
             document = self._extract_document_from_url()
         elif self.type == Document.Type.PDF:
-            document = self._extract_document_from_file()
+            document = self._extract_document_from_pdf()
         else:
             raise ValueError(f"Document type {self.type} not supported.")
 
