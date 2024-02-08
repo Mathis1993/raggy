@@ -15,7 +15,7 @@ from api.serializer import ConversationSerializer, ConversationDetailSerializer,
 from api.serializer import DocumentSerializer
 from conversations.models import Conversation
 from conversations.tasks import task_handle_user_message
-from core.utils.utils import validate_and_normalize_url
+from core.utils.utils import UrlStr
 from knowledge_base.models import Document
 from knowledge_base.tasks import task_handle_document_ingestion
 
@@ -76,13 +76,13 @@ class DocumentModelViewSet(ModelViewSet):
         return DocumentSerializer
 
     @action(detail=False, methods=['post'], url_path='create_from_url')
-    def create(self, request, *args, **kwargs):
+    def create_from_url(self, request, *args, **kwargs):
         requested_url = request.data.get("document_url")
-
         try:
-            requested_url = validate_and_normalize_url(requested_url)
-        except ValueError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            requested_url = UrlStr(requested_url)
+        except Exception as e:
+            logger.info(f"Failed to validate URL: {str(e)}")
+            return JsonResponse({"error": f"Invalid URL: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
         # ToDo(ME-31.01.24): Extract user_id from request
         user_id = 1
@@ -93,14 +93,15 @@ class DocumentModelViewSet(ModelViewSet):
     @action(detail=False, methods=['post'], url_path='upload')
     def upload_file(self, request, *args, **kwargs):
         file = request.FILES.get('file')
+        document_name = request.POST.get('document_name')
         if not file:
-            return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Extract user_id from request (ToDo: Implement actual user extraction)
         user_id = 1
-        document = Document.create_from_file(user_id=user_id, file=file)
+        document = Document.create_from_file(user_id=user_id, file=file, document_name=document_name)
         task_handle_document_ingestion.delay(document_id=document.id)
-        return Response({"document": DocumentSerializer(document).data}, status=status.HTTP_201_CREATED)
+        return JsonResponse({"document": DocumentSerializer(document).data}, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
         document = self.get_object()

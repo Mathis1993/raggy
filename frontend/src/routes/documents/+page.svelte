@@ -1,71 +1,112 @@
 <script lang="ts">
     import {
         Button,
-        Card, Fileupload, Helper,
+        Card,
+        Fileupload,
+        Helper,
         Input,
         Label,
         Modal,
-        Spinner, TabItem,
+        Spinner,
+        TabItem,
         Table,
         TableBody,
         TableBodyCell,
         TableBodyRow,
         TableHead,
-        TableHeadCell, Tabs
+        TableHeadCell,
+        Tabs
     } from "flowbite-svelte";
     import {invalidate, invalidateAll} from "$app/navigation";
-    import {createDocument, deleteDocument, retrieveDocument} from "./documentService";
-    import {ExclamationCircleOutline, EyeOutline, CheckCircleSolid, CloseCircleSolid} from "flowbite-svelte-icons";
+    import {
+        createDocumentFromFileUpload,
+        createDocumentFromUrl,
+        deleteDocument,
+        retrieveDocument
+    } from "./documentService";
+    import {CheckCircleSolid, CloseCircleSolid, ExclamationCircleOutline, EyeOutline} from "flowbite-svelte-icons";
     import {onDestroy, onMount} from "svelte";
     import {page} from "$app/stores";
+    import {writable} from "svelte/store";
 
     $: documents = $page.data.documents || [];
 
-    let createModalVisible: boolean = false;
-    let deleteModalVisible: boolean = false;
-    let detailModalVisible: boolean = false;
+    let modalVisible: any = {create: false, delete: false, detail: false};
+    let createProcessIsRunning = false;
+    let documentIdToDelete: number | null = null;
+    let documentDetails: ContextDocument | null = null;
+    let refreshIntervalId: number;
+    let documentURL: string = '';
+    let documentName: string = '';
+    let errorMessage = writable('');
 
-    let document_url: string = '';
-    let createProcessIsRunning: boolean = false;
-
-    async function handleCreate(document_url: string) {
-        let document: ContextDocument | null = await createDocument(document_url);
-        createModalVisible = false;
-        // TODO: fix invalidation and reloading of the data
-        // await invalidate('/documents');
-        if (document) {
-            documents.push(document);
-        }
-        await invalidateAll();
+    function openModal(type: string) {
+        modalVisible = {create: false, delete: false, detail: false}; // Reset all
+        modalVisible[type] = true;
     }
 
-    let documentToDelete: any = null;
+    function closeModal() {
+        modalVisible = {create: false, delete: false, detail: false};
+    }
+
+
+    async function handleCreateFromUrl() {
+        createProcessIsRunning = true;
+        errorMessage.set(''); // Reset error message on new submission
+        try {
+            let document = await createDocumentFromUrl(documentURL);
+            if (document) {
+                documents.push(document);
+                await invalidateAll();
+                closeModal();
+            }
+        } catch (error) {
+            errorMessage.set(error.message); // Set the error message from the caught error
+        } finally {
+            createProcessIsRunning = false;
+        }
+    }
+
+
+    async function handleCreateFromFileUpload() {
+        const fileInput = document.querySelector('#file') as HTMLInputElement;
+        errorMessage.set('');
+        if (fileInput?.files?.length > 0) {
+            try {
+                const file = fileInput.files[0];
+                const document = await createDocumentFromFileUpload(file, documentName);
+                if (document) {
+                    documents.push(document);
+                    await invalidateAll();
+                    closeModal();
+                }
+            } catch (error) {
+                errorMessage.set(error.message);
+            }
+        }
+    }
 
     async function handleDelete() {
-        if (documentToDelete !== null) {
-            await deleteDocument(documentToDelete);
-            deleteModalVisible = false;
+        if (documentIdToDelete !== null) {
+            await deleteDocument(documentIdToDelete);
             // TODO: fix invalidation and reloading of the data
-            await invalidate('/documents');
+            await invalidateAll();
+            closeModal();
         }
     }
 
-    let documentDetails: any = null;
-
-    async function handleView(documentId: number) {
+    async function handleDetailView(documentId: number) {
         if (documentId != null) {
             documentDetails = await retrieveDocument(documentId);
         }
     }
 
-    let refreshIntervalId: number;
 
     onMount(() => {
         refreshIntervalId = setInterval(refreshDocuments, 5000);
     });
 
     onDestroy(() => {
-        // Clear the interval when the component is destroyed
         clearInterval(refreshIntervalId);
     });
 
@@ -80,30 +121,6 @@
         }
     }
 
-    async function handleFileUpload() {
-        const fileInput = document.querySelector('#file');
-        const file = fileInput.files[0];
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const response = await fetch('http://localhost:8000/api/documents/upload/', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                console.error('Failed to upload file', response);
-                return;
-            }
-
-            const data = await response.json();
-            console.log('File uploaded successfully', data);
-        } catch (error) {
-            console.error('Failed to upload file', error);
-        }
-    }
 
 </script>
 
@@ -113,7 +130,7 @@
         documents </p>
 
     <div class="flex justify-end my-2">
-        <Button on:click={() => (createModalVisible = true)}>Add Document</Button>
+        <Button on:click={() => {openModal("create")}}>Add Document</Button>
     </div>
 
     <Table hoverable={true}>
@@ -147,7 +164,7 @@
                     </TableBodyCell>
                     <TableBodyCell class="flex items-center justify-between">
                         <Button outline={true}
-                                on:click={async () => {detailModalVisible = true; await handleView(document.id);}}
+                                on:click={async () => {openModal("detail"); await handleDetailView(document.id);}}
                                 class="border-primary-400 hover:bg-primary-200">
                             <EyeOutline class="text-primary-600"/>
                         </Button>
@@ -159,15 +176,18 @@
 </Card>
 
 
-<Modal bind:open={createModalVisible} size="xs" autoclose={false} outsideclose class="w-full">
+<Modal open={modalVisible.create} size="xs" autoclose={false} outsideclose class="w-full">
     <Tabs style="full"
           defaultClass="flex rounded-lg divide-x divide-gray-200 shadow dark:divide-gray-700">
         <TabItem class="w-full" open>
             <span slot="title">URLs</span>
-            <form class="flex flex-col space-y-6" on:submit|preventDefault={() => handleCreate(document_url)}>
+            <form class="flex flex-col space-y-6" on:submit|preventDefault={() => handleCreateFromUrl()}>
                 <Label class="space-y-2">
                     <span>URL</span>
-                    <Input bind:value={document_url} type="text" name="url" placeholder="www.company.com" required/>
+                    <Input bind:value={documentURL} type="text" name="url" placeholder="www.company.com" required/>
+                    {#if $errorMessage}
+                        <p class="text-red-500 text-sm mt-1">{$errorMessage}</p>
+                    {/if}
                 </Label>
                 <Button type="submit" class="w-full1" disabled={createProcessIsRunning}>
                     {#if createProcessIsRunning}
@@ -180,13 +200,13 @@
         </TabItem>
         <TabItem class="w-full">
             <span slot="title">Files</span>
-            <form class="flex flex-col space-y-6" on:submit|preventDefault={() => handleFileUpload()}>
+            <form class="flex flex-col space-y-6" on:submit|preventDefault={() => handleCreateFromFileUpload()}>
                 <Label for="file" class="pb-2">File Upload</Label>
                 <Fileupload id="file" class="mb-2"/>
                 <Helper> PDFs or .txt</Helper>
                 <Label class="space-y-2 mt-4">
                     <span>Document Name</span>
-                    <Input bind:value={document_url} type="text" name="document_name" placeholder="optional"/>
+                    <Input bind:value={documentName} type="text" name="document_name" placeholder="optional"/>
                 </Label>
                 <Button type="submit" class="w-full1">
                     Add
@@ -194,32 +214,20 @@
             </form>
         </TabItem>
     </Tabs>
-
-
 </Modal>
 
 
-<Modal bind:open={deleteModalVisible} autoclose={false} outsideclose size="xs">
+<Modal open={modalVisible.delete} autoclose={false} outsideclose size="xs">
     <div class="text-center">
         <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"/>
         <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to remove this
             document?</h3>
         <Button on:click={handleDelete} color="red" class="me-2">Yes, I'm sure</Button>
-        <Button color="alternative" on:click={() => {deleteModalVisible=false}}>No, cancel</Button>
+        <Button color="alternative" on:click={() => {closeModal()}}>No, cancel</Button>
     </div>
 </Modal>
 
-<Modal bind:open={deleteModalVisible} autoclose={false} outsideclose size="xs">
-    <div class="text-center">
-        <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"/>
-        <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to remove this
-            document?</h3>
-        <Button on:click={handleDelete} color="red" class="me-2">Yes, I'm sure</Button>
-        <Button color="alternative" on:click={() => {deleteModalVisible=false}}>No, cancel</Button>
-    </div>
-</Modal>
-
-<Modal title="" bind:open={detailModalVisible} autoclose outsideclose size="sm">
+<Modal title="" open={modalVisible.detail} autoclose outsideclose size="sm">
     <div class="flex justify-between mb-4 rounded-t sm:mb-5">
         <div class="text-lg text-gray-900 md:text-xl dark:text-white">
             <h3 class="font-semibold">{documentDetails ? documentDetails.title : 'Loading...'}</h3>
@@ -244,7 +252,7 @@
             <!--                Edit-->
             <!--            </Button>-->
         </div>
-        <Button color="red" on:click={() => {deleteModalVisible = true; documentToDelete = documentDetails.id;}}>
+        <Button color="red" on:click={() => {openModal("delete"); documentIdToDelete = documentDetails.id;}}>
             <svg aria-hidden="true" class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor" viewBox="0 0 20 20"
                  xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd"

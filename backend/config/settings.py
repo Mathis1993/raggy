@@ -154,6 +154,7 @@ LOGGING = {
             "level": "INFO",
             "propagate": True,
         },
+
     },
 }
 
