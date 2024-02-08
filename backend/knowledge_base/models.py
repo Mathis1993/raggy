@@ -39,8 +39,8 @@ class Document(TrackCreation):
         return cls.objects.create(user_id=user_id, identifier=url, type=cls.Type.WEBSITE, url=url)
 
     @classmethod
-    def create_from_file(cls, user_id: int, file: str):
-        return cls.objects.create(user_id=user_id, file=file, type=cls.Type.PDF)
+    def create_from_file(cls, user_id: int, file: str, document_name: str):
+        return cls.objects.create(user_id=user_id, file=file, type=cls.Type.PDF, identifier=document_name)
 
     def ingest(self):
         if not self.pk:
