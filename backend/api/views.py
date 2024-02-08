@@ -95,7 +95,7 @@ class DocumentModelViewSet(ModelViewSet):
 
         # Extract user_id from request (ToDo: Implement actual user extraction)
         user_id = 1
-        document = Document.create_from_file(user_id=user_id, file=file, identifier=file.name)
+        document = Document.create_from_file(user_id=user_id, file=file)
         task_handle_document_ingestion.delay(document_id=document.id)
         return Response({"document": DocumentSerializer(document).data}, status=status.HTTP_201_CREATED)
 
