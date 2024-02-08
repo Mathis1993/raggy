@@ -75,6 +75,7 @@ class DocumentModelViewSet(ModelViewSet):
             return DocumentSerializer
         return DocumentSerializer
 
+    @action(detail=False, methods=['post'], url_path='create_from_url')
     def create(self, request, *args, **kwargs):
         requested_url = request.data.get("document_url")
 
