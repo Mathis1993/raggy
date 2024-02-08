@@ -37,5 +37,6 @@ class LogoutView(View):
 
 
 class SignupView(generics.CreateAPIView):
+    # ToDo(ME-08.02.24): Upgrade to email verification
     serializer_class = UserSerializer
     permission_classes = []  # Signup has to be accessible without authentication
