@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -59,7 +59,7 @@ class MessageModelViewSet(ModelViewSet):
 
 class DocumentModelViewSet(ModelViewSet):
     model = Document
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

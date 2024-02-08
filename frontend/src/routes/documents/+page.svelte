@@ -19,7 +19,6 @@
     import {onDestroy, onMount} from "svelte";
     import {page} from "$app/stores";
 
-    export let data;
     $: documents = $page.data.documents || [];
 
     let createModalVisible: boolean = false;
@@ -89,7 +88,7 @@
         formData.append('file', file);
 
         try {
-            const response = await fetch('http://localhost:8000/api/documents/upload', {
+            const response = await fetch('http://localhost:8000/api/documents/upload/', {
                 method: 'POST',
                 body: formData,
             });
@@ -189,12 +188,8 @@
                     <span>Document Name</span>
                     <Input bind:value={document_url} type="text" name="document_name" placeholder="optional"/>
                 </Label>
-                <Button type="submit" class="w-full1" disabled={uploadProcessIsRunning}>
-                    {#if uploadProcessIsRunning}
-                        <Spinner/>
-                    {:else}
-                        Add
-                    {/if}
+                <Button type="submit" class="w-full1">
+                    Add
                 </Button>
             </form>
         </TabItem>
