@@ -167,7 +167,7 @@
             <form class="flex flex-col space-y-6" on:submit|preventDefault={() => handleCreate(document_url)}>
                 <Label class="space-y-2">
                     <span>URL</span>
-                    <Input bind:value={document_url} type="url" name="url" placeholder="www.company.com" required/>
+                    <Input bind:value={document_url} type="text" name="url" placeholder="www.company.com" required/>
                 </Label>
                 <Button type="submit" class="w-full1" disabled={createProcessIsRunning}>
                     {#if createProcessIsRunning}
