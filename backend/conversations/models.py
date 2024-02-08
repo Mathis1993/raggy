@@ -23,11 +23,15 @@ class Conversation(TrackCreationAndUpdates):
 
     @model_save(update_fields=["status"])
     def mark_as_running(self):
-        self.save()
+        self.status = self.Status.RUNNING
 
     @model_save(update_fields=["status"])
     def mark_as_completed(self):
-        self.save()
+        self.status = self.Status.COMPLETED
+
+    @model_save(update_fields=["status"])
+    def mark_as_failed(self):
+        self.status = self.Status.FAILED
 
     def get_message_history(self):
         return self.messages.order_by("created_at")[:10]

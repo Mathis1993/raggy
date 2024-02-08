@@ -1,54 +1,64 @@
 <script lang="ts">
     import {Alert, Card, Spinner, Textarea, ToolbarButton} from "flowbite-svelte";
     import ChatBubble from "../../../components/ChatBubble.svelte";
-    import {onMount} from "svelte";
-    import {createMessage, deleteConversation} from "../conversationService";
+    import {onDestroy, onMount, tick} from "svelte";
+    import {createMessage, deleteConversation, retrieveConversation} from "../conversationService";
     import {invalidateAll} from "$app/navigation";
     import {PapperPlaneOutline} from "flowbite-svelte-icons";
+    import {retrieveDocument} from "../../documents/documentService";
 
     export let data;
     let conversation = data.conversation;
     let messages: Message[] = data.conversation.messages;
     let messageContent = '';
-    let chatContainer: ChatBubble;
+    let chatContainer: HTMLDivElement;
 
     onMount(() => {
         scrollToBottom();
     });
 
-    function handleKeyDown(event) {
+    function handleKeyDown(event: KeyboardEvent) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
-            sendMessage(messageContent);
+            sendMessage();
         }
     }
 
-    async function sendMessage(messageText: string) {
-        // TODO: replace this when its an async process in the backend which returns the message with the id
-        messages = [...messages, {
-            id: messages.length + 1,
-            text: messageText,
-            conversation: conversation,
-            is_user_message: true,
-            created_at: new Date().toISOString(),
-        }];
-        scrollToBottom()
-
-        conversation.status = "RUNNING";
-        await createMessage(messageContent, data.conversation);
-
-        // TOOD: replace this with actually fetching the conversation + messages from the backend
-        // reload the conversation to get the new message
+    async function sendMessage() {
+        let message: string = messageContent;
+        messageContent = '';  // clear the input field
+        let updatedConversation: Conversation = await createMessage(message, data.conversation);
+        conversation = updatedConversation
+        messages = updatedConversation.messages
+        await tick(); // wait for the new message to be rendered
+        scrollToBottom(); // scroll to the bottom
         await invalidateAll();
-        messageContent = '';
-        messages = data.conversation.messages;
-        conversation = data.conversation;
-        scrollToBottom();
+        await refreshDocuments(); // start the refresh logic
     }
 
     function scrollToBottom() {
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
+
+    let refreshIntervalId: number;
+    onMount(() => {
+        refreshIntervalId = setInterval(refreshDocuments, 5000);
+    });
+
+    onDestroy(() => {
+        // Clear the interval when the component is destroyed
+        clearInterval(refreshIntervalId);
+    });
+
+    async function refreshDocuments() {
+        if (conversation.status === 'RUNNING') {
+            conversation = await retrieveConversation(conversation.id);
+            messages = conversation.messages;
+            await tick(); // wait for the new message to be rendered
+            scrollToBottom();
+        }
+    }
+
 </script>
 
 
@@ -75,7 +85,7 @@
             {/if}
         </div>
 
-        <form class="mt-4" on:submit|preventDefault={() => sendMessage(messageContent)}>
+        <form class="mt-4" on:submit|preventDefault={() => sendMessage()}>
             <label for="chat" class="sr-only">Your message</label>
             <Alert color="dark" class="px-3 py-2">
                 <svelte:fragment slot="icon">

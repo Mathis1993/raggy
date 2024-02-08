@@ -42,6 +42,23 @@ export async function createConversation() {
     }
 }
 
+
+export async function retrieveConversation(conversationId: number) {
+    try {
+        const response = await fetch(CONVERSATION_API_URL + conversationId);
+
+        if (!response.ok) {
+            console.error('Failed to retrieve conversation');
+            return;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Failed to retrieve conversation', error);
+    }
+}
+
+
 export async function deleteConversation(conversationId: number) {
     try {
         const response = await fetch(CONVERSATION_API_URL + conversationId, {
