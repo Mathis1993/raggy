@@ -10,20 +10,22 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password1', 'password2')
+        fields = ("email", "password1", "password2", "first_name", "last_name")
 
     def validate(self, data):
         # ToDo(ME-08.02.24): Add password strength validation
-        if data['password1'] != data['password2']:
+        if data["password1"] != data["password2"]:
             raise serializers.ValidationError("Passwords must match.")
         return data
 
     def create(self, validated_data):
         user = User.objects.create(
-            email=validated_data['email'],
+            email=validated_data["email"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
             is_superuser=False,
             is_staff=False,
         )
-        user.set_password(validated_data['password1'])
+        user.set_password(validated_data["password1"])
         user.save()
         return user
