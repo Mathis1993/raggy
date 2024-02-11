@@ -1,6 +1,7 @@
 import http
 
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.views import View
@@ -40,3 +41,15 @@ class SignupView(generics.CreateAPIView):
     # ToDo(ME-08.02.24): Upgrade to email verification
     serializer_class = UserSerializer
     permission_classes = []  # Signup has to be accessible without authentication
+
+
+class UserInfoView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        return JsonResponse(
+            {
+                "email": request.user.email,
+                "first_name": request.user.first_name,
+                "last_name": request.user.last_name,
+                "full_name": f"{request.user.first_name} {request.user.last_name}".strip(),
+            }
+        )

@@ -31,6 +31,9 @@
     export let data;
     $: conversations = $page.data.conversations || [];
     $: loadingConversations = !conversations.length;
+    $: userFullName = $page.data.user.full_name || 'Jane Doe';
+    $: userEmail = $page.data.user.email || 'jane@raggy.de';
+
 
     onMount(async () => {
         width = window.innerWidth;
@@ -91,8 +94,8 @@
         </div>
         <Dropdown placement="bottom" triggeredBy="#avatar-menu">
             <DropdownHeader>
-                <span class="block text-sm">Jane Doe</span>
-                <span class="block truncate text-sm font-medium">jane@raggy.com</span>
+                <span class="block text-sm">{userFullName}</span>
+                <span class="block truncate text-sm font-medium">{userEmail}</span>
             </DropdownHeader>
             <DropdownItem>Dashboard</DropdownItem>
             <DropdownItem>Settings</DropdownItem>

@@ -10,13 +10,9 @@ async function handleSubmit(event) {
 		'email': formData.get('email') as string,
 		'password1': formData.get('password1') as string,
 		'password2': formData.get('password2') as string,
+		'first_name': formData.get('first_name') as string,
+		'last_name': formData.get('last_name') as string,
 	});
-	// const body = new URLSearchParams({
-	// 	'email': formData.get('email') as string,
-	// 	'password1': formData.get('password1') as string,
-	// 	'password2': formData.get('password2') as string,
-	// 	'csrfmiddlewaretoken': getCsrfToken(),
-	// });
 
 	const response = await fetch('http://127.0.0.1:8000/users/signup/', {
 		method: 'POST',
@@ -51,6 +47,14 @@ async function handleSubmit(event) {
 				<Label class="space-y-2">
 					<span>Your email</span>
 					<Input type="email" name="email" placeholder="name@company.com" required />
+				</Label>
+				<Label class="space-y-2">
+					<span>Your first name</span>
+					<Input type="text" name="first_name" placeholder="John" />
+				</Label>
+				<Label class="space-y-2">
+					<span>Your last name</span>
+					<Input type="text" name="last_name" placeholder="Doe" />
 				</Label>
 				<Label class="space-y-2">
 					<span>Your password</span>
