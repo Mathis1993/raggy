@@ -1,5 +1,6 @@
 from typing import List
 
+from django.contrib.auth import get_user_model
 from llama_index import ServiceContext
 from llama_index.agent import ReActAgent
 from llama_index.chat_engine import CondensePlusContextChatEngine
@@ -11,6 +12,7 @@ from llama_index.vector_stores import MetadataFilters, ExactMatchFilter
 
 from knowledge_base.vector_store import get_index
 
+User = get_user_model()
 
 class ConversationEngine:
     """
@@ -19,7 +21,8 @@ class ConversationEngine:
     response message.
     """
 
-    def __init__(self, conversation_history: List[ChatMessage] = None, model: str = "gpt-3.5-turbo", temperature: float = 0.1):
+    def __init__(self, user: User, conversation_history: List[ChatMessage] = None, model: str = "gpt-3.5-turbo", temperature: float = 0.1):
+        self.user = user
         self.model = model
         self.temperature = temperature
 
@@ -49,8 +52,6 @@ class ConversationEngine:
         return chat_agent
 
     def _build_chat_context_engine(self, conversation_history: List[ChatMessage]) -> CondensePlusContextChatEngine:
-        # TODO: get user_id from request
-        user_id = 1,
         memory = ChatMemoryBuffer.from_defaults(
             token_limit=3900,
             chat_history=conversation_history,
@@ -59,14 +60,14 @@ class ConversationEngine:
             chat_mode="condense_plus_context",
             service_context=self._build_service_context(),
             memory=memory,
-            # filters=MetadataFilters(
-            #     filters=[
-            #         ExactMatchFilter(
-            #             key="user_id",
-            #             value=user_id,
-            #         )
-            #     ]
-            # ),
+            filters=MetadataFilters(
+                filters=[
+                    ExactMatchFilter(
+                        key="user_id",
+                        value=self.user.id,
+                    )
+                ]
+            ),
         )
         return chat_engine
 
