@@ -2,12 +2,13 @@ import http
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import IntegrityError
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.views import View
 from rest_framework import generics
 
-from users.serializers import UserSerializer
+from users.serializers import UserSerializer, UserGeneralInfoSerializer
 
 
 class CSRFTokenView(View):
@@ -45,11 +46,19 @@ class SignupView(generics.CreateAPIView):
 
 class UserInfoView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
+        user = request.user
         return JsonResponse(
             {
-                "email": request.user.email,
-                "first_name": request.user.first_name,
-                "last_name": request.user.last_name,
-                "full_name": f"{request.user.first_name} {request.user.last_name}".strip(),
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "full_name": f"{user.first_name} {user.last_name}".strip(),
             }
         )
+
+
+class UserInfoUpdateView(generics.UpdateAPIView):
+    serializer_class = UserGeneralInfoSerializer
+
+    def get_object(self):
+        return self.request.user

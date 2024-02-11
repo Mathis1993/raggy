@@ -21,6 +21,7 @@
     import {createConversation} from "./conversations/conversationService";
     import { getCsrfToken } from '$lib/cookies';
     import { goto } from '$app/navigation';
+    import { user } from '../../stores/userStore';
 
     let breakPoint: number = 1024;
     let width: number = typeof window !== 'undefined' ? window.innerWidth : 1024;
@@ -31,8 +32,7 @@
     export let data;
     $: conversations = $page.data.conversations || [];
     $: loadingConversations = !conversations.length;
-    $: userFullName = $page.data.user.full_name || 'Jane Doe';
-    $: userEmail = $page.data.user.email || 'jane@raggy.de';
+    user.set($page.data.user || {});
 
 
     onMount(async () => {
@@ -94,11 +94,11 @@
         </div>
         <Dropdown placement="bottom" triggeredBy="#avatar-menu">
             <DropdownHeader>
-                <span class="block text-sm">{userFullName}</span>
-                <span class="block truncate text-sm font-medium">{userEmail}</span>
+                <span class="block text-sm">{`${$user.first_name} ${$user.last_name}`.trim() || ''}</span>
+                <span class="block truncate text-sm font-medium">{$user.email}</span>
             </DropdownHeader>
             <DropdownItem>Dashboard</DropdownItem>
-            <DropdownItem>Settings</DropdownItem>
+            <DropdownItem href="/settings">Settings</DropdownItem>
             <DropdownDivider/>
             <DropdownItem on:click={handleLogout}>Sign out</DropdownItem>
         </Dropdown>
