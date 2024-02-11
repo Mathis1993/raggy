@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from core.models import TrackCreationAndUpdates
@@ -12,7 +13,7 @@ class Conversation(TrackCreationAndUpdates):
         FAILED = "FAILED", "Failed"
 
     # Placeholder for now
-    user_id = models.IntegerField(default=1)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="conversations")
 
     name = models.CharField(max_length=255, default=None, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

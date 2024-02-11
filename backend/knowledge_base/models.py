@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from core.models import TrackCreation
@@ -20,7 +21,7 @@ class Document(TrackCreation):
         COMPLETED = "completed", "Completed"
         FAILED = "failed", "Failed"
 
-    user_id = models.IntegerField()
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="documents")
     identifier = models.CharField(max_length=2048)
     doc_id = models.CharField(max_length=2048, null=True)
     type = models.CharField(choices=Type.choices, max_length=255)
