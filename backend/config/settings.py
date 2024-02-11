@@ -30,9 +30,11 @@ SECRET_KEY = "django-insecure-+rpsn5x81y%)aa%t^$7)uhual@k^x&d&zi-ax0hf(qnda%&lv+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_CREDENTIALS = True
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+CORS_ORIGIN_WHITELIST = os.getenv("DJANGO_CORS_ORIGIN_WHITELIST", "").split(",")
 
 # Application definition
 
@@ -51,6 +53,7 @@ INSTALLED_APPS = [
     "core",
     "conversations",
     "knowledge_base",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -177,6 +180,17 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# REST_FRAMEWORK
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",  # Enforce authentication on all drf views
+    ]
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -201,6 +215,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Authentication
+AUTH_USER_MODEL = "users.User"
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
