@@ -21,6 +21,7 @@ class ConversationHandler:
         self.conversation = get_object_or_404(Conversation, id=conversation_id)
         self.conversation_history = self._get_conversation_history()
         self.conversation_engine = ConversationEngine(
+            user=self.conversation.user,
             conversation_history=self.conversation_history,
         )
 
@@ -30,6 +31,7 @@ class ConversationHandler:
             self.conversation.mark_as_running()
 
         try:
+            user_id = self.conversation.user_id
             assistant_response: ChatResponse = self.conversation_engine.query(user_message)
             response_msg_obj = self.conversation.add_assistant_message(assistant_response.response)
             self.conversation.mark_as_completed()
