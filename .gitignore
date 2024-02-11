@@ -15,3 +15,6 @@ ngrok
 
 # ssh
 .ssh/
+
+# File uploads
+media/
