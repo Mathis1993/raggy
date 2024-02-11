@@ -16,7 +16,7 @@ class Conversation(TrackCreationAndUpdates):
 
     name = models.CharField(max_length=255, default=None, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.RUNNING)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.COMPLETED)
 
     def __str__(self):
         return self.name or f"Conversation {self.id}"
