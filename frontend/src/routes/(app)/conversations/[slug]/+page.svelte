@@ -1,6 +1,6 @@
 <script lang="ts">
     import {Alert, Card, Spinner, Textarea, ToolbarButton} from "flowbite-svelte";
-    import ChatBubble from "../../../components/ChatBubble.svelte";
+    import ChatBubble from "../../../../components/ChatBubble.svelte";
     import {onDestroy, onMount, tick} from "svelte";
     import {createMessage, deleteConversation, retrieveConversation} from "../conversationService";
     import {invalidateAll} from "$app/navigation";

@@ -1,14 +1,17 @@
 import {goto, invalidateAll} from "$app/navigation";
+import { getCsrfToken } from '$lib/cookies';
 
-const CONVERSATION_API_URL = 'http://localhost:8000/api/conversations/';
+const CONVERSATION_API_URL = 'http://127.0.0.1:8000/api/conversations/';
 
 
 export async function createMessage(messageText: string, conversation: Conversation) {
     const message = messageText.trim();
     const response = await fetch(CONVERSATION_API_URL + conversation.id + "/messages/", {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
         },
         body: JSON.stringify({"message": message, "conversation_id": conversation.id}),
     });
@@ -23,10 +26,12 @@ export async function createMessage(messageText: string, conversation: Conversat
 
 export async function createConversation() {
     try {
-        const response = await fetch('http://localhost:8000/api/conversations/', {
+        const response = await fetch('http://127.0.0.1:8000/api/conversations/', {
             method: 'POST',
+            credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
             },
         });
 
@@ -45,7 +50,7 @@ export async function createConversation() {
 
 export async function retrieveConversation(conversationId: number) {
     try {
-        const response = await fetch(CONVERSATION_API_URL + conversationId);
+        const response = await fetch(CONVERSATION_API_URL + conversationId, { credentials: 'include'});
 
         if (!response.ok) {
             console.error('Failed to retrieve conversation');
@@ -63,6 +68,10 @@ export async function deleteConversation(conversationId: number) {
     try {
         const response = await fetch(CONVERSATION_API_URL + conversationId, {
             method: 'DELETE',
+            credentials: 'include',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+            },
         });
 
         if (!response.ok) {

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import '../app.pcss';
+    import '../../app.pcss';
     import {
         Avatar,
         Button,
@@ -19,6 +19,9 @@
     import {page} from "$app/stores";
     import {onMount} from "svelte";
     import {createConversation} from "./conversations/conversationService";
+    import { getCsrfToken } from '$lib/cookies';
+    import { goto } from '$app/navigation';
+    import { user } from '../../stores/userStore';
 
     let breakPoint: number = 1024;
     let width: number = typeof window !== 'undefined' ? window.innerWidth : 1024;
@@ -29,6 +32,8 @@
     export let data;
     $: conversations = $page.data.conversations || [];
     $: loadingConversations = !conversations.length;
+    user.set($page.data.user || {});
+
 
     onMount(async () => {
         width = window.innerWidth;
@@ -38,6 +43,27 @@
     function toggleSidebar() {
         if (width < breakPoint) {
             sidebarVisible = !sidebarVisible;
+        }
+    }
+
+    async function handleLogout() {
+        const body = new URLSearchParams({
+            'csrfmiddlewaretoken': getCsrfToken(),
+        });
+        const response = await fetch('http://127.0.0.1:8000/users/logout/', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: body,
+        });
+
+        if (response.ok) {
+            await goto('/login')
+        } else {
+            const error = await response.json();
+            return { status: 'error', error };
         }
     }
 
@@ -68,13 +94,13 @@
         </div>
         <Dropdown placement="bottom" triggeredBy="#avatar-menu">
             <DropdownHeader>
-                <span class="block text-sm">Jane Doe</span>
-                <span class="block truncate text-sm font-medium">jane@raggy.com</span>
+                <span class="block text-sm">{`${$user.first_name} ${$user.last_name}`.trim() || ''}</span>
+                <span class="block truncate text-sm font-medium">{$user.email}</span>
             </DropdownHeader>
             <DropdownItem>Dashboard</DropdownItem>
-            <DropdownItem>Settings</DropdownItem>
+            <DropdownItem href="/settings">Settings</DropdownItem>
             <DropdownDivider/>
-            <DropdownItem>Sign out</DropdownItem>
+            <DropdownItem on:click={handleLogout}>Sign out</DropdownItem>
         </Dropdown>
     </Navbar>
 </header>
@@ -121,15 +147,15 @@
                                  on:click={toggleSidebar} active={activeUrl === "/documents"}>
                         <svelte:fragment slot="icon">
                             <FileSearchSolid
-                                    class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
+                              class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
                         </svelte:fragment>
                     </SidebarItem>
                     <SidebarItem class="text-white hover:bg-gray-500" label="Information"
                                  href="https://www.llamaindex.ai/" target="_blank" on:click={toggleSidebar}>
-                                 on:click={toggleSidebar}>
+                        on:click={toggleSidebar}>
                         <svelte:fragment slot="icon">
                             <OpenBookSolid
-                                    class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
+                              class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
                         </svelte:fragment>
                     </SidebarItem>
                 </SidebarGroup>

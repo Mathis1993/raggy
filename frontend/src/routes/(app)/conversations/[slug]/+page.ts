@@ -1,7 +1,7 @@
-export async function load({ params, fetch }) {
+export async function load({ fetch, params }) {
     let conversationId = params.slug;
     try {
-        const response = await fetch(`http://localhost:8000/api/conversations/${conversationId}/`);
+        const response = await fetch(`http://127.0.0.1:8000/api/conversations/${conversationId}/`, { credentials: 'include' });
 
         if (!response.ok) {
             console.error('Failed to fetch conversation:', response.status);
