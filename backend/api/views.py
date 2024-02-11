@@ -3,7 +3,10 @@ import json
 import logging
 
 from django.http import JsonResponse
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -12,6 +15,7 @@ from api.serializer import ConversationSerializer, ConversationDetailSerializer,
 from api.serializer import DocumentSerializer
 from conversations.models import Conversation
 from conversations.tasks import task_handle_user_message
+from core.utils.utils import UrlStr
 from knowledge_base.models import Document
 from knowledge_base.tasks import task_handle_document_ingestion
 
@@ -54,6 +58,7 @@ class MessageModelViewSet(ModelViewSet):
 
 class DocumentModelViewSet(ModelViewSet):
     model = Document
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -68,26 +73,33 @@ class DocumentModelViewSet(ModelViewSet):
             return DocumentSerializer
         return DocumentSerializer
 
-    def create(self, request, *args, **kwargs):
+    @action(detail=False, methods=['post'], url_path='create_from_url')
+    def create_from_url(self, request, *args, **kwargs):
         requested_url = request.data.get("document_url")
-
-        # make sure the url is valid
-        if "http" not in requested_url:
-            requested_url = "https://" + requested_url
+        try:
+            requested_url = UrlStr(requested_url)
+        except Exception as e:
+            logger.info(f"Failed to validate URL: {str(e)}")
+            return JsonResponse({"error": f"Invalid URL: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
         # ToDo(ME-31.01.24): Extract user_id from request
         user_id = 1
-        document = Document.objects.create(
-            user_id=user_id, identifier=requested_url, status=Document.Status.PROCESSING
-        )
-        task = task_handle_document_ingestion.apply_async(
-            kwargs={"document_id": document.id, "url": requested_url}
-        )
-
-        # Log the task details
-        logger.info(task)
-
+        document = Document.create_from_url(user_id, requested_url)
+        task_handle_document_ingestion.delay(document_id=document.id)
         return JsonResponse({"document": DocumentSerializer(document).data})
+
+    @action(detail=False, methods=['post'], url_path='upload')
+    def upload_file(self, request, *args, **kwargs):
+        file = request.FILES.get('file')
+        document_name = request.POST.get('document_name')
+        if not file:
+            return JsonResponse({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Extract user_id from request (ToDo: Implement actual user extraction)
+        user_id = 1
+        document = Document.create_from_file(user_id=user_id, file=file, document_name=document_name)
+        task_handle_document_ingestion.delay(document_id=document.id)
+        return JsonResponse({"document": DocumentSerializer(document).data}, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
         document = self.get_object()
