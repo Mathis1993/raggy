@@ -20,6 +20,8 @@
         TableHeadCell,
         Tabs
     } from "flowbite-svelte";
+    import { debounce } from 'lodash';
+
     import {goto, invalidateAll} from "$app/navigation";
     import {
         createDocumentFromFileUpload,
@@ -53,8 +55,11 @@
     let errorMessage = writable('');
 
     let selectedDocumentType: string = "";
-    function filterDocuments(documentType: string) {
-        goto(`?type=${documentType}`, {replaceState: true});
+    let searchQuery = "";
+    let documentType = "";
+    const debouncedSearch = debounce(filterDocuments, 500);
+    function filterDocuments() {
+        goto(`?type=${documentType}&search=${searchQuery}`, {replaceState: true});
     }
 
     function openModal(type: string) {
@@ -153,7 +158,7 @@
         </Button>
     </div>
     <TableHeader headerType="search" divOuterClass="border-0">
-        <Search slot="search" size="md"/>
+        <Search slot="search" size="md" bind:value={searchQuery} on:input={() => {debouncedSearch();}}/>
         <Button color="light" class="ml-2">
             <FilterOutline class="w-4 h-4"></FilterOutline>
             Filter
@@ -161,13 +166,14 @@
         <Dropdown class="w-60">
             <ul class="p-2">
                 <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <Radio name="documentType" bind:group={selectedDocumentType} value='all' on:change={() => filterDocuments('all')}>All</Radio>
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='all' on:change={() => {documentType="all"; filterDocuments()}}>All</Radio>
                 </li>
                 <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <Radio name="documentType" bind:group={selectedDocumentType} value='website' on:change={() => filterDocuments('website')}>Website</Radio>
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='website' on:change={() => {documentType="website"; filterDocuments()}}>Website</Radio>
                 </li>
                 <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <Radio name="documentType" bind:group={selectedDocumentType} value='pdf' on:change={() => filterDocuments('pdf')}>PDF</Radio>
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='text' on:change={() => {documentType="pdf"; filterDocuments()}}>Text</Radio>
+
                 </li>
             </ul>
         </Dropdown>

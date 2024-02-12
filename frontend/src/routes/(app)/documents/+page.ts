@@ -5,8 +5,10 @@ export const ssr = false;
 
 /** @type {import('./$types').PageLoad} */
 export async function load({ params, url }) {
-    const documentType = url.searchParams.get('type') || "all";
+    const documentType = url.searchParams.get('type') || "";
+    const search = url.searchParams.get('search') || "";
     console.log("documentType", documentType);
-    const documents = await getDocuments(documentType);
+    console.log("search", search);
+    const documents = await getDocuments(documentType, search);
     return {documents: documents};
 }
