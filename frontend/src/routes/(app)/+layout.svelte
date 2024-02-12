@@ -31,7 +31,7 @@
 
     export let data;
     $: conversations = $page.data.conversations || [];
-    $: loadingConversations = !conversations.length;
+    $: loadingConversations = !$page.data.conversationsLoaded;
     user.set($page.data.user || {});
 
 
@@ -121,8 +121,12 @@
                     </div>
                     <div class="max-h-[calc(100vh-40vh)] overflow-y-auto">
                         {#if loadingConversations}
-                            <div>
-                                <Spinner/>
+                            <div class="flex items-center justify-center">
+                                Loading conversations...
+                            </div>
+                        {:else if conversations.length === 0}
+                            <div class="flex items-center justify-center">
+                                No conversations yet
                             </div>
                         {:else}
                             {#each conversations as conversation}
