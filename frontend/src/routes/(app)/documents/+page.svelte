@@ -2,11 +2,14 @@
     import {
         Button,
         Card,
+        Checkbox,
+        Dropdown,
         Fileupload,
         Helper,
         Input,
         Label,
-        Modal,
+        Modal, Radio,
+        Search,
         Spinner,
         TabItem,
         Table,
@@ -17,17 +20,26 @@
         TableHeadCell,
         Tabs
     } from "flowbite-svelte";
-    import {invalidate, invalidateAll} from "$app/navigation";
+    import {goto, invalidateAll} from "$app/navigation";
     import {
         createDocumentFromFileUpload,
         createDocumentFromUrl,
         deleteDocument,
+        getDocuments,
         retrieveDocument
     } from "./documentService";
-    import {CheckCircleSolid, CloseCircleSolid, ExclamationCircleOutline, EyeOutline} from "flowbite-svelte-icons";
+    import {
+        CheckCircleSolid,
+        CloseCircleSolid,
+        ExclamationCircleOutline,
+        EyeOutline,
+        FilterOutline,
+        PlusSolid
+    } from "flowbite-svelte-icons";
     import {onDestroy, onMount} from "svelte";
     import {page} from "$app/stores";
     import {writable} from "svelte/store";
+    import {TableHeader} from "flowbite-svelte-blocks";
 
     $: documents = $page.data.documents || [];
 
@@ -39,6 +51,11 @@
     let documentURL: string = '';
     let documentName: string = '';
     let errorMessage = writable('');
+
+    let selectedDocumentType: string = "";
+    function filterDocuments(documentType: string) {
+        goto(`?type=${documentType}`, {replaceState: true});
+    }
 
     function openModal(type: string) {
         modalVisible = {create: false, delete: false, detail: false}; // Reset all
@@ -130,9 +147,31 @@
         documents </p>
 
     <div class="flex justify-end my-2">
-        <Button on:click={() => {openModal("create")}}>Add Document</Button>
+        <Button on:click={() => {openModal("create")}}>
+            <PlusSolid class="w-4 h-4 mr-2"></PlusSolid>
+            Add Document
+        </Button>
     </div>
-
+    <TableHeader headerType="search" divOuterClass="border-0">
+        <Search slot="search" size="md"/>
+        <Button color="light" class="ml-2">
+            <FilterOutline class="w-4 h-4"></FilterOutline>
+            Filter
+        </Button>
+        <Dropdown class="w-60">
+            <ul class="p-2">
+                <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='all' on:change={() => filterDocuments('all')}>All</Radio>
+                </li>
+                <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='website' on:change={() => filterDocuments('website')}>Website</Radio>
+                </li>
+                <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='pdf' on:change={() => filterDocuments('pdf')}>PDF</Radio>
+                </li>
+            </ul>
+        </Dropdown>
+    </TableHeader>
     <Table hoverable={true}>
         <TableHead>
             <TableHeadCell>Document Name</TableHeadCell>

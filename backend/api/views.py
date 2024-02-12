@@ -65,7 +65,13 @@ class DocumentModelViewSet(ModelViewSet):
         super().__init__(**kwargs)
 
     def get_queryset(self):
-        return self.model.objects.filter(user=self.request.user)
+        documents = self.model.objects.filter(user=self.request.user)
+
+        document_type = self.request.GET.get('type')
+        if document_type and not document_type == "all":
+            documents = documents.filter(type=document_type)
+
+        return documents
 
     def get_serializer_class(self):
         if self.action == "retrieve":
