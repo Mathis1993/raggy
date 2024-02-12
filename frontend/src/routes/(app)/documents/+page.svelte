@@ -59,7 +59,19 @@
     let documentType = "";
     const debouncedSearch = debounce(filterDocuments, 500);
     function filterDocuments() {
-        goto(`?type=${documentType}&search=${searchQuery}`, {replaceState: true});
+        let searchParams = new URLSearchParams(window.location.search);
+        if (documentType) {
+            searchParams.set('type', documentType);
+        } else {
+            searchParams.delete('type');
+        }
+        if (searchQuery) {
+            searchParams.set('search', searchQuery);
+        } else {
+            searchParams.delete('search');
+        }
+
+        goto(`?` + searchParams.toString(), {replaceState: true});
     }
 
     function openModal(type: string) {
