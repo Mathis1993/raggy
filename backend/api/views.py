@@ -2,6 +2,7 @@ import json
 import json
 import logging
 
+from django.db.models import Q
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import action
@@ -70,6 +71,10 @@ class DocumentModelViewSet(ModelViewSet):
         document_type = self.request.GET.get('type')
         if document_type and not document_type == "all":
             documents = documents.filter(type=document_type)
+
+        search = self.request.GET.get('search')
+        if search:
+            documents = documents.filter(Q(title__icontains=search) | Q(identifier__icontains=search))
 
         return documents
 
