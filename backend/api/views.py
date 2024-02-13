@@ -63,9 +63,7 @@ class MessageModelViewSet(ModelViewSet):
 class DocumentModelViewSet(ModelViewSet):
     model = Document
     parser_classes = (MultiPartParser, FormParser, JSONParser)
-    # Pagination
     pagination_class = PageNumberPagination
-    page_size = 1
     # Filtering and Search
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["type"]

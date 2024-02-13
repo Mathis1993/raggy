@@ -1,14 +1,14 @@
 <script lang="ts">
     import {
-        Button, ButtonGroup,
+        Button,
         Card,
-        Checkbox,
         Dropdown,
         Fileupload,
         Helper,
         Input,
         Label,
-        Modal, Radio,
+        Modal,
+        Radio,
         Search,
         Spinner,
         TabItem,
@@ -31,8 +31,9 @@
         retrieveDocument
     } from "./documentService";
     import {
-        CheckCircleSolid, ChevronLeftOutline, ChevronRightOutline,
-        CloseCircleSolid, DownloadOutline,
+        CheckCircleSolid,
+        CloseCircleSolid,
+        DownloadOutline,
         ExclamationCircleOutline,
         EyeOutline,
         FilterOutline,
@@ -42,7 +43,6 @@
     import {page} from "$app/stores";
     import {writable} from "svelte/store";
     import {TableHeader} from "flowbite-svelte-blocks";
-    import {list} from "postcss";
 
     $: documents = $page.data.documents || [];
 
@@ -60,35 +60,21 @@
     let searchQuery = "";
     let documentType = "";
     const debouncedSearch = debounce(filterDocuments, 500);
+
     let currentPage = 1;
-    const pageSize = 1;
-    let totalItems = 0;
-    let pagesToShow: number[] = [];
+    let hasMore = true;
 
-    // Fetch the documents for the current page
-    async function loadPage() {
-        documents = await getDocuments(selectedDocumentType, searchQuery, currentPage);
-        totalItems = documents.length; // Update the total number of items
-        pagesToShow = Array.from({length: Math.ceil(totalItems / pageSize)}, (_, i) => i + 1); // Calculate the pages to show
-    }
-
-    async function loadPreviousPage() {
-        if (currentPage > 1) {
-            currentPage--;
-            await loadPage();
-        }
-    }
-
-    async function loadNextPage() {
-        if (currentPage < pagesToShow.length) {
+    async function loadMoreDocuments() {
+        console.log('loading more documents');
+        console.log('hasMore', hasMore);
+        if (!hasMore) return;
+        const newDocuments = await getDocuments(documentType, searchQuery, currentPage);
+        if (newDocuments.length === 0) {
+            hasMore = false;
+        } else {
+            documents = [...documents, ...newDocuments];
             currentPage++;
-            await loadPage();
         }
-    }
-
-    async function goToPage(pageNumber: number) {
-        currentPage = pageNumber;
-        await loadPage();
     }
 
     function filterDocuments() {
@@ -103,7 +89,6 @@
         } else {
             searchParams.delete('search');
         }
-
         goto(`?` + searchParams.toString(), {replaceState: true});
     }
 
@@ -171,12 +156,28 @@
 
     onMount(() => {
         refreshIntervalId = setInterval(refreshDocuments, 5000);
-        loadPage();
     });
 
     onDestroy(() => {
         clearInterval(refreshIntervalId);
     });
+
+    let debouncedHandleScroll = debounce(handleScroll, 100);
+
+    function handleScroll(event) {
+        const target = event.currentTarget; // Use currentTarget to ensure you're getting the right target
+        const bottomReached = target.scrollHeight - Math.ceil(target.scrollTop) <= target.clientHeight + 1; // Adding a small threshold
+        console.log("Scrolling...", {
+            scrollTop: target.scrollTop,
+            scrollHeight: target.scrollHeight,
+            clientHeight: target.clientHeight,
+            bottomReached
+        });
+        if (bottomReached) {
+            loadMoreDocuments();
+        }
+    }
+
 
     async function refreshDocuments() {
         for (let i = 0; i < documents.length; i++) {
@@ -192,19 +193,12 @@
 
 </script>
 
-<Card class="max-w-full w-full">
+<Card class="max-w-full w-full max-h-[calc(100vh-15vh)] overflow-auto">
     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"> Uploaded Documents</h5>
     <p class="font-normal text-gray-700 dark:text-gray-400 leading-tight"> This is a list of your uploaded
         documents </p>
-
-    <div class="flex justify-end my-2">
-        <Button on:click={() => {openModal("create")}}>
-            <PlusSolid class="w-4 h-4 mr-2"></PlusSolid>
-            Add Document
-        </Button>
-    </div>
-    <TableHeader headerType="search" divOuterClass="border-0">
-        <Search slot="search" size="md" bind:value={searchQuery} on:input={() => {debouncedSearch();}}/>
+    <TableHeader divOuterClass="border-0">
+        <Search name="search" slot="search" size="md" bind:value={searchQuery} on:input={() => {debouncedSearch();}}/>
         <Button color="light" class="ml-2">
             <FilterOutline class="w-4 h-4"></FilterOutline>
             Filter
@@ -225,27 +219,30 @@
                     <Radio name="documentType" bind:group={selectedDocumentType} value='text'
                            on:change={() => {documentType="pdf"; filterDocuments()}}>Files
                     </Radio>
-
                 </li>
             </ul>
         </Dropdown>
+        <Button on:click={() => {openModal("create")}} class="ml-2">
+            <PlusSolid class="w-4 h-4 mr-2"></PlusSolid>
+            Add Document
+        </Button>
     </TableHeader>
-    <Table hoverable={true}>
+    <Table>
         <TableHead>
             <TableHeadCell>Document Name</TableHeadCell>
-            <TableHeadCell>URL</TableHeadCell>
+            <TableHeadCell>Identifier</TableHeadCell>
             <TableHeadCell>Type</TableHeadCell>
             <TableHeadCell>Status</TableHeadCell>
             <TableHeadCell></TableHeadCell>
         </TableHead>
-        <TableBody>
+        <TableBody tableBodyClass="scroll-container max-h-96 overflow-y-auto" on:scroll={debouncedHandleScroll}>
             {#each documents as document}
                 <TableBodyRow class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
                     <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
-                        {document.title ? document.title.substring(0, 50) : 'No title'}
+                        {document.title ? document.title.substring(0, 40) : 'No title'}
                     </TableBodyCell>
                     <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
-                        {document.identifier}
+                        {document.identifier ? document.identifier.substring(0, 30) : 'No identifier'}
                     </TableBodyCell>
                     <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
                         {document.type}
@@ -269,27 +266,6 @@
                 </TableBodyRow>
             {/each}
         </TableBody>
-        <div
-                class="flex flex-col max-w-full md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4">
-                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                    Showing
-                    <span class="font-semibold text-gray-900 dark:text-white">{(currentPage - 1) * pageSize + 1}
-                        -{Math.min(currentPage * pageSize, totalItems)}</span>
-                    of
-                    <span class="font-semibold text-gray-900 dark:text-white">{totalItems}</span>
-                </span>
-            <ButtonGroup>
-                <Button on:click={loadPreviousPage} disabled={currentPage === 1}>
-                    <ChevronLeftOutline size='xs' class='m-1.5'/>
-                </Button>
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}>{pageNumber}</Button>
-                {/each}
-                <Button on:click={loadNextPage} disabled={currentPage === pagesToShow.length}>
-                    <ChevronRightOutline size='xs' class='m-1.5'/>
-                </Button>
-            </ButtonGroup>
-        </div>
     </Table>
 </Card>
 
