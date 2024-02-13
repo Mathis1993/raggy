@@ -32,7 +32,7 @@
     } from "./documentService";
     import {
         CheckCircleSolid, ChevronLeftOutline, ChevronRightOutline,
-        CloseCircleSolid,
+        CloseCircleSolid, DownloadOutline,
         ExclamationCircleOutline,
         EyeOutline,
         FilterOutline,
@@ -270,7 +270,7 @@
             {/each}
         </TableBody>
         <div
-             class="flex flex-col max-w-full md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4">
+                class="flex flex-col max-w-full md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4">
                 <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
                     Showing
                     <span class="font-semibold text-gray-900 dark:text-white">{(currentPage - 1) * pageSize + 1}
@@ -278,17 +278,17 @@
                     of
                     <span class="font-semibold text-gray-900 dark:text-white">{totalItems}</span>
                 </span>
-                <ButtonGroup>
-                    <Button on:click={loadPreviousPage} disabled={currentPage === 1}>
-                        <ChevronLeftOutline size='xs' class='m-1.5'/>
-                    </Button>
-                    {#each pagesToShow as pageNumber}
-                        <Button on:click={() => goToPage(pageNumber)}>{pageNumber}</Button>
-                    {/each}
-                    <Button on:click={loadNextPage} disabled={currentPage === pagesToShow.length}>
-                        <ChevronRightOutline size='xs' class='m-1.5'/>
-                    </Button>
-                </ButtonGroup>
+            <ButtonGroup>
+                <Button on:click={loadPreviousPage} disabled={currentPage === 1}>
+                    <ChevronLeftOutline size='xs' class='m-1.5'/>
+                </Button>
+                {#each pagesToShow as pageNumber}
+                    <Button on:click={() => goToPage(pageNumber)}>{pageNumber}</Button>
+                {/each}
+                <Button on:click={loadNextPage} disabled={currentPage === pagesToShow.length}>
+                    <ChevronRightOutline size='xs' class='m-1.5'/>
+                </Button>
+            </ButtonGroup>
         </div>
     </Table>
 </Card>
@@ -365,10 +365,13 @@
     </dl>
     <div class="flex justify-between items-center">
         <div class="flex items-center space-x-3 sm:space-x-4">
-            <!--            <Button>-->
-            <!--                <svg aria-hidden="true" class="mr-1 -ml-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>-->
-            <!--                Edit-->
-            <!--            </Button>-->
+            {#if documentDetails && documentDetails.file_url}
+                <Button href={documentDetails ? documentDetails.file_url : '#'} target="_blank" color="primary"
+                        class="flex items-center space-x-1">
+                    <DownloadOutline class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor"/>
+                    Download
+                </Button>
+            {/if}
         </div>
         <Button color="red" on:click={() => {openModal("delete"); documentIdToDelete = documentDetails.id;}}>
             <svg aria-hidden="true" class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor" viewBox="0 0 20 20"

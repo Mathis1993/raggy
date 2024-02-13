@@ -7,4 +7,5 @@ type ContextDocument = {
     status: string;
     type: string;
     keywords: string;
+    file_url: string;
 }

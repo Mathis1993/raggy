@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from api.serializer import ConversationSerializer, ConversationDetailSerializer, \
-    MessageSerializer
+    MessageSerializer, DocumentDetailSerializer
 from api.serializer import DocumentSerializer
 from conversations.models import Conversation
 from conversations.tasks import task_handle_user_message
@@ -80,8 +80,7 @@ class DocumentModelViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == "retrieve":
-            # TODO: Add a serializer for the detail view
-            return DocumentSerializer
+            return DocumentDetailSerializer
         return DocumentSerializer
 
     @action(detail=False, methods=['post'], url_path='create_from_url')

@@ -7,7 +7,22 @@ from knowledge_base.models import Document
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
-        fields = ["id", "title", "identifier", "created_at", "status", "type", "keywords", "file"]
+        fields = ["id", "title", "identifier", "created_at", "status", "type"]
+
+
+class DocumentDetailSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Document
+        fields = ["id", "title", "identifier", "created_at", "status", "type", "keywords", "file_url"]
+
+    def get_file_url(self, document):
+        request = self.context.get("request")
+        if document.file:
+            file_url = document.file.url
+            return request.build_absolute_uri(file_url)
+        return None
 
 
 class MessageSerializer(serializers.Serializer):
