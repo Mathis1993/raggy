@@ -43,5 +43,13 @@
             {/if}
         </div>
         <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white"> {message.text} </p>
+
+        {#if message.sources && message.sources.length > 0}
+            <ul class="px-2 border-b border-gray-200 dark:border-gray-700">
+                {#each message.sources as source}
+                    <li class="text-gray-600 text-xs"> {source.identifier} </li>
+                {/each}
+            </ul>
+        {/if}
     </div>
 </div>

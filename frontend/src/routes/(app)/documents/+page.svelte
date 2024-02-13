@@ -198,7 +198,7 @@
     <p class="font-normal text-gray-700 dark:text-gray-400 leading-tight"> This is a list of your uploaded
         documents </p>
     <TableHeader divOuterClass="border-0">
-        <Search name="search" slot="search" size="md" bind:value={searchQuery} on:input={() => {debouncedSearch();}}/>
+        <Search name="search" slot="search" size="md" bind:value={searchQuery} on:input={debouncedSearch}/>
         <Button color="light" class="ml-2">
             <FilterOutline class="w-4 h-4"></FilterOutline>
             Filter
