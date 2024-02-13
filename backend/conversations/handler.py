@@ -31,11 +31,11 @@ class ConversationHandler:
             self.conversation.mark_as_running()
 
         try:
-            user_id = self.conversation.user_id
             assistant_response: ChatResponse = self.conversation_engine.query(user_message)
-            response_msg_obj = self.conversation.add_assistant_message(assistant_response.response)
+            message_object = self.conversation.add_assistant_message(assistant_response.response)
+            message_object.add_sources(assistant_response.source_nodes)
             self.conversation.mark_as_completed()
-            return response_msg_obj
+            return message_object
         except Exception as e:
             logger.error(f"Error while processing message: {e}")
             self.conversation.mark_as_failed()

@@ -31,6 +31,8 @@ class MessageSerializer(serializers.Serializer):
     text = serializers.CharField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True, format="%Y-%m-%d %H:%M")
 
+    sources = DocumentSerializer(many=True, read_only=True, source="source_documents")
+
     class Meta:
         model = Message
         fields = "__all__"
