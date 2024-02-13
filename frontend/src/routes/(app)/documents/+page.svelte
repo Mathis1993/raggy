@@ -1,6 +1,6 @@
 <script lang="ts">
     import {
-        Button,
+        Button, ButtonGroup,
         Card,
         Checkbox,
         Dropdown,
@@ -20,7 +20,7 @@
         TableHeadCell,
         Tabs
     } from "flowbite-svelte";
-    import { debounce } from 'lodash';
+    import {debounce} from 'lodash';
 
     import {goto, invalidateAll} from "$app/navigation";
     import {
@@ -31,7 +31,7 @@
         retrieveDocument
     } from "./documentService";
     import {
-        CheckCircleSolid,
+        CheckCircleSolid, ChevronLeftOutline, ChevronRightOutline,
         CloseCircleSolid,
         ExclamationCircleOutline,
         EyeOutline,
@@ -42,6 +42,7 @@
     import {page} from "$app/stores";
     import {writable} from "svelte/store";
     import {TableHeader} from "flowbite-svelte-blocks";
+    import {list} from "postcss";
 
     $: documents = $page.data.documents || [];
 
@@ -54,10 +55,42 @@
     let documentName: string = '';
     let errorMessage = writable('');
 
+    // Filtering, Searching and Paginiation
     let selectedDocumentType: string = "";
     let searchQuery = "";
     let documentType = "";
     const debouncedSearch = debounce(filterDocuments, 500);
+    let currentPage = 1;
+    const pageSize = 1;
+    let totalItems = 0;
+    let pagesToShow: number[] = [];
+
+    // Fetch the documents for the current page
+    async function loadPage() {
+        documents = await getDocuments(selectedDocumentType, searchQuery, currentPage);
+        totalItems = documents.length; // Update the total number of items
+        pagesToShow = Array.from({length: Math.ceil(totalItems / pageSize)}, (_, i) => i + 1); // Calculate the pages to show
+    }
+
+    async function loadPreviousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            await loadPage();
+        }
+    }
+
+    async function loadNextPage() {
+        if (currentPage < pagesToShow.length) {
+            currentPage++;
+            await loadPage();
+        }
+    }
+
+    async function goToPage(pageNumber: number) {
+        currentPage = pageNumber;
+        await loadPage();
+    }
+
     function filterDocuments() {
         let searchParams = new URLSearchParams(window.location.search);
         if (documentType) {
@@ -138,6 +171,7 @@
 
     onMount(() => {
         refreshIntervalId = setInterval(refreshDocuments, 5000);
+        loadPage();
     });
 
     onDestroy(() => {
@@ -178,13 +212,19 @@
         <Dropdown class="w-60">
             <ul class="p-2">
                 <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <Radio name="documentType" bind:group={selectedDocumentType} value='all' on:change={() => {documentType="all"; filterDocuments()}}>All</Radio>
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='all'
+                           on:change={() => {documentType="all"; filterDocuments()}}>All
+                    </Radio>
                 </li>
                 <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <Radio name="documentType" bind:group={selectedDocumentType} value='website' on:change={() => {documentType="website"; filterDocuments()}}>Website</Radio>
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='website'
+                           on:change={() => {documentType="website"; filterDocuments()}}>Websites
+                    </Radio>
                 </li>
                 <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <Radio name="documentType" bind:group={selectedDocumentType} value='text' on:change={() => {documentType="pdf"; filterDocuments()}}>Text</Radio>
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='text'
+                           on:change={() => {documentType="pdf"; filterDocuments()}}>Files
+                    </Radio>
 
                 </li>
             </ul>
@@ -229,6 +269,27 @@
                 </TableBodyRow>
             {/each}
         </TableBody>
+        <div
+             class="flex flex-col max-w-full md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4">
+                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">{(currentPage - 1) * pageSize + 1}
+                        -{Math.min(currentPage * pageSize, totalItems)}</span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white">{totalItems}</span>
+                </span>
+                <ButtonGroup>
+                    <Button on:click={loadPreviousPage} disabled={currentPage === 1}>
+                        <ChevronLeftOutline size='xs' class='m-1.5'/>
+                    </Button>
+                    {#each pagesToShow as pageNumber}
+                        <Button on:click={() => goToPage(pageNumber)}>{pageNumber}</Button>
+                    {/each}
+                    <Button on:click={loadNextPage} disabled={currentPage === pagesToShow.length}>
+                        <ChevronRightOutline size='xs' class='m-1.5'/>
+                    </Button>
+                </ButtonGroup>
+        </div>
     </Table>
 </Card>
 

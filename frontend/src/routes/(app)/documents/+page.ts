@@ -7,8 +7,6 @@ export const ssr = false;
 export async function load({ params, url }) {
     const documentType = url.searchParams.get('type') || "";
     const search = url.searchParams.get('search') || "";
-    console.log("documentType", documentType);
-    console.log("search", search);
     const documents = await getDocuments(documentType, search);
     return {documents: documents};
 }
