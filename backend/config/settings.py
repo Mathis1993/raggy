@@ -81,8 +81,15 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.JSONParser"
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 10,
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"]
+    "PAGE_SIZE": 100,
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ]
 }
 
 
@@ -169,9 +176,9 @@ LOGGING = {
 }
 
 
-# Password validation
+# Authentication
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
-
+AUTH_USER_MODEL = "users.User"
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -185,19 +192,16 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
+    {
+        "NAME": "users.utils.password_validators.ContainsUppercaseValidator",
+    },
+    {
+        "NAME": "users.utils.password_validators.ContainsLowercaseValidator",
+    },
+    {
+        "NAME": "users.utils.password_validators.SpecialCharacterValidator",
+    },
 ]
-
-# REST_FRAMEWORK
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-    ],
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",  # Enforce authentication on all drf views
-    ]
-}
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -222,8 +226,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Authentication
-AUTH_USER_MODEL = "users.User"
+
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
