@@ -2,6 +2,7 @@ import http
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
@@ -26,7 +27,10 @@ class LoginView(View):
             login(request, user)
             return JsonResponse({"message": "Login successful"})
         else:
-            return JsonResponse({"message": "Invalid credentials"}, status=http.HTTPStatus.BAD_REQUEST)
+            return JsonResponse(
+                {"message": "This did not work. Please check your email and password."},
+                status=http.HTTPStatus.BAD_REQUEST
+            )
 
 
 class LogoutView(View):
@@ -42,6 +46,12 @@ class SignupView(generics.CreateAPIView):
     # ToDo(ME-08.02.24): Upgrade to email verification
     serializer_class = UserSerializer
     permission_classes = []  # Signup has to be accessible without authentication
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except ValidationError as e:
+            return JsonResponse({"message": e.message}, status=http.HTTPStatus.BAD_REQUEST)
 
 
 class UserInfoView(LoginRequiredMixin, View):
