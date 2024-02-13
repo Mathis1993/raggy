@@ -1,8 +1,12 @@
+from typing import List
+
 from django.conf import settings
 from django.db import models
+from llama_index.tools import ToolOutput
 
 from core.models import TrackCreationAndUpdates
 from core.utils.models import model_save
+from knowledge_base.models import Document
 
 
 class Conversation(TrackCreationAndUpdates):
@@ -53,6 +57,8 @@ class Message(TrackCreationAndUpdates):
     is_user_message = models.BooleanField(default=False)
     processing_time = models.FloatField(default=0.0)
 
+    source_documents = models.ManyToManyField("knowledge_base.Document", related_name="messages")
+
     def __str__(self):
         return self.text
 
@@ -80,3 +86,9 @@ class Message(TrackCreationAndUpdates):
             text=text,
             is_user_message=False,
         )
+
+    def add_sources(self, source_nodes: List[ToolOutput]):
+        source_document_ids = [source.metadata.get("postgres_doc_id", None) for source in source_nodes]
+        source_documents = Document.objects.filter(id__in=set(list(source_document_ids)))
+        self.source_documents.add(*source_documents)
+
