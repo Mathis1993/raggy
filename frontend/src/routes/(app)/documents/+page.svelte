@@ -2,11 +2,14 @@
     import {
         Button,
         Card,
+        Dropdown,
         Fileupload,
         Helper,
         Input,
         Label,
         Modal,
+        Radio,
+        Search,
         Spinner,
         TabItem,
         Table,
@@ -17,17 +20,29 @@
         TableHeadCell,
         Tabs
     } from "flowbite-svelte";
-    import {invalidate, invalidateAll} from "$app/navigation";
+    import {debounce} from 'lodash';
+
+    import {goto, invalidateAll} from "$app/navigation";
     import {
         createDocumentFromFileUpload,
         createDocumentFromUrl,
         deleteDocument,
+        getDocuments,
         retrieveDocument
     } from "./documentService";
-    import {CheckCircleSolid, CloseCircleSolid, ExclamationCircleOutline, EyeOutline} from "flowbite-svelte-icons";
+    import {
+        CheckCircleSolid,
+        CloseCircleSolid,
+        DownloadOutline,
+        ExclamationCircleOutline,
+        EyeOutline,
+        FilterOutline,
+        PlusSolid
+    } from "flowbite-svelte-icons";
     import {onDestroy, onMount} from "svelte";
     import {page} from "$app/stores";
     import {writable} from "svelte/store";
+    import {TableHeader} from "flowbite-svelte-blocks";
 
     $: documents = $page.data.documents || [];
 
@@ -39,6 +54,43 @@
     let documentURL: string = '';
     let documentName: string = '';
     let errorMessage = writable('');
+
+    // Filtering, Searching and Paginiation
+    let selectedDocumentType: string = "";
+    let searchQuery = "";
+    let documentType = "";
+    const debouncedSearch = debounce(filterDocuments, 500);
+
+    let currentPage = 1;
+    let hasMore = true;
+
+    async function loadMoreDocuments() {
+        console.log('loading more documents');
+        console.log('hasMore', hasMore);
+        if (!hasMore) return;
+        const newDocuments = await getDocuments(documentType, searchQuery, currentPage);
+        if (newDocuments.length === 0) {
+            hasMore = false;
+        } else {
+            documents = [...documents, ...newDocuments];
+            currentPage++;
+        }
+    }
+
+    function filterDocuments() {
+        let searchParams = new URLSearchParams(window.location.search);
+        if (documentType) {
+            searchParams.set('type', documentType);
+        } else {
+            searchParams.delete('type');
+        }
+        if (searchQuery) {
+            searchParams.set('search', searchQuery);
+        } else {
+            searchParams.delete('search');
+        }
+        goto(`?` + searchParams.toString(), {replaceState: true});
+    }
 
     function openModal(type: string) {
         modalVisible = {create: false, delete: false, detail: false}; // Reset all
@@ -110,6 +162,23 @@
         clearInterval(refreshIntervalId);
     });
 
+    let debouncedHandleScroll = debounce(handleScroll, 100);
+
+    function handleScroll(event) {
+        const target = event.currentTarget; // Use currentTarget to ensure you're getting the right target
+        const bottomReached = target.scrollHeight - Math.ceil(target.scrollTop) <= target.clientHeight + 1; // Adding a small threshold
+        console.log("Scrolling...", {
+            scrollTop: target.scrollTop,
+            scrollHeight: target.scrollHeight,
+            clientHeight: target.clientHeight,
+            bottomReached
+        });
+        if (bottomReached) {
+            loadMoreDocuments();
+        }
+    }
+
+
     async function refreshDocuments() {
         for (let i = 0; i < documents.length; i++) {
             if (documents[i].status === 'processing') {
@@ -124,31 +193,56 @@
 
 </script>
 
-<Card class="max-w-full w-full">
+<Card class="max-w-full w-full max-h-[calc(100vh-15vh)] overflow-auto">
     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"> Uploaded Documents</h5>
     <p class="font-normal text-gray-700 dark:text-gray-400 leading-tight"> This is a list of your uploaded
         documents </p>
-
-    <div class="flex justify-end my-2">
-        <Button on:click={() => {openModal("create")}}>Add Document</Button>
-    </div>
-
-    <Table hoverable={true}>
+    <TableHeader divOuterClass="border-0">
+        <Search name="search" slot="search" size="md" bind:value={searchQuery} on:input={() => {debouncedSearch();}}/>
+        <Button color="light" class="ml-2">
+            <FilterOutline class="w-4 h-4"></FilterOutline>
+            Filter
+        </Button>
+        <Dropdown class="w-60">
+            <ul class="p-2">
+                <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='all'
+                           on:change={() => {documentType="all"; filterDocuments()}}>All
+                    </Radio>
+                </li>
+                <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='website'
+                           on:change={() => {documentType="website"; filterDocuments()}}>Websites
+                    </Radio>
+                </li>
+                <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                    <Radio name="documentType" bind:group={selectedDocumentType} value='text'
+                           on:change={() => {documentType="pdf"; filterDocuments()}}>Files
+                    </Radio>
+                </li>
+            </ul>
+        </Dropdown>
+        <Button on:click={() => {openModal("create")}} class="ml-2">
+            <PlusSolid class="w-4 h-4 mr-2"></PlusSolid>
+            Add Document
+        </Button>
+    </TableHeader>
+    <Table>
         <TableHead>
             <TableHeadCell>Document Name</TableHeadCell>
-            <TableHeadCell>URL</TableHeadCell>
+            <TableHeadCell>Identifier</TableHeadCell>
             <TableHeadCell>Type</TableHeadCell>
             <TableHeadCell>Status</TableHeadCell>
             <TableHeadCell></TableHeadCell>
         </TableHead>
-        <TableBody>
+        <TableBody tableBodyClass="scroll-container max-h-96 overflow-y-auto" on:scroll={debouncedHandleScroll}>
             {#each documents as document}
                 <TableBodyRow class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
                     <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
-                        {document.title ? document.title.substring(0, 50) : 'No title'}
+                        {document.title ? document.title.substring(0, 40) : 'No title'}
                     </TableBodyCell>
                     <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
-                        {document.identifier}
+                        {document.identifier ? document.identifier.substring(0, 30) : 'No identifier'}
                     </TableBodyCell>
                     <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
                         {document.type}
@@ -247,10 +341,13 @@
     </dl>
     <div class="flex justify-between items-center">
         <div class="flex items-center space-x-3 sm:space-x-4">
-            <!--            <Button>-->
-            <!--                <svg aria-hidden="true" class="mr-1 -ml-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>-->
-            <!--                Edit-->
-            <!--            </Button>-->
+            {#if documentDetails && documentDetails.file_url}
+                <Button href={documentDetails ? documentDetails.file_url : '#'} target="_blank" color="primary"
+                        class="flex items-center space-x-1">
+                    <DownloadOutline class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor"/>
+                    Download
+                </Button>
+            {/if}
         </div>
         <Button color="red" on:click={() => {openModal("delete"); documentIdToDelete = documentDetails.id;}}>
             <svg aria-hidden="true" class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor" viewBox="0 0 20 20"

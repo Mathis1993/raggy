@@ -3,13 +3,23 @@ import { getCsrfToken } from '$lib/cookies';
 const DOCUMENT_API_ENDPOINT: string = 'http://127.0.0.1:8000/api/documents/';
 
 
-export async function getDocuments() {
-    const response = await fetch(DOCUMENT_API_ENDPOINT, {credentials: 'include'});
+export async function getDocuments(documentType: string = "", search: string = "", page: number = 1) {
+    let queryParams = new URLSearchParams();
+    if (documentType && documentType !== "all") {
+        queryParams.append('type', documentType);
+    }
+    if (search) {
+        queryParams.append('search', search);
+    }
+    queryParams.append('page', page.toString());
+    const response = await fetch(DOCUMENT_API_ENDPOINT + "?" + queryParams.toString(), {credentials: 'include'});
     if (!response.ok) {
         console.error("Failed to fetch documents", response.status);
         return [];
     }
-    return await response.json();
+    let documents = await response.json();
+    console.log("Documents", documents);
+    return documents;
 }
 
 export async function retrieveDocument(documentId: number) {

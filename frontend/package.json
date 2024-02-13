@@ -41,6 +41,7 @@
 	"type": "module",
 	"dependencies": {
 		"flowbite-svelte-blocks": "^1.1.0",
-		"flowbite-svelte-icons": "^1.0.2"
+		"flowbite-svelte-icons": "^1.0.2",
+		"lodash": "^4.17.21"
 	}
 }

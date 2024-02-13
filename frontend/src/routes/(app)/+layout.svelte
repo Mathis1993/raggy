@@ -19,9 +19,9 @@
     import {page} from "$app/stores";
     import {onMount} from "svelte";
     import {createConversation} from "./conversations/conversationService";
-    import { getCsrfToken } from '$lib/cookies';
-    import { goto } from '$app/navigation';
-    import { user } from '../../stores/userStore';
+    import {getCsrfToken} from '$lib/cookies';
+    import {goto} from '$app/navigation';
+    import {user} from '../../stores/userStore';
 
     let breakPoint: number = 1024;
     let width: number = typeof window !== 'undefined' ? window.innerWidth : 1024;
@@ -63,7 +63,7 @@
             await goto('/login')
         } else {
             const error = await response.json();
-            return { status: 'error', error };
+            return {status: 'error', error};
         }
     }
 
@@ -97,7 +97,6 @@
                 <span class="block text-sm">{`${$user.first_name} ${$user.last_name}`.trim() || ''}</span>
                 <span class="block truncate text-sm font-medium">{$user.email}</span>
             </DropdownHeader>
-            <DropdownItem>Dashboard</DropdownItem>
             <DropdownItem href="/settings">Settings</DropdownItem>
             <DropdownDivider/>
             <DropdownItem on:click={handleLogout}>Sign out</DropdownItem>
@@ -107,10 +106,10 @@
 
 {#if sidebarVisible}
     <div id="sidebar"
-         class="overflow-y-auto z-50 px-2 pt-4 dark:bg-gray-800 w-72 fixed start-0 inset-y-[calc(100vh-93vh)] h-full bg-gray-700">
+         class="flex flex-col overflow-hidden z-50 px-2 pt-4 dark:bg-gray-800 w-72 fixed start-0 inset-y-[calc(100vh-93vh)] h-full bg-gray-700">
         <Sidebar class="w-full">
             <SidebarWrapper class="bg-gray-700 p-0">
-                <SidebarGroup class="text-white">
+                <SidebarGroup class="text-white flex-grow">
                     <div class="flex items-center justify-between">
                         <h2 class="font-semibold text-lg ml-4">
                             Conversations
@@ -137,21 +136,17 @@
                                              on:click={toggleSidebar}
                                              active={activeUrl === `conversations/`}>
                                 </SidebarItem>
-                                <!--                                    <Button on:click={() => {deleteConversation(conversation.id); toggleSidebar()}}-->
-                                <!--                                            class="ml-2 bg-gray-700 hover:bg-gray-500">-->
-                                <!--                                        <TrashBinOutline class="w-4 h-4"/>-->
-                                <!--                                    </Button>-->
                             {/each}
                         {/if}
                     </div>
                 </SidebarGroup>
 
-                <SidebarGroup border class="w-full inset-y-[calc(100vh-30vh)] mt-6">
+                <SidebarGroup border class="absolute bottom-20 w-full mt-6">
                     <SidebarItem class="text-white hover:bg-gray-500" label="Documents" href="/documents"
                                  on:click={toggleSidebar} active={activeUrl === "/documents"}>
                         <svelte:fragment slot="icon">
                             <FileSearchSolid
-                              class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
+                                    class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
                         </svelte:fragment>
                     </SidebarItem>
                     <SidebarItem class="text-white hover:bg-gray-500" label="Information"
@@ -159,7 +154,7 @@
                         on:click={toggleSidebar}>
                         <svelte:fragment slot="icon">
                             <OpenBookSolid
-                              class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
+                                    class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
                         </svelte:fragment>
                     </SidebarItem>
                 </SidebarGroup>
