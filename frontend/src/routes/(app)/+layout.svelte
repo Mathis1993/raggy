@@ -136,10 +136,6 @@
                                              on:click={toggleSidebar}
                                              active={activeUrl === `conversations/`}>
                                 </SidebarItem>
-                                <!--                                    <Button on:click={() => {deleteConversation(conversation.id); toggleSidebar()}}-->
-                                <!--                                            class="ml-2 bg-gray-700 hover:bg-gray-500">-->
-                                <!--                                        <TrashBinOutline class="w-4 h-4"/>-->
-                                <!--                                    </Button>-->
                             {/each}
                         {/if}
                     </div>
