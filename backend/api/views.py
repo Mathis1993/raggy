@@ -2,16 +2,19 @@ import json
 import json
 import logging
 
+from django.db.models import Q
 from django.http import JsonResponse
-from rest_framework import status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, filters
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from api.serializer import ConversationSerializer, ConversationDetailSerializer, \
-    MessageSerializer
+    MessageSerializer, DocumentDetailSerializer
 from api.serializer import DocumentSerializer
 from conversations.models import Conversation
 from conversations.tasks import task_handle_user_message
@@ -60,17 +63,22 @@ class MessageModelViewSet(ModelViewSet):
 class DocumentModelViewSet(ModelViewSet):
     model = Document
     parser_classes = (MultiPartParser, FormParser, JSONParser)
-
+    pagination_class = PageNumberPagination
+    # Filtering and Search
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ["type"]
+    search_fields = ["title", "identifier"]
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def get_queryset(self):
-        return self.model.objects.filter(user=self.request.user)
+        documents = self.model.objects.filter(user=self.request.user)
+        return documents
 
     def get_serializer_class(self):
         if self.action == "retrieve":
-            # TODO: Add a serializer for the detail view
-            return DocumentSerializer
+            return DocumentDetailSerializer
         return DocumentSerializer
 
     @action(detail=False, methods=['post'], url_path='create_from_url')
