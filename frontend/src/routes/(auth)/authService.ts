@@ -43,3 +43,25 @@ export async function login(email: string, password: string) {
     }
     return response.json();
 }
+
+export async function resetPassword(email: string) {
+    const body = new URLSearchParams({
+        'email': email,
+        'csrfmiddlewaretoken': getCsrfToken(),
+    });
+
+    const response = await fetch('http://127.0.0.1:8000/users/reset-password/', {
+        method: 'POST',
+        credentials: 'include',
+        body: body,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    });
+
+    if (response.status !== 200) {
+        throw await response.json();
+    }
+
+    return response.json();
+}
