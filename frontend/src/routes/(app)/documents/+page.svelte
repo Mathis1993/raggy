@@ -31,7 +31,7 @@
         retrieveDocument
     } from "./documentService";
     import {
-        CheckCircleSolid,
+        CheckCircleSolid, CheckPlusCircleOutline, CirclePlusOutline,
         CloseCircleSolid,
         DownloadOutline,
         ExclamationCircleOutline,
@@ -46,6 +46,7 @@
 
     $: documents = $page.data.results || [];
     $: hasMore = $page.data.next !== null;
+    $: currentPage = $page.data.page || 1;
 
     let modalVisible: any = {create: false, delete: false, detail: false};
     let createProcessIsRunning = false;
@@ -62,8 +63,6 @@
     let documentType = "";
     const debouncedSearch = debounce(filterDocuments, 500);
 
-    let currentPage = 1;
-
     async function loadMoreDocuments() {
         if (!hasMore) return;
 
@@ -74,7 +73,7 @@
         const totalDocuments: number = response.count;
         documents = [...documents, ...newDocuments];
         currentPage = response.page;
-        if (documents.next === null) {
+        if (documents.length >= totalDocuments) {
             hasMore = false;
         }
     }
@@ -263,13 +262,13 @@
             {#if hasMore}
                 <TableBodyRow>
                     <TableBodyCell colspan="5" class="text-center">
-                        <Button on:click={loadMoreDocuments} class="w-full1">
+                        <Button color="alternative" on:click={loadMoreDocuments} class="w-full1">
+                            <CirclePlusOutline class="w-4 h-4 mr-2"/>
                             Load More
                         </Button>
                     </TableBodyCell>
                 </TableBodyRow>
             {/if}
-
         </TableBody>
     </Table>
 </Card>
