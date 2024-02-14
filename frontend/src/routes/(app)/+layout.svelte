@@ -141,7 +141,7 @@
                     </div>
                 </SidebarGroup>
 
-                <SidebarGroup border class="absolute bottom-20 w-full mt-6">
+                <SidebarGroup border class="absolute bottom-28 w-full mt-6">
                     <SidebarItem class="text-white hover:bg-gray-500" label="Documents" href="/documents"
                                  on:click={toggleSidebar} active={activeUrl === "/documents"}>
                         <svelte:fragment slot="icon">
