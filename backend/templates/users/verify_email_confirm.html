@@ -1,0 +1,11 @@
+{% block content %}
+
+{% if verified %}
+<p>Your email address was verified successfully, congrats!</p>
+<hr>
+<p>You can close this browser window and proceed to log in to raggy!</p>
+{% else %}
+<p>{{ message }}</p>
+{% endif %}
+
+{% endblock %}
