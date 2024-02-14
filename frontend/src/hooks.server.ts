@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 
-const unProtectedRoutes = ['/login', '/signup', '/logout'];
+const unProtectedRoutes = ['/login', '/signup', '/logout', '/reset-password'];
 export const handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get('sessionid');
 	const isAuthenticated = sessionId !== undefined;
