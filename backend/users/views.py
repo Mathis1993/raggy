@@ -1,4 +1,5 @@
 import http
+import logging
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -11,9 +12,11 @@ from django.views import View
 from rest_framework import generics
 
 from users.serializers import UserSerializer, UserGeneralInfoSerializer
-from users.utils.emails import EmailVerifier, EmailSendingError
+from users.utils.emails import EmailVerifier, EmailSendingError, PasswordResetter
 
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
 
 
 class CSRFTokenView(View):
@@ -105,3 +108,16 @@ class EmailVerificationView(View):
         email_verifier = EmailVerifier(host=request.get_host(), scheme=request.scheme, from_email=settings.FROM_EMAIL)
         verified, message = email_verifier.verify_email_for_user(uidb64, token)
         return render(request, self.template_name, context={"verified": verified, "message": message})
+
+
+class PasswordResetView(View):
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get("email")
+        user = User.objects.filter(email=email).first()
+        if user:
+            password_resetter = PasswordResetter(host=request.get_host(), scheme=request.scheme, from_email=settings.FROM_EMAIL)
+            try:
+                password_resetter.send_password_reset_email(user)
+            except EmailSendingError:
+                logger.warn(f"Could not send password reset email to {email}.")
+        return JsonResponse({"message": "If a user with this email exists, a reset link has been sent."})
