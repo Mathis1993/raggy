@@ -18,7 +18,7 @@ export async function getDocuments(documentType: string = "", search: string = "
         return [];
     }
     let documentResponse = await response.json();
-    documentResponse.currentPage = page;
+    documentResponse.page = page;
     return documentResponse;
 }
 
