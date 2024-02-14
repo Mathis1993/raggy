@@ -1,5 +1,4 @@
 import {getDocuments} from "./documentService";
-import {page} from "$app/stores";
 
 // Only run client-side to ensure credentials are available for fetch function
 export const ssr = false;
