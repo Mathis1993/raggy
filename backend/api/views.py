@@ -29,7 +29,7 @@ class ConversationModelViewSet(ModelViewSet):
     model = Conversation
 
     def get_queryset(self):
-        return self.model.objects.filter(user=self.request.user)
+        return self.model.objects.filter(user=self.request.user).order_by("-created_at")
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -63,7 +63,6 @@ class MessageModelViewSet(ModelViewSet):
 class DocumentModelViewSet(ModelViewSet):
     model = Document
     parser_classes = (MultiPartParser, FormParser, JSONParser)
-    pagination_class = PageNumberPagination
     # Filtering and Search
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["type"]
@@ -73,7 +72,7 @@ class DocumentModelViewSet(ModelViewSet):
         super().__init__(**kwargs)
 
     def get_queryset(self):
-        documents = self.model.objects.filter(user=self.request.user)
+        documents = self.model.objects.filter(user=self.request.user).order_by("-created_at")
         return documents
 
     def get_serializer_class(self):

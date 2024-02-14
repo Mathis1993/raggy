@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 User = get_user_model()
@@ -13,9 +15,14 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("email", "password1", "password2", "first_name", "last_name")
 
     def validate(self, data):
-        # ToDo(ME-08.02.24): Add password strength validation
+        try:
+            validate_password(data["password1"])
+        except ValidationError as e:
+            raise serializers.ValidationError({"password1": list(e.messages)})
+
         if data["password1"] != data["password2"]:
-            raise serializers.ValidationError("Passwords must match.")
+            raise ValidationError({"password2": ["Passwords must match."]})
+
         return data
 
     def create(self, validated_data):
