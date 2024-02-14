@@ -1,9 +1,9 @@
 <script lang="ts">
     import { writable } from 'svelte/store';
-    import { Button, Input, Label, NavBrand } from 'flowbite-svelte';
+    import { Button, Input, Label } from 'flowbite-svelte';
     import { goto } from '$app/navigation';
-    import {Register, Section} from "flowbite-svelte-blocks";
-    import {login} from "../authService"; // Adjust the path as necessary
+    import { Register, Section } from 'flowbite-svelte-blocks';
+    import { login } from '../authService';
 
     let email = '';
     let password = '';
