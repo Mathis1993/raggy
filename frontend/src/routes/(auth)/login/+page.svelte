@@ -4,6 +4,9 @@
     import { goto } from '$app/navigation';
     import { Register, Section } from 'flowbite-svelte-blocks';
     import { login } from '../authService';
+    import { Banner } from "flowbite-svelte-blocks";
+    import { CloseButton } from "flowbite-svelte";
+    import {visible} from '../../../stores/visibleStore';
 
     let email = '';
     let password = '';
@@ -22,6 +25,16 @@
 </script>
 
 <Section name="login" sectionClass="w-1/2">
+    {#if $visible}
+        <!-- ToDo (ME-2024-02-14): Make the popup look nicer -->
+        <Banner>
+            <p class="text-m font-bold text-gray-500 dark:text-gray-400">
+                You need to verify your email address before you can sign in. Please check your email for a verification link.
+                Don't forget to check your spam folder!
+            </p>
+            <CloseButton on:click={() => ($visible = false)} class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 dark:hover:bg-gray-600 dark:hover:text-white" />
+        </Banner>
+    {/if}
     <Register href="/">
         <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
             <form class="flex flex-col space-y-6" on:submit|preventDefault={handleSubmit}>
