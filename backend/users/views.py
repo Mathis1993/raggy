@@ -1,15 +1,19 @@
 import http
 
-from django.contrib.auth import authenticate, login, logout
+from django.conf import settings
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
+from django.shortcuts import render
 from django.views import View
 from rest_framework import generics
 
 from users.serializers import UserSerializer, UserGeneralInfoSerializer
+from users.utils.emails import EmailVerifier, EmailSendingError
+
+User = get_user_model()
 
 
 class CSRFTokenView(View):
@@ -24,6 +28,11 @@ class LoginView(View):
         password = request.POST.get("password")
         user = authenticate(request, email=email, password=password)
         if user is not None:
+            if not user.email_verified:
+                return JsonResponse(
+                    data={"message": "Please verify your email address before logging in."},
+                    status=http.HTTPStatus.FORBIDDEN
+                )
             login(request, user)
             return JsonResponse({"message": "Login successful"})
         else:
@@ -39,19 +48,31 @@ class LogoutView(View):
             logout(request)
             return JsonResponse({"message": "Logout successful"})
         else:
-            return JsonResponse({"message": "Not logged in"}, status=http.HTTPStatus.BAD_REQUEST)
+            return JsonResponse(data={"message": "Not logged in"}, status=http.HTTPStatus.BAD_REQUEST)
 
 
 class SignupView(generics.CreateAPIView):
-    # ToDo(ME-08.02.24): Upgrade to email verification
     serializer_class = UserSerializer
     permission_classes = []  # Signup has to be accessible without authentication
+    user = None
 
     def create(self, request, *args, **kwargs):
+        email_verifier = EmailVerifier(host=request.get_host(), scheme=request.scheme, from_email=settings.FROM_EMAIL)
         try:
-            return super().create(request, *args, **kwargs)
-        except ValidationError as e:
-            return JsonResponse({"message": e.message}, status=http.HTTPStatus.BAD_REQUEST)
+            response = super().create(request, *args, **kwargs)
+            email = response.data.get("email")
+            user = User.objects.get(email=email)
+            email_verifier.send_verification_email(user)
+            return response
+        except (ValidationError, User.DoesNotExist) as e:
+            return JsonResponse(data={"message": e.message}, status=http.HTTPStatus.BAD_REQUEST)
+        except EmailSendingError as e:
+            if self.user:
+                self.user.delete()
+            return JsonResponse(data={"message": e.message}, status=http.HTTPStatus.INTERNAL_SERVER_ERROR)
+
+    def get_user(self) -> User:
+        return self.get_serializer().instance
 
 
 class UserInfoView(LoginRequiredMixin, View):
@@ -72,3 +93,15 @@ class UserInfoUpdateView(generics.UpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class EmailVerificationView(View):
+    # ToDo(ME-14.02.24): Improve template
+    template_name = "users/verify_email_confirm.html"
+
+    def get(self, request, *args, **kwargs):
+        uidb64 = kwargs.get("uidb64")
+        token = kwargs.get("token")
+        email_verifier = EmailVerifier(host=request.get_host(), scheme=request.scheme, from_email=settings.FROM_EMAIL)
+        verified, message = email_verifier.verify_email_for_user(uidb64, token)
+        return render(request, self.template_name, context={"verified": verified, "message": message})

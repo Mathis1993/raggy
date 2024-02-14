@@ -9,6 +9,7 @@ class User(AbstractUser):
 
     username = models.CharField(null=True, blank=True, default=None)  # We don't want to use this field
     email = models.EmailField(_("email address"), unique=True) # Make email field unique
+    email_verified = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
