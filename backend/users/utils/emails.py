@@ -31,6 +31,22 @@ def fallback_message_email_verification(link: str) -> str:
     """
 
 
+def fallback_message_password_reset(link: str) -> str:
+    return f"""
+    Hello!
+
+    A password reset for raggy was requested for your email address.
+
+    If that is correct, you can reset your password by clicking on the link below.
+
+    {link}
+
+    You can also copy the link and paste it into your browser's address bar.
+
+    Cheers!
+    """
+
+
 class EmailSendingError(Exception):
     def __init__(self, message: str):
         super().__init__(message)
@@ -74,6 +90,7 @@ class EmailVerifier:
         sub_link = reverse(viewname="users:verify_email", kwargs={"uidb64": uidb64, "token": token})
         link = f"{self.url}{sub_link}"
         fallback_message = fallback_message_email_verification(link)
+        # ToDo(ME-15.02.24): Improve template
         html_content = render_to_string(template_name="users/emails/verify_email.html", context={"link": link})
         self.email_sender.send_email(
             to_email=to_email,
@@ -115,3 +132,27 @@ class EmailVerifier:
         ):
             user = None
         return user
+
+
+class PasswordResetter:
+    token_generator = default_token_generator
+
+    def __init__(self, host: str, scheme:  Literal["http", "https"], from_email: str):
+        self.url = f"{scheme}://{host}"
+        self.email_sender = EmailSender(from_email)
+
+    def send_password_reset_email(self, user: User):
+        to_email = user.email
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = self.token_generator.make_token(user)
+        sub_link = reverse(viewname="users:reset_password_confirm", kwargs={"uidb64": uidb64, "token": token})
+        link = f"{self.url}{sub_link}"
+        fallback_message = fallback_message_password_reset(link)
+        # ToDo(ME-15.02.24): Improve template
+        html_content = render_to_string(template_name="users/emails/reset_password.html", context={"link": link})
+        self.email_sender.send_email(
+            to_email=to_email,
+            subject="Your password reset for raggy",
+            html_content=html_content,
+            fallback_message=fallback_message,
+        )
