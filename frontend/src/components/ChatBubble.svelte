@@ -1,10 +1,18 @@
 <script lang="ts">
     import {Avatar, Button, Tooltip} from "flowbite-svelte";
     import {FileCopyOutline} from "flowbite-svelte-icons";
+    import markdownit from 'markdown-it';
 
     export let message: Message;
     let role = message.is_user_message ? 'user' : 'bot';
     let color = message.is_user_message ? 'bg-blue-100' : 'bg-gray-100';
+
+    const md = markdownit({
+        html: true,
+        linkify: true,
+        typographer: true
+    })
+    $: html = md.render(message.text);
 
     async function copyToClipboard() {
         try {
@@ -42,7 +50,7 @@
                 <Tooltip>Copy</Tooltip>
             {/if}
         </div>
-        <p class="text-md font-normal py-2.5 text-gray-900 dark:text-white"> {message.text} </p>
+        <p class="prose py-2.5 text-gray-900 dark:text-white"> {@html html} </p>
 
         {#if message.sources && message.sources.length > 0}
             <ul class="px-2 border-b border-gray-200 dark:border-gray-700">
