@@ -30,10 +30,10 @@
     <div class={`flex flex-col w-full leading-1.5 p-4 border-gray-200 rounded-e-xl rounded-es-xl dark:bg-gray-700 ${color}`}>
         <div class="flex items-center justify-between space-x-2 rtl:space-x-reverse">
             <div class="flex items-center">
-                <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                <span class="text-md font-semibold text-gray-900 dark:text-white">
                    {role === 'user' ? 'User' : 'Assistant'}
                 </span>
-                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{message.created_at}</span>
+                <span class="text-md ml-2 font-normal text-gray-500 dark:text-gray-400">{message.created_at}</span>
             </div>
             {#if role !== 'user'}
                 <Button outline={true} on:click={copyToClipboard} class="!p-2 text-gray-500 border-gray-500" size="md">
@@ -42,7 +42,7 @@
                 <Tooltip>Copy</Tooltip>
             {/if}
         </div>
-        <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white"> {message.text} </p>
+        <p class="text-md font-normal py-2.5 text-gray-900 dark:text-white"> {message.text} </p>
 
         {#if message.sources && message.sources.length > 0}
             <ul class="px-2 border-b border-gray-200 dark:border-gray-700">
