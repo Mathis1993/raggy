@@ -20,7 +20,7 @@
         TableHeadCell,
         Tabs
     } from "flowbite-svelte";
-    import {debounce} from 'lodash';
+    import {debounce} from "lodash";
 
     import {goto, invalidateAll} from "$app/navigation";
     import {
@@ -31,7 +31,7 @@
         retrieveDocument
     } from "./documentService";
     import {
-        CheckCircleSolid,
+        CheckCircleSolid, CheckPlusCircleOutline, CirclePlusOutline,
         CloseCircleSolid,
         DownloadOutline,
         ExclamationCircleOutline,
@@ -44,7 +44,9 @@
     import {writable} from "svelte/store";
     import {TableHeader} from "flowbite-svelte-blocks";
 
-    $: documents = $page.data.documents || [];
+    $: documents = $page.data.results || [];
+    $: hasMore = $page.data.next !== null;
+    $: currentPage = $page.data.page || 1;
 
     let modalVisible: any = {create: false, delete: false, detail: false};
     let createProcessIsRunning = false;
@@ -61,19 +63,18 @@
     let documentType = "";
     const debouncedSearch = debounce(filterDocuments, 500);
 
-    let currentPage = 1;
-    let hasMore = true;
-
     async function loadMoreDocuments() {
-        console.log('loading more documents');
-        console.log('hasMore', hasMore);
         if (!hasMore) return;
-        const newDocuments = await getDocuments(documentType, searchQuery, currentPage);
-        if (newDocuments.length === 0) {
+
+        // Already loaded the first page, start from the second page
+        currentPage++;
+        const response = await getDocuments(documentType, searchQuery, currentPage);
+        const newDocuments: ContextDocument[] = response.results;
+        const totalDocuments: number = response.count;
+        documents = [...documents, ...newDocuments];
+        currentPage = response.page;
+        if (documents.length >= totalDocuments) {
             hasMore = false;
-        } else {
-            documents = [...documents, ...newDocuments];
-            currentPage++;
         }
     }
 
@@ -162,22 +163,6 @@
         clearInterval(refreshIntervalId);
     });
 
-    let debouncedHandleScroll = debounce(handleScroll, 100);
-
-    function handleScroll(event) {
-        const target = event.currentTarget; // Use currentTarget to ensure you're getting the right target
-        const bottomReached = target.scrollHeight - Math.ceil(target.scrollTop) <= target.clientHeight + 1; // Adding a small threshold
-        console.log("Scrolling...", {
-            scrollTop: target.scrollTop,
-            scrollHeight: target.scrollHeight,
-            clientHeight: target.clientHeight,
-            bottomReached
-        });
-        if (bottomReached) {
-            loadMoreDocuments();
-        }
-    }
-
 
     async function refreshDocuments() {
         for (let i = 0; i < documents.length; i++) {
@@ -235,7 +220,7 @@
             <TableHeadCell>Status</TableHeadCell>
             <TableHeadCell></TableHeadCell>
         </TableHead>
-        <TableBody tableBodyClass="scroll-container max-h-96 overflow-y-auto" on:scroll={debouncedHandleScroll}>
+        <TableBody tableBodyClass="scroll-container max-h-96 overflow-y-auto">
             {#each documents as document}
                 <TableBodyRow class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
                     <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
@@ -265,6 +250,25 @@
                     </TableBodyCell>
                 </TableBodyRow>
             {/each}
+
+            {#if documents.length === 0}
+                <TableBodyRow>
+                    <TableBodyCell colspan="5" class="text-center">
+                        <p class="text-gray-500 dark:text-gray-400">No documents found</p>
+                    </TableBodyCell>
+                </TableBodyRow>
+            {/if}
+
+            {#if hasMore}
+                <TableBodyRow>
+                    <TableBodyCell colspan="5" class="text-center">
+                        <Button color="alternative" on:click={loadMoreDocuments} class="w-full1">
+                            <CirclePlusOutline class="w-4 h-4 mr-2"/>
+                            Load More
+                        </Button>
+                    </TableBodyCell>
+                </TableBodyRow>
+            {/if}
         </TableBody>
     </Table>
 </Card>
@@ -349,7 +353,7 @@
                 </Button>
             {/if}
         </div>
-        <Button color="red" on:click={() => {openModal("delete"); documentIdToDelete = documentDetails.id;}}>
+        <Button color="red" on:click={() => {openModal("delete"); documentIdToDelete = documentDetails?.id || null;}}>
             <svg aria-hidden="true" class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor" viewBox="0 0 20 20"
                  xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd"

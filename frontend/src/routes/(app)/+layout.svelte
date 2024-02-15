@@ -15,13 +15,14 @@
         SidebarWrapper,
         Spinner,
     } from 'flowbite-svelte';
-    import {BarsSolid, FileSearchSolid, OpenBookSolid, PlusSolid} from "flowbite-svelte-icons";
+    import {BarsSolid, CirclePlusOutline, FileSearchSolid, OpenBookSolid, PlusSolid} from "flowbite-svelte-icons";
     import {page} from "$app/stores";
     import {onMount} from "svelte";
-    import {createConversation} from "./conversations/conversationService";
+    import {createConversation, retrieveConversation, retrieveConversations} from "./conversations/conversationService";
     import {getCsrfToken} from '$lib/cookies';
     import {goto} from '$app/navigation';
     import {user} from '../../stores/userStore';
+    import {getDocuments} from "./documents/documentService";
 
     let breakPoint: number = 1024;
     let width: number = typeof window !== 'undefined' ? window.innerWidth : 1024;
@@ -29,11 +30,10 @@
     $: sidebarVisible = width >= breakPoint;
     $: activeUrl = $page.url.pathname;
 
-    export let data;
-    $: conversations = $page.data.conversations || [];
-    $: loadingConversations = !$page.data.conversationsLoaded;
+    $: conversations = $page.data.conversations.results || [];
+    $: hasMore = $page.data.conversations.next !== null;
+    $: currentPage = $page.data.conversations.page || 1;
     user.set($page.data.user || {});
-
 
     onMount(async () => {
         width = window.innerWidth;
@@ -64,6 +64,21 @@
         } else {
             const error = await response.json();
             return {status: 'error', error};
+        }
+    }
+
+    async function loadMoreConversations() {
+        if (!hasMore) return;
+
+        // Already loaded the first page, start from the second page
+        currentPage++;
+        const response = await retrieveConversations(currentPage);
+        const newConversations: Conversation[] = response.results;
+        const totalConversations: number = response.count;
+        conversations = [...conversations, ...newConversations];
+        currentPage = response.page;
+        if (conversations.length >= totalConversations) {
+            hasMore = false;
         }
     }
 
@@ -119,11 +134,7 @@
                         </Button>
                     </div>
                     <div class="max-h-[calc(100vh-40vh)] overflow-y-auto">
-                        {#if loadingConversations}
-                            <div class="flex items-center justify-center">
-                                Loading conversations...
-                            </div>
-                        {:else if conversations.length === 0}
+                        {#if conversations.length === 0}
                             <div class="flex items-center justify-center">
                                 No conversations yet
                             </div>
@@ -137,11 +148,19 @@
                                              active={activeUrl === `conversations/`}>
                                 </SidebarItem>
                             {/each}
+                            {#if hasMore}
+                                <div class="flex w-full">
+                                    <Button color="alternative" on:click={loadMoreConversations} class="bg-gray-700 text-white border-0 w-full">
+                                        <CirclePlusOutline class="w-4 h-4 mr-2"/>
+                                        Load More
+                                    </Button>
+                                </div>
+                            {/if}
                         {/if}
                     </div>
                 </SidebarGroup>
 
-                <SidebarGroup border class="absolute bottom-20 w-full mt-6">
+                <SidebarGroup border class="absolute bottom-28 w-full mt-6">
                     <SidebarItem class="text-white hover:bg-gray-500" label="Documents" href="/documents"
                                  on:click={toggleSidebar} active={activeUrl === "/documents"}>
                         <svelte:fragment slot="icon">

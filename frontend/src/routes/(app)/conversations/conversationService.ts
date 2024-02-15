@@ -1,5 +1,5 @@
 import {goto, invalidateAll} from "$app/navigation";
-import { getCsrfToken } from '$lib/cookies';
+import {getCsrfToken} from '$lib/cookies';
 
 const CONVERSATION_API_URL = 'http://127.0.0.1:8000/api/conversations/';
 
@@ -21,6 +21,20 @@ export async function createMessage(messageText: string, conversation: Conversat
         return;
     }
     return await response.json();
+}
+
+
+export async function retrieveConversations(page: number = 1) {
+    let queryParams = new URLSearchParams();
+    queryParams.append('page', page.toString());
+    const response = await fetch(CONVERSATION_API_URL + "?" + queryParams.toString(), {credentials: 'include'});
+    if (!response.ok) {
+        console.error("Failed to fetch conversations", response.status);
+        return [];
+    }
+    let conversations = await response.json();
+    conversations.page = page;
+    return conversations;
 }
 
 
@@ -50,7 +64,7 @@ export async function createConversation() {
 
 export async function retrieveConversation(conversationId: number) {
     try {
-        const response = await fetch(CONVERSATION_API_URL + conversationId, { credentials: 'include'});
+        const response = await fetch(CONVERSATION_API_URL + conversationId, {credentials: 'include'});
 
         if (!response.ok) {
             console.error('Failed to retrieve conversation');
