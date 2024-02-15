@@ -64,7 +64,7 @@
 </script>
 
 
-<div class="flex max-w-full flex-grow flex-col h-full">
+<div class="flex max-w-full flex-grow flex-col h-full max-h-[calc(100vh-12vh)]">
     <Card class="max-w-full h-full shadow-0">
         <div class="flex justify-between items-center mb-4 ">
             <h5 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"> {conversation.name || "Start Conversation..."}</h5>
