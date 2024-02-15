@@ -178,7 +178,7 @@
 
 </script>
 
-<Card class="max-w-full w-full max-h-[calc(100vh-15vh)] overflow-auto">
+<Card class="max-w-full w-full max-h-[calc(100vh-12vh)] overflow-auto">
     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"> Uploaded Documents</h5>
     <p class="font-normal text-gray-700 dark:text-gray-400 leading-tight"> This is a list of your uploaded
         documents </p>
