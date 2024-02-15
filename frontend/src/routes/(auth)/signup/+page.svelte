@@ -33,7 +33,7 @@
     }
 </script>
 
-<Section name="register" sectionClass="w-1/2">
+<Section name="register" sectionClass="lg:w-1/2 w-full">
     <Register href="/">
         <svelte:fragment slot="top">
             <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">Raggy</span>

@@ -12,5 +12,10 @@ type Message = {
     created_at: string;
     conversation: Conversation;
     is_user_message: boolean;
-    sources: ContextDocument[];
+    sources: MessageSource[];
+}
+
+type MessageSource = {
+    document: ContextDocument;
+    excerpt: string;
 }
