@@ -12,6 +12,8 @@
     let messages: Message[] = data.conversation.messages;
     let messageContent = '';
     let chatContainer: HTMLDivElement;
+    let rows = 1;
+    $: rows = Math.max(1, messageContent.split('\n').length);
 
     onMount(() => {
         scrollToBottom();
@@ -62,7 +64,7 @@
 </script>
 
 
-<div class="flex max-w-full flex-grow flex-col h-full">
+<div class="flex max-w-full flex-grow flex-col h-full max-h-[calc(100vh-12vh)]">
     <Card class="max-w-full h-full shadow-0">
         <div class="flex justify-between items-center mb-4 ">
             <h5 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"> {conversation.name || "Start Conversation..."}</h5>
@@ -89,10 +91,10 @@
             <label for="chat" class="sr-only">Your message</label>
             <Alert color="dark" class="px-3 py-2">
                 <svelte:fragment slot="icon">
-                    <Textarea id="message" class="mx-4 text-md" rows="1" placeholder="Your message..."
+                    <Textarea id="message" class="mx-4 text-lg" rows={rows} placeholder="Your message..."
                               bind:value={messageContent}
                               on:keydown={handleKeyDown}/>
-                    <ToolbarButton type="submit" color="blue"
+                    <ToolbarButton type="submiadat" color="blue"
                                    class="rounded-full text-primary-600 dark:text-primary-500">
                         <PapperPlaneOutline class="w-5 h-5 rotate-45"/>
                         <span class="sr-only">Send message</span>

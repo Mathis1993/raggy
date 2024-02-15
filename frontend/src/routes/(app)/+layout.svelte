@@ -182,7 +182,7 @@
     </div>
 {/if}
 
-<div class="flex px-4 mx-auto w-full pt-[calc(100vh-90vh)] h-[calc(100vh-10vh)]">
+<div class="flex px-4 mx-auto w-full pt-[calc(100vh-90vh)] h-screen">
     <main class="lg:ml-72 w-full mx-auto">
         <slot/>
     </main>
