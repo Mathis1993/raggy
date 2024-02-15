@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from conversations.models import Conversation, Message
+from conversations.models import Conversation, Message, MessageSourceDocument
 from knowledge_base.models import Document
 
 
@@ -25,17 +25,25 @@ class DocumentDetailSerializer(serializers.ModelSerializer):
         return None
 
 
-class MessageSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
+class MessageSourceDocumentSerializer(serializers.ModelSerializer):
+    document = DocumentSerializer(read_only=True)
+    excerpt = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = MessageSourceDocument
+        fields = ["document", "excerpt"]
+
+
+class MessageSerializer(serializers.ModelSerializer):
     is_user_message = serializers.BooleanField(read_only=True)
     text = serializers.CharField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True, format="%Y-%m-%d %H:%M")
 
-    sources = DocumentSerializer(many=True, read_only=True, source="source_documents")
+    sources = MessageSourceDocumentSerializer(many=True, read_only=True, source="messagesourcedocument_set")
 
     class Meta:
         model = Message
-        fields = "__all__"
+        fields = ["is_user_message", "text", "created_at", "sources"]
 
 
 class ConversationDetailSerializer(serializers.Serializer):
