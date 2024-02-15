@@ -17,9 +17,9 @@ export async function getDocuments(documentType: string = "", search: string = "
         console.error("Failed to fetch documents", response.status);
         return [];
     }
-    let documents = await response.json();
-    console.log("Documents", documents);
-    return documents;
+    let documentResponse = await response.json();
+    documentResponse.page = page;
+    return documentResponse;
 }
 
 export async function retrieveDocument(documentId: number) {

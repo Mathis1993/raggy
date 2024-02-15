@@ -21,7 +21,7 @@
     }
 </script>
 
-<Section name="login" sectionClass="w-1/2">
+<Section name="login" sectionClass="lg:w-1/2 w-full">
     <Register href="/">
         <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
             <form class="flex flex-col space-y-6" on:submit|preventDefault={handleSubmit}>
