@@ -1,10 +1,18 @@
 <script lang="ts">
     import {Avatar, Button, Tooltip} from "flowbite-svelte";
     import {FileCopyOutline} from "flowbite-svelte-icons";
+    import markdownit from 'markdown-it';
 
     export let message: Message;
     let role = message.is_user_message ? 'user' : 'bot';
     let color = message.is_user_message ? 'bg-blue-100' : 'bg-gray-100';
+
+    const md = markdownit({
+        html: true,
+        linkify: true,
+        typographer: true
+    })
+    $: html = md.render(message.text);
 
     async function copyToClipboard() {
         try {
@@ -30,10 +38,10 @@
     <div class={`flex flex-col w-full leading-1.5 p-4 border-gray-200 rounded-e-xl rounded-es-xl dark:bg-gray-700 ${color}`}>
         <div class="flex items-center justify-between space-x-2 rtl:space-x-reverse">
             <div class="flex items-center">
-                <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                <span class="text-md font-semibold text-gray-900 dark:text-white">
                    {role === 'user' ? 'User' : 'Assistant'}
                 </span>
-                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{message.created_at}</span>
+                <span class="text-md ml-2 font-normal text-gray-500 dark:text-gray-400">{message.created_at}</span>
             </div>
             {#if role !== 'user'}
                 <Button outline={true} on:click={copyToClipboard} class="!p-2 text-gray-500 border-gray-500" size="md">
@@ -42,12 +50,13 @@
                 <Tooltip>Copy</Tooltip>
             {/if}
         </div>
-        <p class="text-sm font-normal py-2.5 text-gray-900 dark:text-white"> {message.text} </p>
+        <p class="prose py-2.5 text-gray-900 dark:text-white"> {@html html} </p>
 
         {#if message.sources && message.sources.length > 0}
             <ul class="px-2 border-b border-gray-200 dark:border-gray-700">
                 {#each message.sources as source}
-                    <li class="text-gray-600 text-xs"> {source.identifier} </li>
+                    <li class="text-gray-600 text-xs"> {source.document.identifier} </li>
+                    <Tooltip arrow={false} placement="top" >{source.excerpt}</Tooltip>
                 {/each}
             </ul>
         {/if}
