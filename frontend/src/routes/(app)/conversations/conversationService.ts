@@ -24,6 +24,20 @@ export async function createMessage(messageText: string, conversation: Conversat
 }
 
 
+export async function getMessages(conversationId: number, page: number = 1) {
+    let queryParams = new URLSearchParams();
+    queryParams.append('page', page.toString());
+    const messageResponse = await fetch(CONVERSATION_API_URL + conversationId + "/messages/?" + queryParams.toString(), {credentials: 'include'});
+    if (!messageResponse.ok) {
+        console.error("Failed to fetch messages", messageResponse.status);
+        return [];
+    }
+    let messages = await messageResponse.json();
+    messages.page = page;
+    return messages;
+}
+
+
 export async function retrieveConversations(page: number = 1) {
     let queryParams = new URLSearchParams();
     queryParams.append('page', page.toString());

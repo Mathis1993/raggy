@@ -2,21 +2,34 @@
     import {Alert, Card, Spinner, Textarea, ToolbarButton} from "flowbite-svelte";
     import ChatBubble from "../../../../components/ChatBubble.svelte";
     import {onDestroy, onMount, tick} from "svelte";
-    import {createMessage, deleteConversation, retrieveConversation} from "../conversationService";
+    import {createMessage, deleteConversation, getMessages, retrieveConversation} from "../conversationService";
     import {invalidateAll} from "$app/navigation";
     import {PapperPlaneOutline} from "flowbite-svelte-icons";
     import {retrieveDocument} from "../../documents/documentService";
+    import {page} from "$app/stores";
 
-    export let data;
-    let conversation = data.conversation;
-    let messages: Message[] = data.conversation.messages;
+
+    $: conversation = $page.data.conversation;
+    $: messages = $page.data.messages.results;
+    $: hasMore = $page.data.next !== null;
+    $: currentPage = $page.data.page || 1;
+
     let messageContent = '';
     let chatContainer: HTMLDivElement;
     let rows = 1;
+    let refreshIntervalId: number;
     $: rows = Math.max(1, messageContent.split('\n').length);
 
     onMount(() => {
         scrollToBottom();
+        chatContainer.addEventListener('scroll', handleScroll);
+        refreshIntervalId = setInterval(refreshDocuments, 5000);
+    });
+
+    onDestroy(() => {
+        // Clear the interval when the component is destroyed
+        clearInterval(refreshIntervalId);
+        chatContainer.removeEventListener('scroll', handleScroll);
     });
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -29,7 +42,7 @@
     async function sendMessage() {
         let message: string = messageContent;
         messageContent = '';  // clear the input field
-        let updatedConversation: Conversation = await createMessage(message, data.conversation);
+        let updatedConversation: Conversation = await createMessage(message, conversation);
         conversation = updatedConversation
         messages = updatedConversation.messages
         await tick(); // wait for the new message to be rendered
@@ -42,22 +55,32 @@
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    let refreshIntervalId: number;
-    onMount(() => {
-        refreshIntervalId = setInterval(refreshDocuments, 5000);
-    });
-
-    onDestroy(() => {
-        // Clear the interval when the component is destroyed
-        clearInterval(refreshIntervalId);
-    });
-
     async function refreshDocuments() {
         if (conversation.status === 'RUNNING') {
             conversation = await retrieveConversation(conversation.id);
             messages = conversation.messages;
             await tick(); // wait for the new message to be rendered
             scrollToBottom();
+        }
+    }
+
+    async function loadMoreMessages() {
+        currentPage++;
+        // Compute scroll position before loading more messages
+        const oldScrollHeight = chatContainer.scrollHeight; // get the old scroll height
+        const oldScrollTop = chatContainer.scrollTop; // get the old scroll position
+
+        const newMessages = await getMessages(conversation.id, currentPage);
+        messages = [...newMessages.results, ...messages];
+
+        await tick(); // wait for the new messages to be rendered
+        const newScrollHeight = chatContainer.scrollHeight; // get the new scroll height
+        chatContainer.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight); // adjust the scroll position
+    }
+
+    function handleScroll() {
+        if (chatContainer.scrollTop === 0) { // if the scroll position is at the top
+            loadMoreMessages(); // load more messages
         }
     }
 
