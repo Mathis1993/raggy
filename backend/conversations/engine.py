@@ -16,7 +16,8 @@ User = get_user_model()
 OUTPUT_FORMAT_PROMPT = """
     Always return your answer in a valid markdown format.
      Use headings, new lines, lists, and other markdown elements to make your answer more readable.
-     Please answer in this language: {language}.
+     Ignore the language choice of the input prompt. Please answer in this language: {language} as
+     the user's language is set to this language.
 """
 
 
