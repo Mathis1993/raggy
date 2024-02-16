@@ -16,6 +16,7 @@ User = get_user_model()
 OUTPUT_FORMAT_PROMPT = """
     Always return your answer in a valid markdown format.
      Use headings, new lines, lists, and other markdown elements to make your answer more readable.
+     Please answer in this language: {language}.
 """
 
 
@@ -39,7 +40,7 @@ class ConversationEngine:
             llm=OpenAI(
                 model=self.model,
                 temperature=self.temperature,
-                system_prompt=OUTPUT_FORMAT_PROMPT,
+                system_prompt=OUTPUT_FORMAT_PROMPT.format(language=self.user.settings.language),
             )
         )
 
