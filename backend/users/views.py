@@ -3,13 +3,13 @@ import http
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.views import View
 from rest_framework import generics
+from rest_framework.views import APIView
 
-from users.serializers import UserSerializer, UserGeneralInfoSerializer
+from users.serializers import UserSerializer, UserGeneralInfoSerializer, UserSettingsSerializer
 
 
 class CSRFTokenView(View):
@@ -54,17 +54,11 @@ class SignupView(generics.CreateAPIView):
             return JsonResponse({"message": e.message}, status=http.HTTPStatus.BAD_REQUEST)
 
 
-class UserInfoView(LoginRequiredMixin, View):
+class UserInfoView(LoginRequiredMixin, APIView):
+
     def get(self, request, *args, **kwargs):
-        user = request.user
-        return JsonResponse(
-            {
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "full_name": f"{user.first_name} {user.last_name}".strip(),
-            }
-        )
+        serializer = UserGeneralInfoSerializer(request.user)
+        return JsonResponse(serializer.data)
 
 
 class UserInfoUpdateView(generics.UpdateAPIView):
@@ -72,3 +66,14 @@ class UserInfoUpdateView(generics.UpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class UserSettingsUpdateView(generics.UpdateAPIView):
+    serializer_class = UserSettingsSerializer
+
+    def get_object(self):
+        return self.request.user.settings
+
+    def put(self, request, *args, **kwargs):
+        print(request.data)
+        return super().put(request, *args, **kwargs)
