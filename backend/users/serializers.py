@@ -3,6 +3,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
+from users.models import UserSettings
+
 User = get_user_model()
 
 
@@ -38,7 +40,18 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserSettingsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserSettings
+        fields = ("language",)
+
+
 class UserGeneralInfoSerializer(serializers.ModelSerializer):
+    settings = UserSettingsSerializer(read_only=True)
+
     class Meta:
         model = User
-        fields = ("first_name", "last_name", "email")
+        fields = ("first_name", "last_name", "email", "settings")
+
+
