@@ -88,7 +88,7 @@
 
 
 <header class="flex-none w-full mx-auto bg-white dark:bg-slate-950">
-    <Navbar class="fixed flex items-center min-h-10 justify-between h-[calc(100vh-93vh)] bg-gray-700 border-b border-gray-400">
+    <Navbar class="fixed flex items-center min-h-12 max-h-14 justify-between h-[calc(100vh-93vh)] bg-gray-700 border-b border-gray-400">
         <div class="absolute left-5 flex">
             {#if width < breakPoint}
                 <Button on:click={toggleSidebar} class="bg-gray-700 hover:bg-gray-500 mr-2 px-2 py-1">
