@@ -13,16 +13,15 @@
         SidebarGroup,
         SidebarItem,
         SidebarWrapper,
-        Spinner,
     } from 'flowbite-svelte';
     import {BarsSolid, CirclePlusOutline, FileSearchSolid, OpenBookSolid, PlusSolid} from "flowbite-svelte-icons";
     import {page} from "$app/stores";
-    import {onMount} from "svelte";
-    import {createConversation, retrieveConversation, retrieveConversations} from "./conversations/conversationService";
+    import {onMount, tick} from "svelte";
+    import {createConversation, retrieveConversations} from "./conversations/conversationService";
     import {getCsrfToken} from '$lib/cookies';
     import {goto} from '$app/navigation';
     import {user} from '../../stores/userStore';
-    import {getDocuments} from "./documents/documentService";
+    import ToastModal from "../../components/ToastModal.svelte";
 
     let breakPoint: number = 1024;
     let width: number = typeof window !== 'undefined' ? window.innerWidth : 1024;
@@ -150,7 +149,8 @@
                             {/each}
                             {#if hasMore}
                                 <div class="flex w-full">
-                                    <Button color="alternative" on:click={loadMoreConversations} class="bg-gray-700 text-white border-0 w-full">
+                                    <Button color="alternative" on:click={loadMoreConversations}
+                                            class="bg-gray-700 text-white border-0 w-full">
                                         <CirclePlusOutline class="w-4 h-4 mr-2"/>
                                         Load More
                                     </Button>
@@ -186,4 +186,5 @@
     <main class="lg:ml-72 w-full mx-auto">
         <slot/>
     </main>
+    <ToastModal/>
 </div>
