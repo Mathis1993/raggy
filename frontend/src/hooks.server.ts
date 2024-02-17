@@ -1,11 +1,11 @@
 import { redirect } from '@sveltejs/kit';
 
-const unProtectedRoutes = ['/login', '/signup', '/logout'];
+const unProtectedRoutes = ['/login', '/signup', '/logout', '/verify-email', '/reset-password'];
 export const handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get('sessionid');
 	const isAuthenticated = sessionId !== undefined;
 	// ToDo: Check expiration date of the sessionid cookie
-	if (!isAuthenticated && !unProtectedRoutes.includes(event.url.pathname)) {
+	if (!isAuthenticated && isProtectedRoute(event.url.pathname)) {
 		return redirect(303, '/login');
 	}
 
@@ -17,4 +17,8 @@ export const handle = async ({ event, resolve }) => {
 	}
 
 	return resolve(event);
+}
+
+function isProtectedRoute(path: string) {
+	return !unProtectedRoutes.some(unprotectedPath => path.startsWith(unprotectedPath));
 }
