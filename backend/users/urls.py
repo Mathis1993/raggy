@@ -12,5 +12,6 @@ urlpatterns = [
     path("signup/", views.SignupView.as_view(), name="signup"),
     path("info/", views.UserInfoView.as_view(), name="info"),
     path("update/", views.UserInfoUpdateView.as_view(), name="update"),
+    path("settings/update/", views.UserSettingsUpdateView.as_view(), name="settings_update"),
     # ToDo(ME-03.02.24): Password reset
 ]

@@ -1,15 +1,12 @@
+import {getMessages, retrieveConversation} from "../conversationService";
+
 export async function load({ fetch, params }) {
-    let conversationId = params.slug;
+    let conversationId = parseInt(params.slug, 10);
     try {
-        const response = await fetch(`http://127.0.0.1:8000/api/conversations/${conversationId}/`, { credentials: 'include' });
+        const conversation: Conversation = await retrieveConversation(conversationId);
+        const messages: Message[] = await getMessages(conversationId, 1);
 
-        if (!response.ok) {
-            console.error('Failed to fetch conversation:', response.status);
-            return { status: response.status, error: new Error('Conversation not found') };
-        }
-
-        const conversation = await response.json();
-        return { conversation };
+        return { "conversation": conversation, "messages": messages };
     } catch (error) {
         console.error('Error fetching conversation:', error);
         return { status: 500, error };
