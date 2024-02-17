@@ -33,4 +33,5 @@ urlpatterns = [
         ),
         name="reset_password_complete",
     ),
+    path("settings/update/", views.UserSettingsUpdateView.as_view(), name="settings_update"),
 ]

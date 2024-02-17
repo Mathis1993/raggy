@@ -56,7 +56,7 @@
             <ul class="px-2 border-b border-gray-200 dark:border-gray-700">
                 {#each message.sources as source}
                     <li class="text-gray-600 text-xs"> {source.document.identifier} </li>
-                    <Tooltip arrow={false} placement="top" >{source.excerpt}</Tooltip>
+                    <Tooltip class="w-1/2" arrow={false} placement="top" >{source.excerpt}</Tooltip>
                 {/each}
             </ul>
         {/if}
