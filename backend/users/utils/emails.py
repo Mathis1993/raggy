@@ -1,12 +1,11 @@
 import logging
-from typing import Literal, Tuple
+from typing import Tuple
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ValidationError
-from django.template.loader import render_to_string
 from django.core.mail import send_mail
-from django.urls import reverse
+from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
@@ -76,19 +75,36 @@ class EmailSender:
             logger.info(f"Sent email regarding '{subject}' to {to_email}.")
 
 
-class EmailVerifier:
+class Verifier:
+    @staticmethod
+    def get_user(uidb64):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+            User.DoesNotExist,
+            ValidationError,
+        ):
+            user = None
+        return user
+
+
+class EmailVerifier(Verifier):
     token_generator = default_token_generator
 
-    def __init__(self, host: str, scheme:  Literal["http", "https"], from_email: str):
-        self.url = f"{scheme}://{host}"
+    def __init__(self, base_url: str, from_email: str):
+        self.base_url = base_url
         self.email_sender = EmailSender(from_email)
 
     def send_verification_email(self, user: User):
         to_email = user.email
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = self.token_generator.make_token(user)
-        sub_link = reverse(viewname="users:verify_email", kwargs={"uidb64": uidb64, "token": token})
-        link = f"{self.url}{sub_link}"
+        sub_link = f"/verify-email/{uidb64}/{token}/"
+        link = f"{self.base_url}{sub_link}"
         fallback_message = fallback_message_email_verification(link)
         # ToDo(ME-15.02.24): Improve template
         html_content = render_to_string(template_name="users/emails/verify_email.html", context={"link": link})
@@ -118,35 +134,20 @@ class EmailVerifier:
 
         return False, "The link appears to be invalid and we are unable identify you. Please contact support."
 
-    @staticmethod
-    def get_user(uidb64):
-        try:
-            uid = urlsafe_base64_decode(uidb64).decode()
-            user = User.objects.get(pk=uid)
-        except (
-            TypeError,
-            ValueError,
-            OverflowError,
-            User.DoesNotExist,
-            ValidationError,
-        ):
-            user = None
-        return user
 
-
-class PasswordResetter:
+class PasswordResetter(Verifier):
     token_generator = default_token_generator
 
-    def __init__(self, host: str, scheme:  Literal["http", "https"], from_email: str):
-        self.url = f"{scheme}://{host}"
+    def __init__(self, base_url: str, from_email: str):
+        self.base_url = base_url
         self.email_sender = EmailSender(from_email)
 
     def send_password_reset_email(self, user: User):
         to_email = user.email
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = self.token_generator.make_token(user)
-        sub_link = reverse(viewname="users:reset_password_confirm", kwargs={"uidb64": uidb64, "token": token})
-        link = f"{self.url}{sub_link}"
+        sub_link = f"/reset-password/{uidb64}/{token}/"
+        link = f"{self.base_url}{sub_link}"
         fallback_message = fallback_message_password_reset(link)
         # ToDo(ME-15.02.24): Improve template
         html_content = render_to_string(template_name="users/emails/reset_password.html", context={"link": link})
@@ -156,3 +157,20 @@ class PasswordResetter:
             html_content=html_content,
             fallback_message=fallback_message,
         )
+
+    def verify(self, uidb64: str, token: str) -> Tuple[bool, str]:
+        user = self.get_user(uidb64)
+        if user is not None:
+
+            if self.token_generator.check_token(user, token):
+                user.email_verified = True
+                user.save()
+                logger.info(f"Password reset request for user {user} verified.")
+                return True, "success"
+
+            logger.warning(f"Password reset request verification failed.")
+            logger.info("User exists, resending password reset link.")
+            self.send_password_reset_email(user)
+            return False, "The password reset link appears to be invalid, we have sent you a new one. Please check your email."
+
+        return False, "The password reset link appears to be invalid and we are unable identify you. Please contact support."

@@ -7,7 +7,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
-from django.shortcuts import render
 from django.views import View
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -61,7 +60,8 @@ class SignupView(generics.CreateAPIView):
     user = None
 
     def create(self, request, *args, **kwargs):
-        email_verifier = EmailVerifier(host=request.get_host(), scheme=request.scheme, from_email=settings.FROM_EMAIL)
+        base_url = request.META.get('HTTP_ORIGIN', request.get_host())
+        email_verifier = EmailVerifier(base_url=base_url, from_email=settings.FROM_EMAIL)
         try:
             response = super().create(request, *args, **kwargs)
             email = response.data.get("email")
@@ -69,6 +69,7 @@ class SignupView(generics.CreateAPIView):
             email_verifier.send_verification_email(user)
             return response
         except (ValidationError, User.DoesNotExist) as e:
+            logger.error(e.message)
             return JsonResponse(data={"message": e.message}, status=http.HTTPStatus.BAD_REQUEST)
         except EmailSendingError as e:
             if self.user:
@@ -80,7 +81,6 @@ class SignupView(generics.CreateAPIView):
 
 
 class UserInfoView(LoginRequiredMixin, APIView):
-
     def get(self, request, *args, **kwargs):
         serializer = UserGeneralInfoSerializer(request.user)
         return JsonResponse(serializer.data)
@@ -94,28 +94,50 @@ class UserInfoUpdateView(generics.UpdateAPIView):
 
 
 class EmailVerificationView(View):
-    # ToDo(ME-14.02.24): Improve template
-    template_name = "users/verify_email_confirm.html"
-
-    def get(self, request, *args, **kwargs):
-        uidb64 = kwargs.get("uidb64")
-        token = kwargs.get("token")
-        email_verifier = EmailVerifier(host=request.get_host(), scheme=request.scheme, from_email=settings.FROM_EMAIL)
+    def post(self, request, *args, **kwargs):
+        uidb64 = request.POST.get("uidb64")
+        token = request.POST.get("token")
+        base_url = request.META.get('HTTP_ORIGIN', request.get_host())
+        email_verifier = EmailVerifier(base_url=base_url, from_email=settings.FROM_EMAIL)
         verified, message = email_verifier.verify_email_for_user(uidb64, token)
-        return render(request, self.template_name, context={"verified": verified, "message": message})
+        return JsonResponse({"verified": verified, "message": message})
 
 
-class PasswordResetView(View):
+class RequestPasswordResetView(View):
     def post(self, request, *args, **kwargs):
         email = request.POST.get("email")
         user = User.objects.filter(email=email).first()
+        base_url = request.META.get('HTTP_ORIGIN', request.get_host())
         if user:
-            password_resetter = PasswordResetter(host=request.get_host(), scheme=request.scheme, from_email=settings.FROM_EMAIL)
+            password_resetter = PasswordResetter(base_url=base_url, from_email=settings.FROM_EMAIL)
             try:
                 password_resetter.send_password_reset_email(user)
             except EmailSendingError:
-                logger.warn(f"Could not send password reset email to {email}.")
+                logger.warning(f"Could not send password reset email to {email}.")
         return JsonResponse({"message": "If a user with this email exists, a reset link has been sent."})
+
+
+class ResetPasswordView(View):
+    def post(self, request, *args, **kwargs):
+        uidb64 = request.POST.get("uidb64")
+        token = request.POST.get("token")
+        base_url = request.META.get('HTTP_ORIGIN', request.get_host())
+        password_resetter = PasswordResetter(base_url=base_url, from_email=settings.FROM_EMAIL)
+        success, message = password_resetter.verify(uidb64, token)
+        if not success:
+            return JsonResponse({"message": message}, status=http.HTTPStatus.BAD_REQUEST)
+        password1 = request.POST.get("password1")
+        password2 = request.POST.get("password2")
+        password_data = {"password1": password1, "password2": password2 }
+        serializer = UserSerializer(data=password_data)
+        try:
+            serializer.validate(password_data)
+        except ValidationError as e:
+            return JsonResponse(data=e.message_dict, status=http.HTTPStatus.BAD_REQUEST)
+        user = password_resetter.get_user(uidb64)
+        user.set_password(password1)
+        user.save()
+        return JsonResponse({"message": "Password reset successful"})
 
 
 class UserSettingsUpdateView(generics.UpdateAPIView):
