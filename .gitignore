@@ -2,7 +2,6 @@
 .idea
 .docker
 backend/.env
-.env
 
 # Mac
 .DS_Store

@@ -22,9 +22,9 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         is_new = self._state.adding
+        super().save(*args, **kwargs)
         if is_new:
             UserSettings.objects.get_or_create(user=self)
-        super().save(*args, **kwargs)
 
 
 class UserSettings(TrackUpdates):
