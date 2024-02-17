@@ -160,7 +160,7 @@
                     </div>
                 </SidebarGroup>
 
-                <SidebarGroup border class="text-white mt-auto">
+                <SidebarGroup border class="text-white mt-0 mb-16 ">
                     <SidebarItem class="text-white hover:bg-gray-500" label="Documents" href="/documents"
                                  on:click={toggleSidebar} active={activeUrl === "/documents"}>
                         <svelte:fragment slot="icon">
