@@ -1,7 +1,7 @@
 <script lang="ts">import { Register, Section } from 'flowbite-svelte-blocks';
 import { Button, Input, Label, Modal } from 'flowbite-svelte';
 import { writable } from 'svelte/store';
-import { resetPassword } from '../authService';
+import { requestPasswordReset } from '../authService';
 
 let email = '';
 let resetError = writable('');
@@ -9,7 +9,7 @@ let popupVisible = writable(false);
 
 async function handleSubmit(event) {
 	try {
-		await resetPassword(email);
+		await requestPasswordReset(email);
 		popupVisible.set(true);
 	} catch (error) {
 		resetError.set(error.message || 'An error occurred during the password reset.');
@@ -49,7 +49,7 @@ async function handleSubmit(event) {
 				{#if $resetError}
 					<p class="text-red-500">{ $resetError }</p>
 				{/if}
-				<Button type="submit" class="w-full1">Reset passwod</Button>
+				<Button type="submit" class="w-full1">Request password reset</Button>
 			</form>
 		</div>
 	</Register>
