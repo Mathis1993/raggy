@@ -2,6 +2,7 @@ import json
 import json
 import logging
 
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Q
 from django.http import JsonResponse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -102,9 +103,22 @@ class DocumentModelViewSet(ModelViewSet):
             return JsonResponse({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
 
         user_id = self.request.user.id
-        document = Document.create_from_file(user_id=user_id, file=file, document_name=document_name)
+        file_type = self.infer_file_type(file)
+        if document_name:
+            file_extension = file.name.split(".")[-1]
+            doc_name = document_name.replace(" ", "_")
+            file.name = f"{doc_name}.{file_extension}"
+        document = Document.create_from_file(user_id=user_id, file=file, document_name=document_name, file_type=file_type)
         task_handle_document_ingestion.delay(document_id=document.id)
         return JsonResponse({"document": DocumentSerializer(document).data}, status=status.HTTP_201_CREATED)
+
+    @staticmethod
+    def infer_file_type(file: InMemoryUploadedFile) -> Document.Type:
+        if file.name.endswith(".pdf"):
+            return Document.Type.PDF
+        if file.name.endswith(".doc") or file.name.endswith(".docx"):
+            return Document.Type.WORD
+        return Document.Type.PLAIN_TEXT
 
     def destroy(self, request, *args, **kwargs):
         document = self.get_object()
