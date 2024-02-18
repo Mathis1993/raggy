@@ -56,6 +56,7 @@
     let documentURL: string = '';
     let documentName: string = '';
     let errorMessage = writable('');
+    const acceptedFileExtensions = ['.pdf', '.txt', '.doc', '.docx'];
 
     // Filtering, Searching and Paginiation
     let selectedDocumentType: string = "";
@@ -300,7 +301,7 @@
             <span slot="title">Files</span>
             <form class="flex flex-col space-y-6" on:submit|preventDefault={() => handleCreateFromFileUpload()}>
                 <Label for="file" class="pb-2">File Upload</Label>
-                <Fileupload id="file" class="mb-2"/>
+                <Fileupload id="file" class="mb-2" accept={acceptedFileExtensions.join(',')}/>
                 <Helper> PDFs or .txt</Helper>
                 <Label class="space-y-2 mt-4">
                     <span>Document Name</span>
