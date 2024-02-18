@@ -4,6 +4,8 @@ OPENAI_API_KEY = env.str("OPENAI_API_KEY")
 
 # LLMs
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+CHUNK_SIZE = 512
+CHUNK_OVERLAP = 100
 
 # VECTOR STORE (Milvus)
 MILVUS_HOST = os.environ.get("MILVUS_HOST", "localhost")
