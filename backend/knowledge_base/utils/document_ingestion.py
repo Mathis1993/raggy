@@ -62,7 +62,7 @@ class DocumentIngestionService:
         embedding = LangchainEmbedding(HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL))
         pipeline = IngestionPipeline(
             transformations=[
-                SentenceSplitter(),
+                SentenceSplitter(chunk_size=settings.CHUNK_SIZE, chunk_overlap=settings.CHUNK_OVERLAP),
                 TitleExtractor(),
                 KeywordExtractor(),
                 embedding,
