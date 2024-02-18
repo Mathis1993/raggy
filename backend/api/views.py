@@ -104,6 +104,10 @@ class DocumentModelViewSet(ModelViewSet):
 
         user_id = self.request.user.id
         file_type = self.infer_file_type(file)
+        if document_name:
+            file_extension = file.name.split(".")[-1]
+            doc_name = document_name.replace(" ", "_")
+            file.name = f"{doc_name}.{file_extension}"
         document = Document.create_from_file(user_id=user_id, file=file, document_name=document_name, file_type=file_type)
         task_handle_document_ingestion.delay(document_id=document.id)
         return JsonResponse({"document": DocumentSerializer(document).data}, status=status.HTTP_201_CREATED)
