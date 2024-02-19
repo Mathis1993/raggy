@@ -1,10 +1,11 @@
 import json
 import json
 import logging
+import os
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404, FileResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, filters
 from rest_framework.decorators import action
@@ -124,3 +125,20 @@ class DocumentModelViewSet(ModelViewSet):
         document = self.get_object()
         document.delete_and_digest()
         return JsonResponse({"document": DocumentSerializer(document).data})
+
+    @action(detail=False, methods=["get"], url_path="download/(?P<pk>[0-9]+)")
+    def file_download(self, request, *args, **kwargs):
+        document = self.get_object()
+        if not document.user == self.request.user:
+            raise Http404("Document not found.")
+
+        if not document.file:
+            raise Http404("Document does not have an attached file.")
+
+        file_path = document.file.path
+        if not os.path.exists(file_path):
+            raise Http404("The requested file was not found on the server.")
+
+        response = FileResponse(open(file_path, 'rb'), content_type='application/octet-stream')
+        response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(file_path)
+        return response
