@@ -10,6 +10,10 @@ from core.utils.models import model_save
 from knowledge_base.utils.document_ingestion import DocumentIngestionService
 
 
+def user_directory_path(instance, filename):
+    return "documents/user_{0}/{1}".format(instance.user.id, filename)
+
+
 class Document(TrackCreation):
     class Meta:
         db_table = "knowledge_base_documents"
@@ -34,7 +38,7 @@ class Document(TrackCreation):
     content = models.TextField(null=True)
     status = models.CharField(choices=Status.choices, max_length=255, default=Status.PROCESSING)
     url = models.URLField(null=True, blank=True)
-    file = models.FileField(upload_to='documents/', null=True, blank=True)
+    file = models.FileField(upload_to=user_directory_path, null=True, blank=True)
     keywords = models.TextField(null=True)
 
     def __str__(self):

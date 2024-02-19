@@ -1,6 +1,6 @@
 import { getCsrfToken } from '$lib/cookies';
 
-const DOCUMENT_API_ENDPOINT: string = 'http://127.0.0.1:8000/api/documents/';
+export const DOCUMENT_API_ENDPOINT: string = 'http://127.0.0.1:8000/api/documents/';
 
 
 export async function getDocuments(documentType: string = "", search: string = "", page: number = 1) {
