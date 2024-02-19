@@ -4,6 +4,7 @@
     import { goto } from '$app/navigation';
     import { Register, Section } from 'flowbite-svelte-blocks';
     import { login } from '../authService';
+    import {addToast} from "../../../stores/toastStore"; // Adjust the path as necessary
     import { Banner } from "flowbite-svelte-blocks";
     import { CloseButton } from "flowbite-svelte";
     import { visible, visibleText } from '../../../stores/visibleStore';
@@ -17,8 +18,10 @@
 
         try {
             await login(email, password);
+            addToast('You have been logged in.', 'success')
             await goto('/');
         } catch (error) {
+            addToast('An error occurred during login.', 'error')
             loginError.set(error.message || 'An error occurred during login.');
         }
     }
