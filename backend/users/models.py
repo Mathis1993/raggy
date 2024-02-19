@@ -11,7 +11,8 @@ class User(AbstractUser):
         db_table = "users_users"
 
     username = models.CharField(null=True, blank=True, default=None)  # We don't want to use this field
-    email = models.EmailField(_("email address"), unique=True)  # Make email field unique
+    email = models.EmailField(_("email address"), unique=True) # Make email field unique
+    email_verified = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -21,9 +22,9 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         is_new = self._state.adding
+        super().save(*args, **kwargs)
         if is_new:
             UserSettings.objects.get_or_create(user=self)
-        super().save(*args, **kwargs)
 
 
 class UserSettings(TrackUpdates):

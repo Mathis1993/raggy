@@ -36,6 +36,14 @@ class DocumentIngestionService:
                 llama_document: llama_index.Document = DocumentExtractor.extract_content_from_pdf(
                     self.document.file.path
                 )
+            elif self.document.type == Document.Type.WORD:
+                llama_document: llama_index.Document = DocumentExtractor().extract_content_from_word(
+                    file_path=self.document.file.path
+                )
+            elif self.document.type == Document.Type.PLAIN_TEXT:
+                llama_document: llama_index.Document = DocumentExtractor().extract_content_from_plain_text(
+                    file_path=self.document.file.path
+                )
             else:
                 raise ValueError(f"Unsupported document type: {self.document.type}")
 
@@ -54,7 +62,7 @@ class DocumentIngestionService:
         embedding = LangchainEmbedding(HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL))
         pipeline = IngestionPipeline(
             transformations=[
-                SentenceSplitter(),
+                SentenceSplitter(chunk_size=settings.CHUNK_SIZE, chunk_overlap=settings.CHUNK_OVERLAP),
                 TitleExtractor(),
                 KeywordExtractor(),
                 embedding,

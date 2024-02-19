@@ -18,9 +18,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         try:
+            print("HEEEEEEEEEEEEEEEEEEEEEEEEEEE")
             validate_password(data["password1"])
         except ValidationError as e:
-            raise serializers.ValidationError({"password1": list(e.messages)})
+            raise ValidationError({"password1": list(e.messages)})
 
         if data["password1"] != data["password2"]:
             raise ValidationError({"password2": ["Passwords must match."]})

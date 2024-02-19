@@ -87,7 +87,7 @@
 
 
 <header class="flex-none w-full mx-auto bg-white dark:bg-slate-950">
-    <Navbar class="fixed flex items-center min-h-10 justify-between h-[calc(100vh-93vh)] bg-gray-700 border-b border-gray-400">
+    <Navbar class="fixed flex items-center min-h-14 max-h-14 justify-between bg-gray-700 border-b border-gray-400">
         <div class="absolute left-5 flex">
             {#if width < breakPoint}
                 <Button on:click={toggleSidebar} class="bg-gray-700 hover:bg-gray-500 mr-2 px-2 py-1">
@@ -120,10 +120,10 @@
 
 {#if sidebarVisible}
     <div id="sidebar"
-         class="flex flex-col overflow-hidden z-50 px-2 pt-4 dark:bg-gray-800 w-72 fixed start-0 inset-y-[calc(100vh-93vh)] h-full bg-gray-700">
-        <Sidebar class="w-full">
-            <SidebarWrapper class="bg-gray-700 p-0">
-                <SidebarGroup class="text-white flex-grow">
+         class="flex flex-col overflow-hidden z-50 px-2 pt-4 dark:bg-gray-800 w-72 fixed start-0 top-14 h-full bg-gray-700">
+        <Sidebar class="w-full flex flex-col h-full">
+            <SidebarWrapper class="bg-gray-700 p-0 flex flex-col h-full">
+                <SidebarGroup class="text-white flex-grow overflow-auto">
                     <div class="flex items-center justify-between">
                         <h2 class="font-semibold text-lg ml-4">
                             Conversations
@@ -132,7 +132,7 @@
                             <PlusSolid class="w-4 h-4"/>
                         </Button>
                     </div>
-                    <div class="max-h-[calc(100vh-40vh)] overflow-y-auto">
+                    <div class="max-h-[calc(100vh-40vh)]">
                         {#if conversations.length === 0}
                             <div class="flex items-center justify-center">
                                 No conversations yet
@@ -160,7 +160,7 @@
                     </div>
                 </SidebarGroup>
 
-                <SidebarGroup border class="absolute bottom-28 w-full mt-6">
+                <SidebarGroup border class="text-white mt-0 mb-16 ">
                     <SidebarItem class="text-white hover:bg-gray-500" label="Documents" href="/documents"
                                  on:click={toggleSidebar} active={activeUrl === "/documents"}>
                         <svelte:fragment slot="icon">
