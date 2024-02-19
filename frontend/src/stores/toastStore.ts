@@ -15,6 +15,6 @@ export const addToast = (message: string, type: string) => {
 
 };
 
-export const dismissToast = (id) => {
+export const dismissToast = (id: number) => {
     toasts.update((all) => all.filter((t) => t.id !== id));
 };

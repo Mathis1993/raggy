@@ -3,7 +3,8 @@
     import { Button, Input, Label, NavBrand } from 'flowbite-svelte';
     import { goto } from '$app/navigation';
     import {Register, Section} from "flowbite-svelte-blocks";
-    import {login} from "../authService"; // Adjust the path as necessary
+    import {login} from "../authService";
+    import {addToast} from "../../../stores/toastStore"; // Adjust the path as necessary
 
     let email = '';
     let password = '';
@@ -14,8 +15,10 @@
 
         try {
             await login(email, password);
+            addToast('You have been logged in.', 'success')
             await goto('/');
         } catch (error) {
+            addToast('An error occurred during login.', 'error')
             loginError.set(error.message || 'An error occurred during login.');
         }
     }
