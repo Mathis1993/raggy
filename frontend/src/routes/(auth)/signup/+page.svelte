@@ -4,6 +4,7 @@
     import { goto } from '$app/navigation';
     import {signUp} from "../authService";
     import {Register, Section} from "flowbite-svelte-blocks";
+    import {addToast} from "../../../stores/toastStore";
 
     // Initialize error messages as arrays to handle multiple messages
     const emailError = writable([]);
@@ -24,8 +25,10 @@
 
         try {
             await signUp(signUpData);
+            addToast('Account created successfully', 'success');
             await goto('/login');
         } catch (error) {
+            addToast('Failed to create account', 'error');
             emailError.set(error.email || []);
             password1Error.set(error.password1 || []);
             password2Error.set(error.password2 || []);

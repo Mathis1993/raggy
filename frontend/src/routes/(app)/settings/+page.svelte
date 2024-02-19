@@ -26,12 +26,11 @@
         if (response.ok) {
             const newUser = await response.json();
             user.set(newUser);
-            addToast('Profile updated successfully', 'success');
-            return {status: 'success', user};
+            return addToast('Profile updated successfully', 'success');
         }
         addToast('Error updating profile', 'error');
         const error = await response.json();
-        return {status: 'error', error};
+        return addToast(error, 'error')
     }
 
     async function handleLanguageChange() {
@@ -49,11 +48,10 @@
         });
         if (response.ok) {
             addToast('Language changed successfully', 'success');
-            return {status: 'success', user};
+            return;
         }
         const error = await response.json();
-        addToast('Error changing language', 'error')
-        return {status: 'error', error};
+        return addToast(error, 'error')
     }
 
 </script>

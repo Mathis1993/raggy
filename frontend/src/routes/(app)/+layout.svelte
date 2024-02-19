@@ -21,7 +21,7 @@
     import {getCsrfToken} from '$lib/cookies';
     import {goto} from '$app/navigation';
     import {user} from '../../stores/userStore';
-    import ToastModal from "../../components/ToastModal.svelte";
+    import ToastModal from "../../components/ToastModalSection.svelte";
 
     let breakPoint: number = 1024;
     let width: number = typeof window !== 'undefined' ? window.innerWidth : 1024;
