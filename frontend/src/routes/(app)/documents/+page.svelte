@@ -26,7 +26,7 @@
     import {
         createDocumentFromFileUpload,
         createDocumentFromUrl,
-        deleteDocument,
+        deleteDocument, DOCUMENT_API_ENDPOINT,
         getDocuments,
         retrieveDocument
     } from "./documentService";
@@ -347,7 +347,7 @@
     <div class="flex justify-between items-center">
         <div class="flex items-center space-x-3 sm:space-x-4">
             {#if documentDetails && documentDetails.type !== 'website'}
-                <Button href="/api/documents/download/{documentDetails.id}" target="_blank" color="primary"
+                <Button href="{DOCUMENT_API_ENDPOINT}download/{documentDetails.id}" target="_blank" color="primary"
                         class="flex items-center space-x-1">
                     <DownloadOutline class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor"/>
                     Download
