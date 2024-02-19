@@ -2,6 +2,7 @@
     import {Button, Card, Input, Label, Select} from 'flowbite-svelte';
     import {getCsrfToken} from '$lib/cookies';
     import {user} from '../../../stores/userStore';
+    import {addToast} from "../../../stores/toastStore";
 
     let selectedLanguage: string = $user.settings.language;
     let languages = [
@@ -25,10 +26,11 @@
         if (response.ok) {
             const newUser = await response.json();
             user.set(newUser);
-            return {status: 'success', user};
+            return addToast('Profile updated successfully', 'success');
         }
+        addToast('Error updating profile', 'error');
         const error = await response.json();
-        return {status: 'error', error};
+        return addToast(error, 'error')
     }
 
     async function handleLanguageChange() {
@@ -45,10 +47,11 @@
             body: body
         });
         if (response.ok) {
-            return {status: 'success', user};
+            addToast('Language changed successfully', 'success');
+            return;
         }
         const error = await response.json();
-        return {status: 'error', error};
+        return addToast(error, 'error')
     }
 
 </script>
@@ -96,3 +99,4 @@
         </form>
     </Card>
 </div>
+
