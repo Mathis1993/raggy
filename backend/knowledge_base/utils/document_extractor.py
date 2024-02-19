@@ -1,6 +1,7 @@
 from pathlib import Path
+from typing import List
 
-from llama_index import download_loader
+from llama_index import download_loader, SimpleDirectoryReader, Document
 from llama_index.readers import BeautifulSoupWebReader
 
 
@@ -21,3 +22,21 @@ class DocumentExtractor:
         if len(documents) == 0:
             raise ValueError(f"Content extraction from pdf {file_path} failed.")
         return documents[0]
+
+    def extract_content_from_word(self, file_path: str):
+        documents = self._extract_using_simple_directory_reader(file_path)
+        if len(documents) == 0:
+            raise ValueError(f"Content extraction from word {file_path} failed.")
+        return documents[0]
+
+    def extract_content_from_plain_text(self, file_path: str):
+        documents = self._extract_using_simple_directory_reader(file_path)
+        if len(documents) == 0:
+            raise ValueError(f"Content extraction from word {file_path} failed.")
+        return documents[0]
+
+    @staticmethod
+    def _extract_using_simple_directory_reader(file_path: str) -> List[Document]:
+        reader = SimpleDirectoryReader(input_files=[file_path])
+        documents = reader.load_data()
+        return documents

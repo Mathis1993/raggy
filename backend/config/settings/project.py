@@ -60,7 +60,7 @@ LOGGING = {
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR + str("templates")],
+        "DIRS": [BASE_DIR + str("/templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

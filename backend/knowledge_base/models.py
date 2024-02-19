@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Union
+
 from django.conf import settings
 from django.db import models
 
@@ -15,6 +19,7 @@ class Document(TrackCreation):
         WEBSITE = "website", "Website"
         PDF = "pdf", "PDF"
         PLAIN_TEXT = "plain_text", "Plain Text"
+        WORD = "word", "Word"
 
     class Status(models.TextChoices):
         PROCESSING = "processing", "Processing"
@@ -40,8 +45,8 @@ class Document(TrackCreation):
         return cls.objects.create(user_id=user_id, identifier=url, type=cls.Type.WEBSITE, url=url)
 
     @classmethod
-    def create_from_file(cls, user_id: int, file: str, document_name: str):
-        return cls.objects.create(user_id=user_id, file=file, type=cls.Type.PDF, identifier=document_name)
+    def create_from_file(cls, user_id: int, file: str, document_name: str, file_type: Document.Type) -> Document:
+        return cls.objects.create(user_id=user_id, file=file, type=file_type, identifier=document_name)
 
     def ingest(self):
         if not self.pk:
