@@ -56,4 +56,6 @@ windows:
             - cd backend
         - frontend:
             - cd frontend
+        - celery:
+            - cd backend
   - other:
