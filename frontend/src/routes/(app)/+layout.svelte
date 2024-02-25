@@ -22,6 +22,7 @@
     import {goto} from '$app/navigation';
     import {user} from '../../stores/userStore';
     import ToastModal from "../../components/ToastModalSection.svelte";
+    import { fetchFromBackend } from '$lib/fetch';
 
     let breakPoint: number = 1024;
     let width: number = typeof window !== 'undefined' ? window.innerWidth : 1024;
@@ -46,16 +47,11 @@
     }
 
     async function handleLogout() {
-        const body = new URLSearchParams({
-            'csrfmiddlewaretoken': getCsrfToken(),
-        });
-        const response = await fetch('http://127.0.0.1:8000/users/logout/', {
+        const response = await fetchFromBackend('http://127.0.0.1:8000/users/logout/', {
             method: 'POST',
-            credentials: 'include',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: body,
         });
 
         if (response.ok) {
