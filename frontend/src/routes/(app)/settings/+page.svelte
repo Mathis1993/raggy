@@ -1,8 +1,8 @@
 <script lang="ts">
-    import {Button, Card, Input, Label, Select} from 'flowbite-svelte';
-    import {getCsrfToken} from '$lib/cookies';
-    import {user} from '../../../stores/userStore';
-    import {addToast} from "../../../stores/toastStore";
+    import { Button, Card, Input, Label, Select } from 'flowbite-svelte';
+    import { user } from '../../../stores/userStore';
+    import { addToast } from '../../../stores/toastStore';
+    import { fetchFromBackend } from '$lib/fetch';
 
     let selectedLanguage: string = $user.settings.language;
     let languages = [
@@ -14,12 +14,10 @@
         const form = event.target;
         const formData = new FormData(form);
         const body = JSON.stringify(Object.fromEntries(formData));
-        const response = await fetch('http://127.0.0.1:8000/users/update/', {
+        const response = await fetchFromBackend('http://127.0.0.1:8000/users/update/', {
             method: 'PUT',
-            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfToken(),
             },
             body: body
         });
@@ -37,12 +35,10 @@
         const body = JSON.stringify({
             language: selectedLanguage
         });
-        const response = await fetch('http://127.0.0.1:8000/users/settings/update/', {
+        const response = await fetchFromBackend('http://127.0.0.1:8000/users/settings/update/', {
             method: 'PUT',
-            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfToken(),
             },
             body: body
         });
@@ -99,4 +95,3 @@
         </form>
     </Card>
 </div>
-
