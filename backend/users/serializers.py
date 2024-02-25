@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
-
 from users.models import UserSettings
 
 User = get_user_model()
@@ -18,7 +17,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         try:
-            print("HEEEEEEEEEEEEEEEEEEEEEEEEEEE")
             validate_password(data["password1"])
         except ValidationError as e:
             raise ValidationError({"password1": list(e.messages)})
@@ -54,5 +52,3 @@ class UserGeneralInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("first_name", "last_name", "email", "settings")
-
-
