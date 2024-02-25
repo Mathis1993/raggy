@@ -32,3 +32,10 @@ repos:
         exclude: ".git .hg .idea venv __pycache__ ./migrations/. config"
         args: ["--config=.flake8"]
         additional_dependencies: [flake8-bugbear]
+
+  -   repo: https://github.com/pre-commit/mirrors-eslint
+      rev: ''
+      hooks:
+      - id: eslint
+        files: \.[jt]sx?$  # *.js, *.jsx, *.ts and *.tsx
+        types: [file]
