@@ -6,6 +6,10 @@ from django.conf import settings
 from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
+from backend.knowledge_base.services.document_ingestion import (
+    DocumentMetadataHandler,
+    NodeProcessor,
+)
 from core.models import TrackCreation
 from core.utils.models import model_save
 
