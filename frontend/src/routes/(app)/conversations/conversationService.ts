@@ -71,6 +71,7 @@ export async function createConversation() {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({}),
       },
     );
 
@@ -107,7 +108,7 @@ export async function retrieveConversation(conversationId: number) {
 export async function deleteConversation(conversationId: number) {
   try {
     const response = await fetchFromBackend(
-      CONVERSATION_API_URL + conversationId,
+      CONVERSATION_API_URL + conversationId + "/",
       {
         method: "DELETE",
       },

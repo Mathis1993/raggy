@@ -9,7 +9,6 @@ from conversations.engine import (
     LlamaIndexChatEngine,
 )
 from conversations.models import Conversation
-from knowledge_base.vector_store import vector_store
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,6 @@ class ConversationHandler:
     def _initialize_chat_engine(self):
         conversation_history = self._get_conversation_history()
         self.chat_engine = self.chat_engine_cls(
-            vector_store=vector_store,  # This should be injected
             user_id=self.conversation.user.id,
             conversation_history=conversation_history,
         )
