@@ -31,13 +31,19 @@
         retrieveDocument
     } from "./documentService";
     import {
-        CheckCircleSolid, CheckPlusCircleOutline, CirclePlusOutline,
+        CheckCircleSolid, 
+        CheckPlusCircleOutline,
+        CirclePlusOutline,
+        FilePdfSolid,
+        FileSolid,
         CloseCircleSolid,
         DownloadOutline,
         ExclamationCircleOutline,
         EyeOutline,
         FilterOutline,
-        PlusSolid
+        PlusSolid,
+        DotsVerticalOutline,
+        FileSearchSolid,
     } from "flowbite-svelte-icons";
     import {onDestroy, onMount} from "svelte";
     import {page} from "$app/stores";
@@ -64,6 +70,39 @@
     let searchQuery = "";
     let documentType = "";
     const debouncedSearch = debounce(filterDocuments, 500);
+
+    // Add status color mapping
+    const statusColors = {
+        'processing': 'text-blue-600',
+        'completed': 'text-green-600',
+        'failed': 'text-red-600',
+        'disabled': 'text-gray-400',
+        'archived': 'text-gray-600'
+    };
+
+    // Remove the fileTypeIcons mapping and replace with a function
+    function getFileIcon(type: string) {
+        if (type === 'PDF') {
+            return FilePdfSolid;
+        } else if (type === 'WEBSITE') {
+            return FileSearch;
+        } else {
+            return FileSearchSolid;
+        }
+    }
+
+    function formatDateTime(dateString: string, includeSeconds: boolean = false) {
+        const date = new Date(dateString);
+        return date.toLocaleString(undefined, {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: includeSeconds ? '2-digit' : undefined,
+            hour12: false
+        });
+    }
 
     async function loadMoreDocuments() {
         if (!hasMore) return;
@@ -181,13 +220,27 @@
 </script>
 
 <Card class="max-w-full w-full max-h-[calc(100vh-12vh)] overflow-auto">
-    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"> Uploaded Documents</h5>
-    <p class="font-normal text-gray-700 dark:text-gray-400 leading-tight"> This is a list of your uploaded
-        documents </p>
-    <TableHeader divOuterClass="border-0">
+    <div class="flex justify-between items-center mb-4">
+        <h5 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Documents</h5>
+        <div class="flex items-center gap-2">
+            {#if documents.some(doc => doc.status === 'failed')}
+                <div class="flex items-center text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-lg">
+                    <ExclamationCircleOutline class="w-4 h-4 mr-1"/>
+                    {documents.filter(doc => doc.status === 'failed').length} documents indexing failed
+                    <Button size="xs" color="alternative" class="ml-2">RETRY</Button>
+                </div>
+            {/if}
+            <Button on:click={() => {openModal("create")}} class="ml-2">
+                <PlusSolid class="w-4 h-4 mr-2"/>
+                Add files
+            </Button>
+        </div>
+    </div>
+
+    <TableHeader divClass="mb-4" divOuterClass="border-0">
         <Search name="search" slot="search" size="md" bind:value={searchQuery} on:input={debouncedSearch}/>
         <Button color="light" class="ml-2">
-            <FilterOutline class="w-4 h-4"></FilterOutline>
+            <FilterOutline class="w-4 h-4"/>
             Filter
         </Button>
         <Dropdown class="w-60">
@@ -209,46 +262,77 @@
                 </li>
             </ul>
         </Dropdown>
-        <Button on:click={() => {openModal("create")}} class="ml-2">
-            <PlusSolid class="w-4 h-4 mr-2"></PlusSolid>
-            Add Document
-        </Button>
     </TableHeader>
+
     <Table>
         <TableHead>
-            <TableHeadCell>Document Name</TableHeadCell>
-            <TableHeadCell>Identifier</TableHeadCell>
-            <TableHeadCell>Type</TableHeadCell>
+            <TableHeadCell class="!p-4 w-4">
+                <input type="checkbox" class="rounded border-gray-300">
+            </TableHeadCell>
+            <TableHeadCell>Name</TableHeadCell>
+            <TableHeadCell>Upload Time</TableHeadCell>
             <TableHeadCell>Status</TableHeadCell>
-            <TableHeadCell></TableHeadCell>
+            <TableHeadCell class="w-20"></TableHeadCell>
         </TableHead>
-        <TableBody tableBodyClass="scroll-container max-h-96 overflow-y-auto">
+        <TableBody>
             {#each documents as document}
-                <TableBodyRow class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
-                    <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
-                        {document.title ? document.title.substring(0, 40) : 'No title'}
-                    </TableBodyCell>
-                    <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
-                        {document.identifier ? document.identifier.substring(0, 30) : 'No identifier'}
-                    </TableBodyCell>
-                    <TableBodyCell class={document.status === 'processing' ? 'text-gray-500' : 'text-black'}>
-                        {document.type}
+                <TableBodyRow>
+                    <TableBodyCell class="!p-4">
+                        <input type="checkbox" class="rounded border-gray-300">
                     </TableBodyCell>
                     <TableBodyCell>
-                        {#if document.status === "processing"}
-                            <Spinner/>
-                        {:else if document.status === "completed"}
-                            <CheckCircleSolid class="text-green-700"/>
-                        {:else if document.status === "failed"}
-                            <CloseCircleSolid class="text-red-700"/>
-                        {/if}
+                        <div class="flex items-center">
+                            <div class="p-2 bg-gray-100 rounded-lg mr-3">
+                                <svelte:component this={getFileIcon(document.type)} class="w-5 h-5 text-gray-600" />
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">{document.title || 'Untitled'}</p>
+                                <p class="text-sm text-gray-500">{document.identifier}</p>
+                            </div>
+                        </div>
                     </TableBodyCell>
-                    <TableBodyCell class="flex items-center justify-between">
-                        <Button outline={true}
-                                on:click={async () => {openModal("detail"); await handleDetailView(document.id);}}
-                                class="border-primary-400 hover:bg-primary-200">
-                            <EyeOutline class="text-primary-600"/>
-                        </Button>
+                    <TableBodyCell>
+                        {formatDateTime(document.created_at)}
+                    </TableBodyCell>
+                    <TableBodyCell>
+                        <div class="flex items-center">
+                            {#if document.status === "PROCESSING"}
+                                <div class="flex items-center text-blue-600">
+                                    <Spinner size="sm" class="mr-2"/>
+                                    <span class="text-sm font-medium">Indexing...</span>
+                                </div>
+                            {:else if document.status === "COMPLETED"}
+                                <div class="flex items-center text-green-600">
+                                    <CheckCircleSolid class="w-4 h-4 mr-2"/>
+                                    <span class="text-sm font-medium">Available</span>
+                                </div>
+                            {:else if document.status === "FAILED"}
+                                <div class="flex items-center text-red-600">
+                                    <CloseCircleSolid class="w-4 h-4 mr-2"/>
+                                    <span class="text-sm font-medium">Error</span>
+                                </div>
+                            {:else if document.status === "DISABLED"}
+                                <div class="flex items-center text-gray-400">
+                                    <span class="text-sm font-medium">Disabled</span>
+                                </div>
+                            {:else if document.status === "ARCHIVED"}
+                                <div class="flex items-center text-gray-600">
+                                    <span class="text-sm font-medium">Archived</span>
+                                </div>
+                            {/if}
+                        </div>
+                    </TableBodyCell>
+                    <TableBodyCell>
+                        <div class="flex items-center justify-end gap-2">
+                            <Button outline={true} size="sm"
+                                    on:click={async () => {openModal("detail"); await handleDetailView(document.id);}}
+                                    class="!p-2 border-gray-200">
+                                <EyeOutline class="w-4 h-4 text-gray-500"/>
+                            </Button>
+                            <Button outline={true} size="sm" class="!p-2 border-gray-200">
+                                <DotsVerticalOutline class="w-4 h-4 text-gray-500"/>
+                            </Button>
+                        </div>
                     </TableBodyCell>
                 </TableBodyRow>
             {/each}
@@ -264,7 +348,7 @@
             {#if hasMore}
                 <TableBodyRow>
                     <TableBodyCell colspan="5" class="text-center">
-                        <Button color="alternative" on:click={loadMoreDocuments} class="w-full1">
+                        <Button color="alternative" on:click={loadMoreDocuments}>
                             <CirclePlusOutline class="w-4 h-4 mr-2"/>
                             Load More
                         </Button>
@@ -418,42 +502,75 @@
     </div>
 </Modal>
 
-<Modal title="" open={modalVisible.detail} autoclose outsideclose size="sm">
-    <div class="flex justify-between mb-4 rounded-t sm:mb-5">
-        <div class="text-lg text-gray-900 md:text-xl dark:text-white">
-            <h3 class="font-semibold">{documentDetails ? documentDetails.title : 'Loading...'}</h3>
+<Modal title="" open={modalVisible.detail} autoclose outsideclose size="md">
+    <div class="p-6">
+        <div class="flex items-start gap-4 mb-6">
+            <div class="p-3 bg-gray-100 rounded-lg">
+                <svelte:component this={getFileIcon(documentDetails?.type || 'txt')} class="w-6 h-6 text-gray-600" />
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold text-gray-900">{documentDetails?.title || 'Loading...'}</h3>
+                <p class="text-sm text-gray-500">{documentDetails?.identifier || 'Loading...'}</p>
+            </div>
         </div>
-    </div>
-    <dl>
-        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Identifier</dt>
-        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">{documentDetails ? documentDetails.identifier : 'Loading...'}</dd>
-        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Created At</dt>
-        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">{documentDetails ? documentDetails.created_at : 'Loading...'}</dd>
-        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Type</dt>
-        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">{documentDetails ? documentDetails.type : 'Loading...'}</dd>
-        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Status</dt>
-        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">{documentDetails ? documentDetails.status : 'Loading...'}</dd>
-        <dt class="mb-2 font-semibold leading-none text-gray-900 dark:text-white">Keywords</dt>
-        <dd class="mb-4 font-light text-gray-500 sm:mb-5 dark:text-gray-400">{documentDetails ? documentDetails.keywords : 'Loading...'}</dd>
-    </dl>
-    <div class="flex justify-between items-center">
-        <div class="flex items-center space-x-3 sm:space-x-4">
+
+        <div class="space-y-4">
+            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                <span class="text-sm font-medium text-gray-500">Status</span>
+                <div class="flex items-center">
+                    {#if documentDetails?.status === "PROCESSING"}
+                        <div class="flex items-center text-blue-600">
+                            <Spinner size="sm" class="mr-2"/>
+                            <span class="text-sm font-medium">Indexing...</span>
+                        </div>
+                    {:else if documentDetails?.status === "COMPLETED"}
+                        <div class="flex items-center text-green-600">
+                            <CheckCircleSolid class="w-4 h-4 mr-2"/>
+                            <span class="text-sm font-medium">Available</span>
+                        </div>
+                    {:else if documentDetails?.status === "FAILED"}
+                        <div class="flex items-center text-red-600">
+                            <CloseCircleSolid class="w-4 h-4 mr-2"/>
+                            <span class="text-sm font-medium">Error</span>
+                        </div>
+                    {:else if documentDetails?.status === "DISABLED"}
+                        <div class="flex items-center text-gray-400">
+                            <span class="text-sm font-medium">Disabled</span>
+                        </div>
+                    {:else if documentDetails?.status === "ARCHIVED"}
+                        <div class="flex items-center text-gray-600">
+                            <span class="text-sm font-medium">Archived</span>
+                        </div>
+                    {/if}
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                <span class="text-sm font-medium text-gray-500">Type</span>
+                <span class="text-sm text-gray-900">{documentDetails?.type || 'Loading...'}</span>
+            </div>
+
+            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                <span class="text-sm font-medium text-gray-500">Upload Time</span>
+                <span class="text-sm text-gray-900">{documentDetails ? formatDateTime(documentDetails.created_at, true) : 'Loading...'}</span>
+            </div>
+        </div>
+
+        <div class="flex justify-end items-center gap-3 mt-6">
             {#if documentDetails && documentDetails.type !== 'website'}
                 <Button href="{DOCUMENT_API_ENDPOINT}download/{documentDetails.id}" target="_blank" color="primary"
-                        class="flex items-center space-x-1">
-                    <DownloadOutline class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor"/>
+                        class="flex items-center">
+                    <DownloadOutline class="w-4 h-4 mr-2"/>
                     Download
                 </Button>
             {/if}
+            <Button color="red" class="flex items-center" on:click={() => {openModal("delete"); documentIdToDelete = documentDetails?.id || null;}}>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete
+            </Button>
         </div>
-        <Button color="red" on:click={() => {openModal("delete"); documentIdToDelete = documentDetails?.id || null;}}>
-            <svg aria-hidden="true" class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor" viewBox="0 0 20 20"
-                 xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd"
-                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                      clip-rule="evenodd"/>
-            </svg>
-            Delete
-        </Button>
     </div>
 </Modal>
