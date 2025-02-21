@@ -14,7 +14,15 @@
         SidebarItem,
         SidebarWrapper,
     } from 'flowbite-svelte';
-    import {BarsSolid, CirclePlusOutline, FileSearchSolid, OpenBookSolid, PlusSolid} from "flowbite-svelte-icons";
+    import {
+        BarsSolid, 
+        HomeSolid,
+        MessagesOutline,
+        BookOpenOutline,
+        QuestionCircleOutline,
+        AdjustmentsVerticalOutline,
+        ArrowLeftToBracketOutline,
+    } from "flowbite-svelte-icons";
     import {page} from "$app/stores";
     import {onMount, tick} from "svelte";
     import {createConversation, retrieveConversations} from "./conversations/conversationService";
@@ -83,20 +91,20 @@
 
 
 <header class="flex-none w-full mx-auto bg-white dark:bg-slate-950">
-    <Navbar class="fixed flex items-center min-h-14 max-h-14 justify-between bg-gray-700 border-b border-gray-400">
-        <div class="absolute left-5 flex">
+    <Navbar class="fixed flex items-center min-h-16 max-h-16 justify-between bg-gray-800 border-b border-gray-700">
+        <div class="absolute left-5 flex items-center">
             {#if width < breakPoint}
-                <Button on:click={toggleSidebar} class="bg-gray-700 hover:bg-gray-500 mr-2 px-2 py-1">
+                <Button on:click={toggleSidebar} class="bg-gray-800 hover:bg-gray-700 mr-2 px-2 py-1">
                     <BarsSolid class="w-4 h-4"/>
                 </Button>
             {/if}
-            <NavBrand href="/" class="text-gray-50">
-                <span class="self-center whitespace-nowrap text-xl font-semibold">Raggy</span>
-                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+            <NavBrand href="/" class="text-gray-50 flex items-center">
+                <svg class="w-8 h-8 mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                      fill="none" viewBox="0 0 24 24">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M16.9 9.7 20 6.6 17.4 4 4 17.4 6.6 20 16.9 9.7Zm0 0L14.3 7M6 7v2m0 0v2m0-2H4m2 0h2m7 7v2m0 0v2m0-2h-2m2 0h2M8 4h0v0h0v0Zm2 2h0v0h0v0Zm2-2h0v0h0v0Zm8 8h0v0h0v0Zm-2 2h0v0h0v0Zm2 2h0v0h0v0Z"/>
                 </svg>
+                <span class="self-center whitespace-nowrap text-2xl font-semibold">Raggy</span>
             </NavBrand>
         </div>
         <div class="absolute right-5 flex items-center md:order-2">
@@ -107,7 +115,7 @@
                 <span class="block text-sm">{`${$user.first_name} ${$user.last_name}`.trim() || ''}</span>
                 <span class="block truncate text-sm font-medium">{$user.email}</span>
             </DropdownHeader>
-            <DropdownItem href="/settings">Settings</DropdownItem>
+            <DropdownItem href="/settings">Account Settings</DropdownItem>
             <DropdownDivider/>
             <DropdownItem on:click={handleLogout}>Sign out</DropdownItem>
         </Dropdown>
@@ -116,60 +124,50 @@
 
 {#if sidebarVisible}
     <div id="sidebar"
-         class="flex flex-col overflow-hidden z-50 px-2 pt-4 dark:bg-gray-800 w-72 fixed start-0 top-14 h-full bg-gray-700">
+         class="flex flex-col overflow-hidden z-50 dark:bg-gray-800 w-72 fixed start-0 top-16 h-full bg-gray-800">
         <Sidebar class="w-full flex flex-col h-full">
-            <SidebarWrapper class="bg-gray-700 p-0 flex flex-col h-full">
-                <SidebarGroup class="text-white flex-grow overflow-auto">
-                    <div class="flex items-center justify-between">
-                        <h2 class="font-semibold text-lg ml-4">
-                            Conversations
-                        </h2>
-                        <Button size="sm" class="ml-4 bg-gray-700 hover:bg-gray-500" on:click={createConversation}>
-                            <PlusSolid class="w-4 h-4"/>
-                        </Button>
-                    </div>
-                    <div class="max-h-[calc(100vh-40vh)]">
-                        {#if conversations.length === 0}
-                            <div class="flex items-center justify-center">
-                                No conversations yet
-                            </div>
-                        {:else}
-                            {#each conversations as conversation}
-                                <SidebarItem class="text-white hover:bg-gray-500"
-                                             label={conversation.name || "Start Conversation..." }
-                                             data-sveltekit-reload
-                                             href={`/conversations/${conversation.id}`}
-                                             on:click={toggleSidebar}
-                                             active={activeUrl === `conversations/`}>
-                                </SidebarItem>
-                            {/each}
-                            {#if hasMore}
-                                <div class="flex w-full">
-                                    <Button color="alternative" on:click={loadMoreConversations}
-                                            class="bg-gray-700 text-white border-0 w-full">
-                                        <CirclePlusOutline class="w-4 h-4 mr-2"/>
-                                        Load More
-                                    </Button>
-                                </div>
-                            {/if}
-                        {/if}
-                    </div>
-                </SidebarGroup>
-
-                <SidebarGroup border class="text-white mt-0 mb-16 ">
-                    <SidebarItem class="text-white hover:bg-gray-500" label="Documents" href="/documents"
-                                 on:click={toggleSidebar} active={activeUrl === "/documents"}>
+            <SidebarWrapper class="bg-gray-800 p-0 flex flex-col h-full">
+                <SidebarGroup class="text-white flex-grow">
+                    <SidebarItem class="text-white hover:bg-gray-700" label="Dashboard" href="/"
+                                active={activeUrl === "/"}>
                         <svelte:fragment slot="icon">
-                            <FileSearchSolid
-                                    class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
+                            <HomeSolid class="w-5 h-5"/>
                         </svelte:fragment>
                     </SidebarItem>
-                    <SidebarItem class="text-white hover:bg-gray-500" label="Information"
-                                 href="https://www.llamaindex.ai/" target="_blank" on:click={toggleSidebar}>
-                        on:click={toggleSidebar}>
+                    
+                    <SidebarItem class="text-white hover:bg-gray-700" label="Chat" href="/conversations"
+                                active={activeUrl.includes("/conversations")}>
                         <svelte:fragment slot="icon">
-                            <OpenBookSolid
-                                    class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"/>
+                            <MessagesOutline class="w-5 h-5"/>
+                        </svelte:fragment>
+                    </SidebarItem>
+
+                    <SidebarItem class="text-white hover:bg-gray-700" label="Knowledge Base" href="/documents"
+                                active={activeUrl.includes("/documents")}>
+                        <svelte:fragment slot="icon">
+                            <BookOpenOutline class="w-5 h-5"/>
+                        </svelte:fragment>
+                    </SidebarItem>
+
+                    <SidebarItem class="text-white hover:bg-gray-700" label="FAQ" href="/faq"
+                                active={activeUrl.includes("/faq")}>
+                        <svelte:fragment slot="icon">
+                            <QuestionCircleOutline class="w-5 h-5"/>
+                        </svelte:fragment>
+                    </SidebarItem>
+
+                    <SidebarItem class="text-white hover:bg-gray-700" label="Project Settings" href="/settings"
+                                active={activeUrl.includes("/settings")}>
+                        <svelte:fragment slot="icon">
+                            <AdjustmentsVerticalOutline class="w-5 h-5"/>
+                        </svelte:fragment>
+                    </SidebarItem>
+                </SidebarGroup>
+
+                <SidebarGroup class="text-white mt-auto mb-4">
+                    <SidebarItem class="text-white hover:bg-gray-700" label="Logout" on:click={handleLogout}>
+                        <svelte:fragment slot="icon">
+                            <ArrowLeftToBracketOutline class="w-5 h-5"/>
                         </svelte:fragment>
                     </SidebarItem>
                 </SidebarGroup>
@@ -178,7 +176,7 @@
     </div>
 {/if}
 
-<div class="flex px-4 mx-auto w-full pt-[calc(100vh-90vh)] h-screen">
+<div class="flex mx-auto w-full pt-16 h-screen">
     <main class="lg:ml-72 w-full mx-auto">
         <slot/>
     </main>
