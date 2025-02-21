@@ -2,7 +2,7 @@ from typing import List
 
 from django.conf import settings
 from django.db import models
-from llama_index.tools import ToolOutput
+from llama_index.core.tools import ToolOutput
 
 from core.models import TrackCreationAndUpdates
 from core.utils.models import model_save

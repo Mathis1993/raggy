@@ -1,14 +1,14 @@
 from pathlib import Path
 from typing import List
 
-from llama_index import download_loader, SimpleDirectoryReader, Document
-from llama_index.readers import BeautifulSoupWebReader
+from llama_index.core import download_loader, SimpleDirectoryReader
+from llama_index.readers.web import SimpleWebPageReader
 
 
 class DocumentExtractor:
     @staticmethod
     def extract_content_from_url(url: str):
-        documents = BeautifulSoupWebReader().load_data([url])
+        documents = SimpleWebPageReader().load_data([url])
         if len(documents) == 0:
             raise ValueError(f"Content extraction from url {url} failed.")
         document = documents[0]
@@ -36,7 +36,7 @@ class DocumentExtractor:
         return documents[0]
 
     @staticmethod
-    def _extract_using_simple_directory_reader(file_path: str) -> List[Document]:
+    def _extract_using_simple_directory_reader(file_path: str) -> List:
         reader = SimpleDirectoryReader(input_files=[file_path])
         documents = reader.load_data()
         return documents

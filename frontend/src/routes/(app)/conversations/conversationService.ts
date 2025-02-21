@@ -1,5 +1,4 @@
 import { goto, invalidateAll } from "$app/navigation";
-import { getCsrfToken } from "$lib/cookies";
 import { fetchFromBackend } from "$lib/fetch";
 
 const CONVERSATION_API_URL = "http://127.0.0.1:8000/api/conversations/";
@@ -76,6 +75,7 @@ export async function createConversation() {
     );
 
     if (!response.ok) {
+      console.log(response);
       console.error("Failed to create conversation");
       return;
     }

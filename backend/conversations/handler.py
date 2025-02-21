@@ -2,10 +2,10 @@ import logging
 from typing import List
 
 from django.shortcuts import get_object_or_404
-from llama_index.core.llms.types import ChatResponse, ChatMessage, MessageRole
+from llama_index.core.base.llms.types import ChatResponse, ChatMessage, MessageRole
 
 from conversations.engine import ConversationEngine
-from conversations.models import Conversation, Message
+from conversations.models import Conversation
 
 
 logger = logging.getLogger(__name__)

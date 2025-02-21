@@ -1,9 +1,7 @@
 import logging
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from llama_index import ServiceContext, StorageContext, VectorStoreIndex
-from llama_index.embeddings import LangchainEmbedding
-from llama_index.vector_stores import MilvusVectorStore, MetadataFilters, ExactMatchFilter
+from llama_index.core import StorageContext, VectorStoreIndex
+from llama_index.vector_stores.milvus import MilvusVectorStore
 from pymilvus import Collection, CollectionSchema, FieldSchema, DataType, connections, utility
 
 from config import settings
@@ -11,7 +9,7 @@ from config import settings
 logger = logging.getLogger(__name__)
 
 COLLECTION = "raggy"
-VECTOR_DIM = 384
+VECTOR_DIM = 1536
 EMBEDDING_FIELD = "embedding"
 DOC_ID_FIELD = "postgres_doc_id"
 ALIAS = "default"
@@ -34,7 +32,7 @@ def initialize_milvus_store(uri: str, load_collection: bool = False):
 
     # Ensure collection is loaded
     if load_collection:
-        milvus_store.collection.load()
+        milvus_store._collection.load()
 
     return milvus_store
 
@@ -85,11 +83,7 @@ def get_index():
         uri=f"http://{settings.MILVUS_HOST}:{settings.MILVUS_PORT}",
         load_collection=True
     )
-    embedding = LangchainEmbedding(HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL))
-    service_context = ServiceContext.from_defaults(embed_model=embedding)
     storage_context = StorageContext.from_defaults(vector_store=milvus_store)
     return VectorStoreIndex.from_vector_store(
         vector_store=milvus_store,
-        storage_context=storage_context,
-        service_context=service_context
     )

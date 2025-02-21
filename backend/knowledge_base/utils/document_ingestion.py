@@ -2,12 +2,12 @@ import logging
 
 import llama_index
 from django.conf import settings
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from llama_index.data_structs import Node
-from llama_index.embeddings import LangchainEmbedding
-from llama_index.extractors import TitleExtractor, KeywordExtractor
-from llama_index.ingestion import IngestionPipeline
-from llama_index.node_parser import SentenceSplitter
+from llama_index.core import Document
+from llama_index.core.data_structs import Node
+from llama_index.core.extractors import TitleExtractor, KeywordExtractor
+from llama_index.core.ingestion import IngestionPipeline
+from llama_index.core.node_parser import SentenceSplitter
+from llama_index.embeddings.openai import OpenAIEmbedding
 
 from knowledge_base.utils.document_extractor import DocumentExtractor
 from knowledge_base.vector_store import initialize_milvus_store
@@ -55,27 +55,30 @@ class DocumentIngestionService:
             logger.error(f"Failed to ingest document {self.document.id}: {e}")
             self.document.mark_as_failed()
 
-    def _extract_nodes(self, llama_document: llama_index.Document):
+    def _extract_nodes(self, llama_document: Document) -> [Node]:
         llama_document.metadata["user_id"] = self.document.user_id
         llama_document.metadata["postgres_doc_id"] = self.document.id
 
-        embedding = LangchainEmbedding(HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL))
         pipeline = IngestionPipeline(
             transformations=[
                 SentenceSplitter(chunk_size=settings.CHUNK_SIZE, chunk_overlap=settings.CHUNK_OVERLAP),
                 TitleExtractor(),
                 KeywordExtractor(),
-                embedding,
+                OpenAIEmbedding(),
             ],
         )
         nodes = pipeline.run(documents=[llama_document])
         return nodes
 
     def _store_nodes(self, nodes: [Node]):
-        self.milvus_store.add([n for n in nodes if n.embedding is not None])
-        logger.info(f"Added {len(nodes)} nodes from document.")
+        logger.info(f"Storing {len(nodes)} nodes from document.")
+        nodes_to_store = [n for n in nodes if n.embedding is not None]
+        logger.info(f"Storing {len(nodes_to_store)} nodes with embeddings.")
+        self.milvus_store.add(nodes_to_store)
+        print(nodes_to_store[0])
+        logger.info(f"Added {len(nodes_to_store)} nodes from document.")
 
-    def _update_document(self, llama_document: llama_index.Document, nodes: [Node]):
+    def _update_document(self, llama_document, nodes: [Node]):
         self.document.doc_id = llama_document.doc_id
         self.document.content = llama_document.text
         if len(nodes) > 0:
@@ -87,7 +90,7 @@ class DocumentIngestionService:
     def digest_document(self):
         # TODO: Currently, we cannot just use the .delete() method of the milvus store as it does
         #  some weird string concatenation with the ref_doc_id. So, we implement this on our own.
-        self.milvus_store.milvusclient.delete(
+        self.milvus_store._milvusclient.delete(
             collection_name=self.milvus_store.collection_name, pks=[self.document.pk]
         )
         logger.debug(f"Successfully deleted embedding with postgres_doc_id: {self.document.pk}")
