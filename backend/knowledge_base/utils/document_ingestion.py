@@ -1,6 +1,5 @@
 import logging
 
-import llama_index
 from django.conf import settings
 from llama_index.core import Document
 from llama_index.core.data_structs import Node
@@ -9,7 +8,7 @@ from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.openai import OpenAIEmbedding
 
-from knowledge_base.utils.document_extractor import DocumentExtractor
+from knowledge_base.extractors import ExtractorRepository
 from knowledge_base.vector_store import initialize_milvus_store
 
 logger = logging.getLogger(__name__)
@@ -19,6 +18,7 @@ class DocumentIngestionService:
 
     def __init__(self, document):
         self.document = document
+        self.extractor_repository = ExtractorRepository()
         self.milvus_store = initialize_milvus_store(
                 uri=f"http://{settings.MILVUS_HOST}:{settings.MILVUS_PORT}",
                 load_collection=False
@@ -28,24 +28,14 @@ class DocumentIngestionService:
         """ Orchestrates the ingestion of a document, whether it's from a URL or a file."""
         from knowledge_base.models import Document
         try:
-            if self.document.type == Document.Type.WEBSITE:
-                llama_document: llama_index.Document = DocumentExtractor.extract_content_from_url(
-                    self.document.url
-                )
-            elif self.document.type == Document.Type.PDF:
-                llama_document: llama_index.Document = DocumentExtractor.extract_content_from_pdf(
-                    self.document.file.path
-                )
-            elif self.document.type == Document.Type.WORD:
-                llama_document: llama_index.Document = DocumentExtractor().extract_content_from_word(
-                    file_path=self.document.file.path
-                )
-            elif self.document.type == Document.Type.PLAIN_TEXT:
-                llama_document: llama_index.Document = DocumentExtractor().extract_content_from_plain_text(
-                    file_path=self.document.file.path
-                )
-            else:
-                raise ValueError(f"Unsupported document type: {self.document.type}")
+            # Get appropriate extractor
+            extractor = self.extractor_repository.get_extractor(self.document.type)
+
+            # Extract content using source (either URL or file path)
+            source = (
+                self.document.url if self.document.type == "WEBSITE" else self.document.file.path
+            )
+            llama_document: Document = extractor.extract(source)
 
             nodes: [Node] = self._extract_nodes(llama_document)
             self._store_nodes(nodes)
