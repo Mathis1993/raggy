@@ -4,41 +4,67 @@ from typing import List
 from django.shortcuts import get_object_or_404
 from llama_index.core.base.llms.types import ChatResponse, ChatMessage, MessageRole
 
-from conversations.engine import ConversationEngine
+from backend.conversations.exceptions import ChatEngineError, ConversationError, PersistenceError
+from conversations.engine import (
+    LlamaIndexChatEngine,
+)
 from conversations.models import Conversation
-
+from knowledge_base.vector_store import vector_store
 
 logger = logging.getLogger(__name__)
 
 
+
 class ConversationHandler:
-    """
-    Class responsible for handling the conversation. It is responsible for creating a conversation
-    engine and  handling the messages from the user and the assistant. It stores the messages in
-    the database.
-    """
-    def __init__(self, conversation_id: int):
+    def __init__(self, conversation_id: int, chat_engine_cls=LlamaIndexChatEngine):
         self.conversation = get_object_or_404(Conversation, id=conversation_id)
-        self.conversation_history = self._get_conversation_history()
-        self.conversation_engine = ConversationEngine(
-            user=self.conversation.user,
-            conversation_history=self.conversation_history,
+        self.chat_engine_cls = chat_engine_cls
+        self._initialize_chat_engine()
+
+    def _initialize_chat_engine(self):
+        conversation_history = self._get_conversation_history()
+        self.chat_engine = self.chat_engine_cls(
+            vector_store=vector_store,  # This should be injected
+            user_id=self.conversation.user.id,
+            conversation_history=conversation_history,
         )
 
     def handle_message(self, user_message: str, add_to_conversation: bool = True) -> ChatMessage:
-        if add_to_conversation:
-            self.conversation.add_user_message(user_message)
-            self.conversation.mark_as_running()
-
         try:
-            assistant_response: ChatResponse = self.conversation_engine.query(user_message)
-            message_object = self.conversation.add_assistant_message(assistant_response.response)
-            message_object.add_sources(assistant_response.source_nodes)
+            if add_to_conversation:
+                self._persist_user_message(user_message)
+                self.conversation.mark_as_running()
+
+            assistant_response = self._process_message(user_message)
+            return self._persist_assistant_response(assistant_response)
+
+        except ChatEngineError as e:
+            logger.error(f"Chat engine error: {e}")
+            self.conversation.mark_as_failed()
+            raise
+        except PersistenceError as e:
+            logger.error(f"Database persistence error: {e}")
+            self.conversation.mark_as_failed()
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            self.conversation.mark_as_failed()
+            raise ConversationError(f"Unexpected error during message handling: {e}")
+
+    def _process_message(self, user_message: str) -> ChatResponse:
+        try:
+            return self.chat_engine.query(user_message)
+        except Exception as e:
+            raise ChatEngineError(f"Error processing message: {e}")
+
+    def _persist_assistant_response(self, response: ChatResponse) -> ChatMessage:
+        try:
+            message_object = self.conversation.add_assistant_message(response.response)
+            message_object.add_sources(response.source_nodes)
             self.conversation.mark_as_completed()
             return message_object
         except Exception as e:
-            logger.error(f"Error while processing message: {e}")
-            self.conversation.mark_as_failed()
+            raise PersistenceError(f"Error persisting assistant response: {e}")
 
     def _get_conversation_history(self) -> List[ChatMessage]:
         if self.conversation is None:

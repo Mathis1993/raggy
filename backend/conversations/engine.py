@@ -1,4 +1,6 @@
 from typing import List
+from abc import ABC, abstractmethod
+import logging
 
 from django.contrib.auth import get_user_model
 from llama_cloud import MetadataFilters
@@ -9,8 +11,9 @@ from llama_index.core.vector_stores import ExactMatchFilter
 
 from knowledge_base.vector_store import vector_store
 
-User = get_user_model()
+logger = logging.getLogger(__name__)
 
+User = get_user_model()
 
 OUTPUT_FORMAT_PROMPT = """
     Always return your answer in a valid markdown format.
@@ -20,41 +23,48 @@ OUTPUT_FORMAT_PROMPT = """
 """
 
 
-class ConversationEngine:
-    """
-    ConversationEngine is the main class for the chatbot. It is responsible for setting up the
-    Llamaindex ChatEngine and providing a query method to query the chat engine. It returns a
-    response message.
-    """
+class BaseChatEngine(ABC):
+    @abstractmethod
+    def query(self, message: str) -> ChatResponse:
+        pass
 
-    def __init__(self, user: User, conversation_history: List[ChatMessage] = None, model: str = "gpt-4o", temperature: float = 0.1):
-        self.user = user
+
+class LlamaIndexChatEngine(BaseChatEngine):
+    def __init__(
+        self,
+        user_id: int,
+        conversation_history: List[ChatMessage] = None,
+        model: str = "gpt-4o",
+        temperature: float = 0.1,
+    ):
+        self.vector_store = vector_store
+        self.user_id = user_id
         self.model = model
         self.temperature = temperature
-
-        self.vector_index = vector_store.get_index()
         self.conversation_engine = self._build_chat_context_engine(conversation_history)
 
-    def _build_chat_context_engine(self, conversation_history: List[ChatMessage]) -> CondensePlusContextChatEngine:
+    def query(self, message: str) -> ChatResponse:
+        return self.conversation_engine.chat(message)
+
+    def _build_chat_context_engine(
+        self, conversation_history: List[ChatMessage]
+    ) -> CondensePlusContextChatEngine:
         memory = ChatMemoryBuffer.from_defaults(
             token_limit=3900,
             chat_history=conversation_history,
         )
 
         chat_engine = CondensePlusContextChatEngine.from_defaults(
-            retriever=self.vector_index.as_retriever(),
+            retriever=self.vector_store.get_index().as_retriever(),
             memory=memory,
             filters=MetadataFilters(
                 filters=[
                     ExactMatchFilter(
                         key="user_id",
-                        value=self.user.id,
+                        value=self.user_id,
                     )
                 ]
             ),
         )
 
         return chat_engine
-
-    def query(self, message: str) -> ChatResponse:
-        return self.conversation_engine.chat(message)
