@@ -7,7 +7,7 @@ from django.db import models
 
 from core.models import TrackCreation
 from core.utils.models import model_save
-from knowledge_base.utils.document_ingestion import DocumentIngestionService
+from knowledge_base.services.document_ingestion import DocumentIngestionService
 
 
 def user_directory_path(instance, filename):
