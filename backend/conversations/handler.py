@@ -4,7 +4,7 @@ from typing import List
 from django.shortcuts import get_object_or_404
 from llama_index.core.base.llms.types import ChatResponse, ChatMessage, MessageRole
 
-from backend.conversations.exceptions import ChatEngineError, ConversationError, PersistenceError
+from conversations.exceptions import ChatEngineError, ConversationError, PersistenceError
 from conversations.engine import (
     LlamaIndexChatEngine,
 )

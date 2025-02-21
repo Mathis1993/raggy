@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from backend.knowledge_base.services.document_ingestion import (
+from knowledge_base.services.document_ingestion import (
     DocumentMetadataHandler,
     NodeProcessor,
 )
@@ -95,13 +95,11 @@ class Document(TrackCreation):
     def delete_and_digest(self) -> None:
         """Delete document and clean up related data"""
         from knowledge_base.services.document_ingestion import DocumentIngestionService
-        from knowledge_base.vector_store import VectorStore
         from knowledge_base.extractors import ExtractorRepository
 
         service = DocumentIngestionService(
             document=self,
             extractor_repository=ExtractorRepository(),
-            vector_store=VectorStore(),
             node_processor=NodeProcessor(chunk_size=512, chunk_overlap=50),
             metadata_updater=DocumentMetadataHandler(),
         )

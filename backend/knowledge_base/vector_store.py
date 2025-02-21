@@ -58,6 +58,7 @@ class RaggyVectorStore:
 
 # Create a singleton instance
 vector_store = RaggyVectorStore()
+vector_store.initialize_store(load_collection=True)
 
 
 def create_milvus_collection():

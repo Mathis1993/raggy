@@ -1,7 +1,7 @@
 import logging
 from celery import shared_task
 
-from backend.conversations.exceptions import ConversationError
+from conversations.exceptions import ConversationError
 from conversations.handler import ConversationHandler
 
 

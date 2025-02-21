@@ -17,6 +17,11 @@ Raggy is a sophisticated Retrieval-Augmented Generation (RAG) system built with 
 ```
 raggy/
 ├── backend/           # Django backend application
+│   ├── manage.py     # Django management script
+│   ├── backend/      # Django project configuration
+│   ├── conversations/ # Conversations app
+│   ├── knowledge_base/ # Knowledge base app
+│   └── ...           # Other Django apps
 ├── frontend/         # Frontend application
 ├── .docker/          # Docker volume mounts and configurations
 ├── concepts/         # Project documentation and concepts
@@ -79,6 +84,9 @@ raggy/
    MILVUS_HOST=localhost
    MILVUS_PORT=19530
    
+   # Python Path
+   PYTHONPATH=${PYTHONPATH}:${PWD}/backend
+   
    # Add other required environment variables
    ```
 
@@ -97,8 +105,21 @@ raggy/
 
 6. **Initialize the database**
    ```bash
-   uv run python manage.py migrate
-   uv run python manage.py createsuperuser
+   # Make sure you're in the backend directory
+   cd backend
+   
+   # Run migrations and create superuser
+   PYTHONPATH=${PWD} uv run python manage.py migrate
+   PYTHONPATH=${PWD} uv run python manage.py createsuperuser
+   ```
+
+7. **Run the development server**
+   ```bash
+   # Make sure you're in the backend directory
+   cd backend
+   
+   # Start the Django development server
+   PYTHONPATH=${PWD} uv run python manage.py runserver
    ```
 
 ## Development
@@ -151,3 +172,12 @@ raggy/
 - [ ] Configure Milvus user authentication
 - [ ] Add production deployment guide
 - [ ] Implement automated testing pipeline
+
+
+
+
+
+
+RUN COMMANDS
+python manage.py runserver
+❯ celery --app  core worker --loglevel=info --concurrency=1 --pool=solo --queues=celery

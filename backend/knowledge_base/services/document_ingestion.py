@@ -18,7 +18,9 @@ logger = logging.getLogger(__name__)
 class NodeProcessor:
     """Handles the processing of documents into nodes with embeddings"""
 
-    def __init__(self, chunk_size: int, chunk_overlap: int):
+    def __init__(
+        self, chunk_size: int = settings.CHUNK_SIZE, chunk_overlap: int = settings.CHUNK_OVERLAP
+    ):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
@@ -59,16 +61,15 @@ class DocumentIngestionService:
     def __init__(
         self,
         document,
-        extractor_repository: ExtractorRepository,
-        vector_store: RaggyVectorStore,
-        node_processor: NodeProcessor,
-        metadata_updater: DocumentMetadataHandler,
+        extractor_repository: ExtractorRepository = None,
+        node_processor: NodeProcessor = None,
+        metadata_updater: DocumentMetadataHandler = None,
     ):
         self.document = document
-        self.extractor_repository = extractor_repository
         self.vector_store = vector_store
-        self.node_processor = node_processor
-        self.metadata_updater = metadata_updater
+        self.extractor_repository = extractor_repository or ExtractorRepository()
+        self.node_processor = node_processor or NodeProcessor()
+        self.metadata_updater = metadata_updater or DocumentMetadataHandler()
 
     def ingest_document(self) -> None:
         """Orchestrates the ingestion of a document"""
@@ -103,5 +104,10 @@ class DocumentIngestionService:
 
     def digest_document(self) -> None:
         """Remove document nodes from vector store"""
-        self.vector_store.delete(self.document.pk)
-        logger.debug(f"Successfully deleted embedding with postgres_doc_id: {self.document.pk}")
+        try:
+            self.vector_store.store.delete(self.document.pk)
+            logger.debug(f"Successfully deleted embedding with postgres_doc_id: {self.document.pk}")
+        except Exception as e:
+            logger.error(
+                f"Failed to delete embedding with postgres_doc_id: {self.document.pk}: {e}"
+            )
