@@ -122,6 +122,81 @@ raggy/
    PYTHONPATH=${PWD} uv run python manage.py runserver
    ```
 
+## Running the Application
+
+Follow these steps to run all components of the application:
+
+1. **Start Docker Services**
+   ```bash
+   # Start all required services (PostgreSQL, Redis, Milvus, MinIO, etc.)
+   docker-compose up -d
+
+   # Verify services are running
+   docker-compose ps
+   ```
+
+2. **Start Django Backend Server**
+   ```bash
+   # Navigate to backend directory
+   cd backend
+
+   # Start Django development server
+   PYTHONPATH=${PWD} uv run python manage.py runserver
+   ```
+   The Django server will be available at http://localhost:8000
+
+3. **Start Celery Worker**
+   ```bash
+   # In a new terminal, navigate to backend directory
+   cd backend
+
+   # Start Celery worker
+   PYTHONPATH=${PWD} uv run celery --app core worker --loglevel=info --concurrency=1 --pool=solo --queues=celery
+   ```
+
+4. **Start Frontend Development Server**
+   ```bash
+   # In a new terminal, navigate to frontend directory
+   cd frontend
+
+   # Install dependencies (if not done already)
+   npm install
+
+   # Start development server
+   npm run dev
+   ```
+   The frontend will be available at http://localhost:3000
+
+5. **Access Milvus Attu UI**
+   - Open your browser and navigate to http://localhost:3000
+   - Default credentials:
+     - Username: root
+     - Password: milvus
+
+### Verifying the Setup
+
+1. **Check Backend Status**
+   - Visit http://localhost:8000/admin for Django admin interface
+   - Visit http://localhost:8000/api for API documentation
+
+2. **Monitor Celery Tasks**
+   - Check terminal running Celery for task logs
+   - Tasks status will be visible in the console
+
+3. **Vector Database Management**
+   - Use Attu UI at http://localhost:3000 to manage Milvus
+   - Monitor collections, partitions, and perform searches
+
+### Stopping the Application
+
+1. Stop the frontend development server with Ctrl+C
+2. Stop the Celery worker with Ctrl+C
+3. Stop the Django server with Ctrl+C
+4. Stop Docker services:
+   ```bash
+   docker-compose down
+   ```
+
 ## Development
 
 - The backend is built with Django 5.1 and uses Django REST Framework for API development
