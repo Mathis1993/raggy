@@ -30,8 +30,54 @@ class RaggyVectorStore:
         connections.connect(alias=self.CONNECTION_ALIAS, uri=self.uri)
         logger.info(f"Connected to Milvus server at {self.uri}")
 
+    def _create_collection_if_not_exists(self) -> None:
+        """Create Milvus collection with custom schema if it doesn't exist."""
+        if utility.has_collection(self.COLLECTION_NAME):
+            logger.info(f"Collection '{self.COLLECTION_NAME}' already exists.")
+            return
+
+        fields = [
+            FieldSchema(
+                name="id",
+                dtype=DataType.VARCHAR,
+                max_length=255,
+                is_primary=True,
+                auto_id=True,  # Let Milvus auto-generate a unique ID for each node
+            ),
+            FieldSchema(
+                name="postgres_doc_id", dtype=DataType.INT64
+            ),  # For filtering nodes by source document
+            FieldSchema(name="user_id", dtype=DataType.INT64),
+            FieldSchema(name="document_title", dtype=DataType.VARCHAR, max_length=1024),
+            FieldSchema(name="doc_id", dtype=DataType.VARCHAR, max_length=2048),
+            FieldSchema(
+                name=self.EMBEDDING_FIELD,
+                dtype=DataType.FLOAT_VECTOR,
+                dim=self.VECTOR_DIM,
+            ),
+        ]
+
+        schema = CollectionSchema(
+            fields=fields,
+            description=f"Collection for storing {self.COLLECTION_NAME} document embeddings and metadata",
+            enable_dynamic_field=True,
+        )
+
+        collection = Collection(name=self.COLLECTION_NAME, schema=schema)
+        logger.info(f"Collection '{self.COLLECTION_NAME}' created successfully.")
+
+        index_params = {
+            "index_type": "IVF_FLAT",
+            "metric_type": "L2",
+            "params": {"nlist": 128},
+        }
+        collection.create_index(field_name="embedding", index_params=index_params)
+        logger.info(f"Index for collection '{self.COLLECTION_NAME}' created successfully.")
+
     def initialize_store(self, load_collection: bool = False) -> MilvusVectorStore:
         """Initialize the Milvus vector store with automatic collection creation."""
+        self._create_collection_if_not_exists()
+
         self.store = MilvusVectorStore(
             uri=self.uri,
             collection_name=self.COLLECTION_NAME,
@@ -59,49 +105,3 @@ class RaggyVectorStore:
 # Create a singleton instance
 vector_store = RaggyVectorStore()
 vector_store.initialize_store(load_collection=True)
-
-
-def create_milvus_collection():
-    # Check if the collection already exists
-    if utility.has_collection(RaggyVectorStore.COLLECTION_NAME):
-        logger.info(f"Collection '{RaggyVectorStore.COLLECTION_NAME}' already exists.")
-        return
-
-    # Define the fields for the collection
-    fields = [
-        FieldSchema(
-            name=RaggyVectorStore.DOC_ID_FIELD, dtype=DataType.INT64, is_primary=True, auto_id=False
-        ),
-        FieldSchema(name="user_id", dtype=DataType.INT64),
-        FieldSchema(name="document_title", dtype=DataType.VARCHAR, max_length=1024),
-        FieldSchema(name="doc_id", dtype=DataType.VARCHAR, max_length=2048),
-        FieldSchema(name="id", dtype=DataType.VARCHAR, max_length=255),
-        FieldSchema(
-            name=RaggyVectorStore.EMBEDDING_FIELD,
-            dtype=DataType.FLOAT_VECTOR,
-            dim=RaggyVectorStore.VECTOR_DIM,
-        ),
-    ]
-
-    # Create the collection schema
-    schema = CollectionSchema(
-        fields=fields,
-        description=f"Collection for storing {RaggyVectorStore.COLLECTION_NAME} document embeddings and metadata",
-        enable_dynamic_field=True,
-    )
-
-    # Create the collection
-    collection = Collection(name=RaggyVectorStore.COLLECTION_NAME, schema=schema)
-
-    logger.info(f"Collection '{RaggyVectorStore.COLLECTION_NAME}' created successfully.")
-
-    # Create the index
-    index_params = {
-        # ToDo(ME-01.02.24): What is the best index type for us? https://milvus.io/docs/index.md
-        "index_type": "IVF_FLAT",
-        "metric_type": "L2",
-        "params": {"nlist": 128},
-    }
-    collection.create_index(field_name="embedding", index_params=index_params)
-
-    logger.info(f"Index for collection '{RaggyVectorStore.COLLECTION_NAME}' created successfully.")

@@ -4,39 +4,15 @@ from typing import List
 from django.conf import settings
 from llama_index.core import Document
 from llama_index.core.data_structs import Node
-from llama_index.core.extractors import TitleExtractor, KeywordExtractor
+from llama_index.core.extractors import TitleExtractor
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.openai import OpenAIEmbedding
 
 from knowledge_base.extractors import ExtractorRepository
-from knowledge_base.vector_store import RaggyVectorStore, vector_store
+from knowledge_base.vector_store import vector_store
 
 logger = logging.getLogger(__name__)
-
-
-class NodeProcessor:
-    """Handles the processing of documents into nodes with embeddings"""
-
-    def __init__(
-        self, chunk_size: int = settings.CHUNK_SIZE, chunk_overlap: int = settings.CHUNK_OVERLAP
-    ):
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
-
-    def process_document(self, document: Document, metadata: dict) -> List[Node]:
-        """Process a document into nodes with embeddings"""
-        document.metadata.update(metadata)
-
-        pipeline = IngestionPipeline(
-            transformations=[
-                SentenceSplitter(chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap),
-                TitleExtractor(),
-                KeywordExtractor(),
-                OpenAIEmbedding(),
-            ],
-        )
-        return pipeline.run(documents=[document])
 
 
 class DocumentMetadataHandler:
@@ -62,14 +38,16 @@ class DocumentIngestionService:
         self,
         document,
         extractor_repository: ExtractorRepository = None,
-        node_processor: NodeProcessor = None,
         metadata_updater: DocumentMetadataHandler = None,
+        chunk_size: int = settings.CHUNK_SIZE,
+        chunk_overlap: int = settings.CHUNK_OVERLAP,
     ):
         self.document = document
         self.vector_store = vector_store
         self.extractor_repository = extractor_repository or ExtractorRepository()
-        self.node_processor = node_processor or NodeProcessor()
         self.metadata_updater = metadata_updater or DocumentMetadataHandler()
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
 
     def ingest_document(self) -> None:
         """Orchestrates the ingestion of a document"""
@@ -94,12 +72,30 @@ class DocumentIngestionService:
     def _process_nodes(self, llama_document: Document) -> List[Node]:
         """Process document into nodes with embeddings"""
         metadata = {"user_id": self.document.user_id, "postgres_doc_id": self.document.id}
-        return self.node_processor.process_document(llama_document, metadata)
+        llama_document.metadata.update(metadata)
+
+        pipeline = IngestionPipeline(
+            transformations=[
+                SentenceSplitter(chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap),
+                TitleExtractor(),
+                # KeywordExtractor(),
+                OpenAIEmbedding(),
+            ],
+            # Remove vector_store from pipeline to handle storage separately
+        )
+        nodes = pipeline.run(documents=[llama_document])
+        logger.info(f"Created {len(nodes)} nodes from document {self.document.id}")
+        return nodes
 
     def _store_nodes(self, nodes: List[Node]) -> None:
         """Store nodes in vector store"""
         nodes_to_store = [n for n in nodes if n.embedding is not None]
-        logger.info(f"Storing {len(nodes_to_store)} nodes with embeddings.")
+        logger.info(
+            f"Storing {len(nodes_to_store)} nodes with embeddings for document {self.document.id}"
+        )
+        if not nodes_to_store:
+            logger.warning(f"No nodes with embeddings found for document {self.document.id}")
+            return
         self.vector_store.store.add(nodes_to_store)
 
     def digest_document(self) -> None:

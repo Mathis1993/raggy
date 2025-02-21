@@ -3,7 +3,7 @@ import logging
 from celery import shared_task
 from django.db import IntegrityError
 
-from knowledge_base.services.document_ingestion import DocumentIngestionService
+from knowledge_base.ingestion.service import DocumentIngestionService
 from knowledge_base.models import Document
 
 

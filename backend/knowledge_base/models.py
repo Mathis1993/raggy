@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-from typing import Union
-
 from django.conf import settings
 from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from knowledge_base.services.document_ingestion import (
-    DocumentMetadataHandler,
-    NodeProcessor,
-)
+from knowledge_base.ingestion.service import DocumentMetadataHandler
 from core.models import TrackCreation
 from core.utils.models import model_save
 
@@ -94,13 +89,12 @@ class Document(TrackCreation):
 
     def delete_and_digest(self) -> None:
         """Delete document and clean up related data"""
-        from knowledge_base.services.document_ingestion import DocumentIngestionService
+        from knowledge_base.ingestion.service import DocumentIngestionService
         from knowledge_base.extractors import ExtractorRepository
 
         service = DocumentIngestionService(
             document=self,
             extractor_repository=ExtractorRepository(),
-            node_processor=NodeProcessor(chunk_size=512, chunk_overlap=50),
             metadata_updater=DocumentMetadataHandler(),
         )
         service.digest_document()

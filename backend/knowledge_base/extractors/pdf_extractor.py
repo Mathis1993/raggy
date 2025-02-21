@@ -6,10 +6,10 @@ from .base import DocumentExtractor
 class PDFExtractor(DocumentExtractor):
     def extract(self, source: str) -> Document:
         PDFReader = download_loader("PDFReader")
-        loader = PDFReader()
-        documents = loader.load_data(file=Path(source))
+        reader = PDFReader(return_full_document=True)
+        documents = reader.load_data(file=Path(source))
+        print(len(documents))
 
         if not documents:
             raise ValueError(f"Content extraction from PDF {source} failed.")
-
         return documents[0]
