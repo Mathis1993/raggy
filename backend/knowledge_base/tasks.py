@@ -3,6 +3,7 @@ import logging
 from celery import shared_task
 from django.db import IntegrityError
 
+from backend.knowledge_base.services.document_ingestion import DocumentIngestionService
 from knowledge_base.models import Document
 
 
@@ -13,7 +14,8 @@ logger = logging.getLogger(__name__)
 def task_handle_document_ingestion(document_id: int) -> bool:
     document = Document.objects.get(id=document_id)
     try:
-        document.ingest()
+        service = DocumentIngestionService(document)
+        service.ingest_document()
     except IntegrityError as e:
         logger.error(f"Could not ingest document: {e}")
         document.mark_as_failed()

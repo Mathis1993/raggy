@@ -65,7 +65,6 @@ class MessageModelViewSet(ModelViewSet):
 class DocumentModelViewSet(ModelViewSet):
     model = Document
     parser_classes = (MultiPartParser, FormParser, JSONParser)
-    # Filtering and Search
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ["type"]
     search_fields = ["title", "identifier"]
@@ -74,8 +73,7 @@ class DocumentModelViewSet(ModelViewSet):
         super().__init__(**kwargs)
 
     def get_queryset(self):
-        documents = self.model.objects.filter(user=self.request.user).order_by("-created_at")
-        return documents
+        return self.model.objects.filter(user=self.request.user).order_by("-created_at")
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -104,22 +102,18 @@ class DocumentModelViewSet(ModelViewSet):
             return JsonResponse({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
 
         user_id = self.request.user.id
-        file_type = self.infer_file_type(file)
+        file_type = Document.infer_file_type(file)
+
         if document_name:
             file_extension = file.name.split(".")[-1]
             doc_name = document_name.replace(" ", "_")
             file.name = f"{doc_name}.{file_extension}"
-        document = Document.create_from_file(user_id=user_id, file=file, document_name=document_name, file_type=file_type)
+
+        document = Document.create_from_file(
+            user_id=user_id, file=file, document_name=document_name, file_type=file_type
+        )
         task_handle_document_ingestion.delay(document_id=document.id)
         return JsonResponse({"document": DocumentSerializer(document).data}, status=status.HTTP_201_CREATED)
-
-    @staticmethod
-    def infer_file_type(file: InMemoryUploadedFile) -> Document.Type:
-        if file.name.endswith(".pdf"):
-            return Document.Type.PDF
-        if file.name.endswith(".doc") or file.name.endswith(".docx"):
-            return Document.Type.WORD
-        return Document.Type.PLAIN_TEXT
 
     def destroy(self, request, *args, **kwargs):
         document = self.get_object()
