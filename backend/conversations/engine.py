@@ -7,7 +7,7 @@ from llama_index.core.chat_engine import CondensePlusContextChatEngine
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.vector_stores import ExactMatchFilter
 
-from knowledge_base.vector_store import get_index
+from knowledge_base.vector_store import vector_store
 
 User = get_user_model()
 
@@ -32,7 +32,7 @@ class ConversationEngine:
         self.model = model
         self.temperature = temperature
 
-        self.vector_index = get_index()
+        self.vector_index = vector_store.get_index()
         self.conversation_engine = self._build_chat_context_engine(conversation_history)
 
     def _build_chat_context_engine(self, conversation_history: List[ChatMessage]) -> CondensePlusContextChatEngine:

@@ -1143,6 +1143,19 @@ wheels = [
 ]
 
 [[package]]
+name = "llama-index-vector-stores-milvus"
+version = "0.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "llama-index-core" },
+    { name = "pymilvus" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4e/27/bee1d23b0f22c34cea3c586568794e1a80ce77e81a6f6b1ceb9163ed5dc8/llama_index_vector_stores_milvus-0.5.0.tar.gz", hash = "sha256:211deebd274a306b8a5bf4ad681c2d5a04160f32246c5cccd1ddedd58caddb56", size = 12644 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/28/29/df9a9490b06300faa52b3c8e9b5c54e39de58a0ebc4436cabfdf57f206cd/llama_index_vector_stores_milvus-0.5.0-py3-none-any.whl", hash = "sha256:fcedc2ccb47b525d953c33935b4b8af733c84fbb6257a89f0d23e44f583904d7", size = 13345 },
+]
+
+[[package]]
 name = "llama-parse"
 version = "0.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2017,6 +2030,7 @@ dependencies = [
     { name = "langchain" },
     { name = "llama-index" },
     { name = "llama-index-readers-web" },
+    { name = "llama-index-vector-stores-milvus" },
     { name = "openai" },
     { name = "psycopg2-binary" },
     { name = "pymilvus" },
@@ -2051,6 +2065,7 @@ requires-dist = [
     { name = "langchain", specifier = ">=0.3.19" },
     { name = "llama-index", specifier = ">=0.12.19" },
     { name = "llama-index-readers-web", specifier = ">=0.3.5" },
+    { name = "llama-index-vector-stores-milvus", specifier = ">=0.5.0" },
     { name = "openai", specifier = ">=1.63.2" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
     { name = "pymilvus", specifier = ">=2.5.4" },

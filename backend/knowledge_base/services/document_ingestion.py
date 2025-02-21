@@ -10,7 +10,7 @@ from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.openai import OpenAIEmbedding
 
 from knowledge_base.extractors import ExtractorRepository
-from knowledge_base.vector_store import VectorStore
+from knowledge_base.vector_store import RaggyVectorStore, vector_store
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class NodeProcessor:
 
 
 class DocumentMetadataHandler:
-    """Handles document metadata based on extracted nodes"""
+    """Handles updating document metadata based on extracted nodes"""
 
     @staticmethod
     def update(document, llama_document: Document, nodes: List[Node]) -> None:
@@ -60,7 +60,7 @@ class DocumentIngestionService:
         self,
         document,
         extractor_repository: ExtractorRepository,
-        vector_store: VectorStore,
+        vector_store: RaggyVectorStore,
         node_processor: NodeProcessor,
         metadata_updater: DocumentMetadataHandler,
     ):
@@ -99,7 +99,7 @@ class DocumentIngestionService:
         """Store nodes in vector store"""
         nodes_to_store = [n for n in nodes if n.embedding is not None]
         logger.info(f"Storing {len(nodes_to_store)} nodes with embeddings.")
-        self.vector_store.add(nodes_to_store)
+        self.vector_store.store.add(nodes_to_store)
 
     def digest_document(self) -> None:
         """Remove document nodes from vector store"""

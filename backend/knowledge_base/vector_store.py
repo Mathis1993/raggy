@@ -1,70 +1,98 @@
 import logging
+from typing import Optional
 
 from llama_index.core import StorageContext, VectorStoreIndex
 from llama_index.vector_stores.milvus import MilvusVectorStore
-from pymilvus import Collection, CollectionSchema, FieldSchema, DataType, connections, utility
+from pymilvus import Collection, CollectionSchema, DataType, FieldSchema, connections, utility
 
 from config import settings
 
 logger = logging.getLogger(__name__)
 
-COLLECTION = "raggy"
-VECTOR_DIM = 1536
-EMBEDDING_FIELD = "embedding"
-DOC_ID_FIELD = "postgres_doc_id"
-ALIAS = "default"
+class RaggyVectorStore:
+    """Handler for vector store operations using Milvus."""
 
+    COLLECTION_NAME = "raggy"
+    VECTOR_DIM = 1536
+    EMBEDDING_FIELD = "embedding"
+    DOC_ID_FIELD = "postgres_doc_id"
+    CONNECTION_ALIAS = "default"
 
-def initialize_milvus_store(uri: str, load_collection: bool = False):
-    # Connect to the Milvus server
-    connections.connect(alias=ALIAS, uri=uri)
+    def __init__(self, host: str = settings.MILVUS_HOST, port: str = settings.MILVUS_PORT):
+        """Initialize the vector store with connection details."""
+        self.uri = f"http://{host}:{port}"
+        self.store: Optional[MilvusVectorStore] = None
+        self.index: Optional[VectorStoreIndex] = None
+        self.connect()
 
-    create_milvus_collection()
+    def connect(self) -> None:
+        """Establish connection to Milvus server."""
+        connections.connect(alias=self.CONNECTION_ALIAS, uri=self.uri)
+        logger.info(f"Connected to Milvus server at {self.uri}")
 
-    # Llamaindex wrapper
-    milvus_store = MilvusVectorStore(
-        uri=uri,
-        collection_name=COLLECTION,
-        dim=VECTOR_DIM,
-        embedding_field=EMBEDDING_FIELD,
-        doc_id_field=DOC_ID_FIELD,
-    )
+    def initialize_store(self, load_collection: bool = False) -> MilvusVectorStore:
+        """Initialize the Milvus vector store with automatic collection creation."""
+        self.store = MilvusVectorStore(
+            uri=self.uri,
+            collection_name=self.COLLECTION_NAME,
+            dim=self.VECTOR_DIM,
+            embedding_field=self.EMBEDDING_FIELD,
+            doc_id_field=self.DOC_ID_FIELD,
+        )
 
-    # Ensure collection is loaded
-    if load_collection:
-        milvus_store._collection.load()
+        if load_collection and self.store._collection:
+            self.store._collection.load()
 
-    return milvus_store
+        return self.store
+
+    def get_index(self) -> VectorStoreIndex:
+        """Get or create the vector store index."""
+        if not self.store:
+            self.initialize_store(load_collection=True)
+
+        self.index = VectorStoreIndex.from_vector_store(
+            vector_store=self.store,
+            storage_context=StorageContext.from_defaults(vector_store=self.store),
+        )
+        return self.index
+
+# Create a singleton instance
+vector_store = RaggyVectorStore()
 
 
 def create_milvus_collection():
     # Check if the collection already exists
-    if utility.has_collection(COLLECTION):
-        logger.info(F"Collection '{COLLECTION}' already exists.")
+    if utility.has_collection(RaggyVectorStore.COLLECTION_NAME):
+        logger.info(f"Collection '{RaggyVectorStore.COLLECTION_NAME}' already exists.")
         return
 
     # Define the fields for the collection
     fields = [
-        FieldSchema(name=DOC_ID_FIELD, dtype=DataType.INT64, is_primary=True, auto_id=False),
+        FieldSchema(
+            name=RaggyVectorStore.DOC_ID_FIELD, dtype=DataType.INT64, is_primary=True, auto_id=False
+        ),
         FieldSchema(name="user_id", dtype=DataType.INT64),
         FieldSchema(name="document_title", dtype=DataType.VARCHAR, max_length=1024),
         FieldSchema(name="doc_id", dtype=DataType.VARCHAR, max_length=2048),
         FieldSchema(name="id", dtype=DataType.VARCHAR, max_length=255),
-
-        FieldSchema(name=EMBEDDING_FIELD, dtype=DataType.FLOAT_VECTOR, dim=VECTOR_DIM)
+        FieldSchema(
+            name=RaggyVectorStore.EMBEDDING_FIELD,
+            dtype=DataType.FLOAT_VECTOR,
+            dim=RaggyVectorStore.VECTOR_DIM,
+        ),
     ]
 
     # Create the collection schema
     schema = CollectionSchema(
         fields=fields,
-        description=f"Collection for storing {COLLECTION} document embeddings and metadata",
-        enable_dynamic_field=True
+        description=f"Collection for storing {RaggyVectorStore.COLLECTION_NAME} document embeddings and metadata",
+        enable_dynamic_field=True,
     )
 
     # Create the collection
-    collection = Collection(name=COLLECTION, schema=schema)
+    collection = Collection(name=RaggyVectorStore.COLLECTION_NAME, schema=schema)
 
-    logger.info(f"Collection '{COLLECTION}' created successfully.")
+    logger.info(f"Collection '{RaggyVectorStore.COLLECTION_NAME}' created successfully.")
 
     # Create the index
     index_params = {
@@ -75,15 +103,4 @@ def create_milvus_collection():
     }
     collection.create_index(field_name="embedding", index_params=index_params)
 
-    logger.info(f"Index for collection '{COLLECTION}' created successfully.")
-
-
-def get_index():
-    milvus_store = initialize_milvus_store(
-        uri=f"http://{settings.MILVUS_HOST}:{settings.MILVUS_PORT}",
-        load_collection=True
-    )
-    storage_context = StorageContext.from_defaults(vector_store=milvus_store)
-    return VectorStoreIndex.from_vector_store(
-        vector_store=milvus_store,
-    )
+    logger.info(f"Index for collection '{RaggyVectorStore.COLLECTION_NAME}' created successfully.")
