@@ -16,7 +16,8 @@
     } from 'flowbite-svelte';
     import {
         BarsSolid, 
-        HomeSolid,
+        ChervonDoubleLeftSolid,
+        ChervonDoubleRightSolid,
         MessagesOutline,
         BookOpenOutline,
         QuestionCircleOutline,
@@ -35,6 +36,7 @@
     let breakPoint: number = 1024;
     let width: number = typeof window !== 'undefined' ? window.innerWidth : 1024;
     let sidebarVisible: boolean = true;
+    let sidebarCollapsed: boolean = false;
     $: sidebarVisible = width >= breakPoint;
     $: activeUrl = $page.url.pathname;
 
@@ -52,6 +54,10 @@
         if (width < breakPoint) {
             sidebarVisible = !sidebarVisible;
         }
+    }
+
+    function toggleCollapse() {
+        sidebarCollapsed = !sidebarCollapsed;
     }
 
     async function handleLogout() {
@@ -124,60 +130,52 @@
 
 {#if sidebarVisible}
     <div id="sidebar"
-         class="flex flex-col overflow-hidden z-50 dark:bg-gray-800 w-72 fixed start-0 top-16 h-full bg-gray-800">
+         class="flex flex-col overflow-hidden z-50 dark:bg-gray-800 {sidebarCollapsed ? 'w-16' : 'w-72'} fixed start-0 top-16 h-[calc(100vh-4rem)] bg-gray-800 transition-all duration-300">
         <Sidebar class="w-full flex flex-col h-full">
             <SidebarWrapper class="bg-gray-800 p-0 flex flex-col h-full">
                 <SidebarGroup class="text-white flex-grow">
-                    <SidebarItem class="text-white hover:bg-gray-700" label="Dashboard" href="/"
-                                active={activeUrl === "/"}>
-                        <svelte:fragment slot="icon">
-                            <HomeSolid class="w-5 h-5"/>
-                        </svelte:fragment>
-                    </SidebarItem>
-                    
-                    <SidebarItem class="text-white hover:bg-gray-700" label="Chat" href="/conversations"
-                                active={activeUrl.includes("/conversations")}>
-                        <svelte:fragment slot="icon">
-                            <MessagesOutline class="w-5 h-5"/>
-                        </svelte:fragment>
+                    <SidebarItem class="text-gray-300 hover:bg-gray-700 px-3 py-3 my-1" href="/conversations"
+                                active={activeUrl.includes("/conversations")} label={sidebarCollapsed ? '' : 'Chat'}>
+                        <MessagesOutline class="w-6 h-6" slot="icon"/>
                     </SidebarItem>
 
-                    <SidebarItem class="text-white hover:bg-gray-700" label="Knowledge Base" href="/documents"
-                                active={activeUrl.includes("/documents")}>
-                        <svelte:fragment slot="icon">
-                            <BookOpenOutline class="w-5 h-5"/>
-                        </svelte:fragment>
+                    <SidebarItem class="text-gray-300 hover:bg-gray-700 px-3 py-3 my-1" href="/documents"
+                                active={activeUrl.includes("/documents")} label={sidebarCollapsed ? '' : 'Knowledge Base'}>
+                        <BookOpenOutline class="w-6 h-6" slot="icon"/>
                     </SidebarItem>
 
-                    <SidebarItem class="text-white hover:bg-gray-700" label="FAQ" href="/faq"
-                                active={activeUrl.includes("/faq")}>
-                        <svelte:fragment slot="icon">
-                            <QuestionCircleOutline class="w-5 h-5"/>
-                        </svelte:fragment>
+                    <SidebarItem class="text-gray-300 hover:bg-gray-700 px-3 py-3 my-1" href="/faq"
+                                active={activeUrl.includes("/faq")} label={sidebarCollapsed ? '' : 'FAQ'}>
+                        <QuestionCircleOutline class="w-6 h-6" slot="icon"/>
                     </SidebarItem>
 
-                    <SidebarItem class="text-white hover:bg-gray-700" label="Project Settings" href="/settings"
-                                active={activeUrl.includes("/settings")}>
-                        <svelte:fragment slot="icon">
-                            <AdjustmentsVerticalOutline class="w-5 h-5"/>
-                        </svelte:fragment>
+                    <SidebarItem class="text-gray-300 hover:bg-gray-700 px-3 py-3 my-1" href="/settings"
+                                active={activeUrl.includes("/settings")} label={sidebarCollapsed ? '' : 'Project Settings'}>
+                        <AdjustmentsVerticalOutline class="w-6 h-6" slot="icon"/>
                     </SidebarItem>
                 </SidebarGroup>
-
-                <SidebarGroup class="text-white mt-auto mb-4">
-                    <SidebarItem class="text-white hover:bg-gray-700" label="Logout" on:click={handleLogout}>
-                        <svelte:fragment slot="icon">
-                            <ArrowLeftToBracketOutline class="w-5 h-5"/>
-                        </svelte:fragment>
-                    </SidebarItem>
-                </SidebarGroup>
+                <div class="mt-auto">
+                    <div class="px-3 py-2">
+                        <Button
+                            class="w-full bg-gray-700 hover:bg-gray-600 flex justify-center"
+                            size="xs"
+                            on:click={toggleCollapse}
+                        >
+                            {#if sidebarCollapsed}
+                                <ChervonDoubleRightSolid class="w-4 h-4"/>
+                            {:else}
+                                <ChervonDoubleLeftSolid class="w-4 h-4"/>
+                            {/if}
+                        </Button>
+                    </div>
+                </div>
             </SidebarWrapper>
         </Sidebar>
     </div>
 {/if}
 
 <div class="flex mx-auto w-full pt-16 h-screen">
-    <main class="lg:ml-72 w-full mx-auto">
+    <main class="{sidebarVisible ? (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-72') : ''} w-full mx-auto transition-all duration-300">
         <slot/>
     </main>
     <ToastModal/>
