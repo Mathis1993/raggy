@@ -1,19 +1,26 @@
 <script lang="ts">
     import { Button, Textarea } from 'flowbite-svelte';
     import { PapperPlaneOutline } from 'flowbite-svelte-icons';
-    import { createConversation } from "./conversationService";
+    import { createConversationWithMessage } from "./conversationService";
     import { user } from '../../../stores/userStore';
     import ConversationHistory from '../../../components/ConversationHistory.svelte';
     
     let messageContent = '';
     let rows = 3; // Default to 3 rows
+    let isSubmitting = false;
     
     $: rows = Math.max(3, messageContent.split('\n').length);
     
     async function handleSubmit() {
-        if (!messageContent.trim()) return;
-        const conversation = await createConversation();
-        messageContent = '';
+        if (!messageContent.trim() || isSubmitting) return;
+        
+        try {
+            isSubmitting = true;
+            await createConversationWithMessage(messageContent);
+            messageContent = '';
+        } finally {
+            isSubmitting = false;
+        }
     }
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -48,7 +55,12 @@
                             on:keydown={handleKeyDown}
                         />
                         <div class="flex justify-end">
-                            <Button type="submit" color="blue" class="px-6">
+                            <Button 
+                                type="submit" 
+                                color="blue" 
+                                class="px-6" 
+                                disabled={!messageContent.trim() || isSubmitting}
+                            >
                                 <div class="flex items-center gap-2">
                                     <span>Start Conversation</span>
                                     <PapperPlaneOutline class="w-4 h-4 rotate-45"/>

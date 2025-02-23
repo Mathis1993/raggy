@@ -1,4 +1,4 @@
-type Conversation = {
+export type Conversation = {
     id: number;
     name: string;
     created_at: string;
@@ -6,7 +6,7 @@ type Conversation = {
     messages: Message[];
 }
 
-type Message = {
+export type Message = {
     id: number;
     text: string;
     created_at: string;
@@ -15,7 +15,13 @@ type Message = {
     sources: MessageSource[];
 }
 
-type MessageSource = {
+export type MessageSource = {
     document: ContextDocument;
     excerpt: string;
+}
+
+export type ContextDocument = {
+    id: number;
+    title: string;
+    type: string;
 }

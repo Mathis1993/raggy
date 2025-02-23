@@ -127,3 +127,35 @@ export async function deleteConversation(conversationId: number) {
   // invalidate page data of layout.svelte
   await invalidateAll();
 }
+
+export async function createConversationWithMessage(messageText: string) {
+  try {
+    const response = await fetchFromBackend(
+      CONVERSATION_API_URL,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      },
+    );
+
+    if (!response.ok) {
+      console.error("Failed to create conversation");
+      return;
+    }
+
+    const conversation = await response.json();
+
+    // Send the initial message
+    await createMessage(messageText, conversation);
+
+    // Navigate to the new conversation
+    await goto(`/conversations/${conversation.id}`, { replaceState: true });
+
+    return conversation;
+  } catch (error) {
+    console.error("Failed to create conversation with message", error);
+  }
+}

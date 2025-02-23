@@ -7,51 +7,61 @@
     import {goto, invalidateAll} from "$app/navigation";
     import {PapperPlaneOutline} from "flowbite-svelte-icons";
     import {page} from "$app/stores";
+    import type { MessageSource, Conversation, Message } from '../../../../types/conversation.js';
+    import SourceLane from '../../../../components/SourceLane.svelte';
+    import { slide } from 'svelte/transition';
 
     $: conversation = $page.data.conversation;
-    $: messages = $page.data.messages.results;
+    $: messages = conversation?.messages || [];
     $: hasMore = $page.data.next !== null;
     $: currentPage = $page.data.page || 1;
 
     let messageContent = '';
-    let chatContainer: HTMLDivElement;
     let rows = 1;
     let refreshIntervalId: number;
+    let selectedSource: MessageSource | null = null;
+    let isSourceLaneOpen = false;
+    let sourceLaneWidth = 384;
+
+    // Update CSS variable when width changes
+    $: if (typeof document !== 'undefined') {
+        document.documentElement.style.setProperty('--source-lane-width', `${sourceLaneWidth}px`);
+    }
 
     $: rows = Math.max(1, messageContent.split('\n').length);
 
-    onMount(async () => {
+    let messageContainer: HTMLDivElement;
+
+    onMount(() => {
         scrollToBottom();
-        chatContainer.addEventListener('scroll', handleScroll);
+        messageContainer?.addEventListener('scroll', handleScroll);
         refreshIntervalId = setInterval(refreshDocuments, 5000);
     });
 
     onDestroy(() => {
-        clearInterval(refreshIntervalId);
-        chatContainer.removeEventListener('scroll', handleScroll);
+        if (refreshIntervalId) {
+            clearInterval(refreshIntervalId);
+        }
+        messageContainer?.removeEventListener('scroll', handleScroll);
     });
 
     function handleKeyDown(event: KeyboardEvent) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
-            sendMessage();
+            handleSubmit();
         }
     }
 
-    async function sendMessage() {
-        let message: string = messageContent;
-        messageContent = '';  // clear the input field
-        let updatedConversation: Conversation = await createMessage(message, conversation);
-        conversation = updatedConversation
-        messages = updatedConversation.messages
-        await tick(); // wait for the new message to be rendered
-        scrollToBottom(); // scroll to the bottom
-        await invalidateAll();
-        await refreshDocuments(); // start the refresh logic
+    async function handleSubmit() {
+        if (!messageContent.trim()) return;
+        await createMessage(messageContent, conversation);
+        messageContent = '';
     }
 
     function scrollToBottom() {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        if (messageContainer) {
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
     }
 
     async function refreshDocuments() {
@@ -64,80 +74,106 @@
     }
 
     function handleScroll() {
-        if (chatContainer.scrollTop === 0) { // if the scroll position is at the top
+        if (messageContainer?.scrollTop === 0) { // if the scroll position is at the top
             loadMoreMessages(); // load more messages
         }
     }
 
     async function loadMoreMessages() {
+        if (!messageContainer) return;
+        
         currentPage++;
         // Compute scroll position before loading more messages
-        const oldScrollHeight = chatContainer.scrollHeight; // get the old scroll height
-        const oldScrollTop = chatContainer.scrollTop; // get the old scroll position
+        const oldScrollHeight = messageContainer.scrollHeight;
+        const oldScrollTop = messageContainer.scrollTop;
 
         const newMessages = await getMessages(conversation.id, currentPage);
         messages = [...newMessages.results, ...messages];
 
         await tick(); // wait for the new messages to be rendered
-        const newScrollHeight = chatContainer.scrollHeight; // get the new scroll height
-        chatContainer.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight); // adjust the scroll position
+        const newScrollHeight = messageContainer.scrollHeight;
+        messageContainer.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
     }
 
+    function handleSourceClick(source: MessageSource) {
+        selectedSource = source;
+        isSourceLaneOpen = true;
+    }
+
+    function closeSourceLane() {
+        isSourceLaneOpen = false;
+        selectedSource = null;
+    }
 </script>
 
-<div class="flex h-[calc(100vh-4rem)] relative bg-gray-50 dark:bg-gray-900 overflow-hidden">
-    <!-- Main Chat Container -->
-    <div class="flex-1 flex justify-center w-full content-wrapper">
-        <!-- Main Chat Area with max width and padding -->
-        <div class="flex flex-col h-full w-full max-w-4xl px-6">
-            <!-- Chat Header -->
-            <div class="flex justify-between items-center py-6 border-b dark:border-gray-700">
-                <h5 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <span>{conversation.name || "New Conversation"}</span>
-                    {#if conversation.status === 'RUNNING'}
-                        <Spinner size="4" class="ml-2"/>
-                    {/if}
-                </h5>
-                <button on:click={() => deleteConversation(conversation.id)} 
-                        class="text-gray-500 hover:text-red-600 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" class="h-5 w-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Chat Messages -->
-            <div class="flex-1 overflow-y-auto py-6 space-y-6" bind:this={chatContainer}>
-                <div class="space-y-6">
-                    {#each messages as message}
-                        <ChatBubble {message}/>
-                    {/each}
-                </div>
-            </div>
-
-            <!-- Chat Input -->
-            <div class="border-t dark:border-gray-700 py-6">
-                <form on:submit|preventDefault={() => sendMessage()} class="flex gap-3">
-                    <div class="flex-1 relative">
-                        <Textarea
-                            id="message"
-                            class="w-full resize-none rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3"
-                            {rows}
-                            placeholder="Type your message..."
-                            bind:value={messageContent}
-                            on:keydown={handleKeyDown}
-                        />
+<div class="flex h-[calc(100vh-4rem)] relative bg-gray-50 dark:bg-gray-900">
+    <div class="flex-1 flex overflow-hidden">
+        <div class="flex-1 flex justify-center">
+            <div 
+                class="w-full max-w-3xl flex flex-col relative px-4" 
+                style="
+                    margin-right: {isSourceLaneOpen ? 'var(--source-lane-width, 384px)' : 'auto'}; 
+                    margin-left: {isSourceLaneOpen ? '0' : 'auto'};
+                    transition: margin 300ms ease-in-out;
+                "
+            >
+                <div class="flex-1 overflow-y-auto py-4" bind:this={messageContainer}>
+                    <div class="space-y-4">
+                        {#each messages as message}
+                            <ChatBubble 
+                                {message} 
+                                onSourceClick={handleSourceClick}
+                            />
+                        {/each}
                     </div>
-                    <Button type="submit" color="blue" class="px-4 self-end">
-                        <PapperPlaneOutline class="w-5 h-5 rotate-45"/>
-                        <span class="sr-only">Send message</span>
-                    </Button>
-                </form>
+                </div>
+
+                <div class="sticky bottom-0 bg-gray-50 dark:bg-gray-900 py-4">
+                    <form on:submit|preventDefault={handleSubmit} class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4">
+                        <div class="flex items-stretch gap-4">
+                            <div class="flex-1">
+                                <Textarea
+                                    id="message"
+                                    class="w-full resize-none rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5"
+                                    rows={rows}
+                                    maxRows={10}
+                                    placeholder="Type your message..."
+                                    bind:value={messageContent}
+                                    on:keydown={handleKeyDown}
+                                />
+                            </div>
+                            <div class="flex">
+                                <Button type="submit" color="blue" class="px-6 !h-[42px]" disabled={!messageContent.trim()}>
+                                    <PapperPlaneOutline class="w-4 h-4 rotate-45"/>
+                                </Button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
     <ConversationHistory currentConversationId={conversation.id} />
+
+    {#if isSourceLaneOpen}
+        <div class="fixed right-0 h-[calc(100vh-4rem)]" transition:slide|local={{ duration: 300, axis: 'x' }}>
+            <SourceLane
+                {selectedSource}
+                onClose={closeSourceLane}
+                bind:width={sourceLaneWidth}
+            />
+        </div>
+    {/if}
 </div>
+
+<style>
+    :root {
+        --source-lane-width: 384px;
+    }
+
+    :global(textarea) {
+        min-height: 44px;
+        max-height: 300px;
+    }
+</style>
