@@ -9,12 +9,17 @@
     import {page} from "$app/stores";
     import type { MessageSource, Conversation, Message } from '../../../../types/conversation.js';
     import SourceLane from '../../../../components/SourceLane.svelte';
+    import TypingIndicator from '../../../../components/TypingIndicator.svelte';
     import { slide } from 'svelte/transition';
 
     $: conversation = $page.data.conversation;
     $: messages = conversation?.messages || [];
     $: hasMore = $page.data.next !== null;
     $: currentPage = $page.data.page || 1;
+    $: isTyping = conversation?.status === 'RUNNING';
+    $: if (isTyping) {
+        tick().then(() => scrollToBottom());
+    }
 
     let messageContent = '';
     let rows = 1;
@@ -54,8 +59,16 @@
 
     async function handleSubmit() {
         if (!messageContent.trim()) return;
-        await createMessage(messageContent, conversation);
+        const currentMessage = messageContent;
         messageContent = '';
+        
+        const response = await createMessage(currentMessage, conversation);
+        if (response) {
+            conversation = response;
+            messages = response.messages;
+            await tick();
+            scrollToBottom();
+        }
     }
 
     function scrollToBottom() {
@@ -125,6 +138,11 @@
                                 onSourceClick={handleSourceClick}
                             />
                         {/each}
+                        {#if isTyping}
+                            <div transition:slide|local={{ duration: 200 }}>
+                                <TypingIndicator />
+                            </div>
+                        {/if}
                     </div>
                 </div>
 
