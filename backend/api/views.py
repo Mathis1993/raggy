@@ -45,7 +45,7 @@ class MessageModelViewSet(ModelViewSet):
     def get_queryset(self):
         conversation_id = self.kwargs["conversation_id"]
         conversation = get_object_or_404(Conversation, id=conversation_id, user=self.request.user)
-        return conversation.messages.all()
+        return conversation.messages.all().order_by("-created_at")
 
     def create(self, request, *args, **kwargs):
         data = request.data

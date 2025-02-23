@@ -98,13 +98,16 @@
     async function loadMoreMessages() {
         if (!messageContainer) return;
         
+        const newMessages = await getMessages(conversation.id, currentPage + 1);
+        if (!newMessages.next) return; // If there are no more pages, don't load or update anything
+        
         currentPage++;
         // Compute scroll position before loading more messages
         const oldScrollHeight = messageContainer.scrollHeight;
         const oldScrollTop = messageContainer.scrollTop;
 
-        const newMessages = await getMessages(conversation.id, currentPage);
-        messages = [...newMessages.results, ...messages];
+        // Since messages are ordered by -created_at (newest first), we need to append them at the beginning
+        messages = [...messages, ...newMessages.results];
 
         await tick(); // wait for the new messages to be rendered
         const newScrollHeight = messageContainer.scrollHeight;
