@@ -33,7 +33,7 @@
 
     async function navigateToConversation(id: number) {
         drawerHidden = true; // Close the drawer when selecting a conversation
-        await goto(`/conversations/${id}`);
+        await goto(`/conversations/${id}?fromHistory=true`);
     }
 
     // Load history when component mounts

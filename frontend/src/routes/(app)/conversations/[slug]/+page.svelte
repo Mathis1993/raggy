@@ -1,23 +1,25 @@
 <script lang="ts">
-    import {Alert, Button, Card, Spinner, Textarea, ToolbarButton} from "flowbite-svelte";
+    import {Button, Textarea} from "flowbite-svelte";
     import ChatBubble from "../../../../components/ChatBubble.svelte";
     import ConversationHistory from "../../../../components/ConversationHistory.svelte";
     import {onDestroy, onMount, tick} from "svelte";
-    import {createMessage, deleteConversation, getMessages, retrieveConversation} from "../conversationService";
-    import {goto, invalidateAll} from "$app/navigation";
-    import {PapperPlaneOutline} from "flowbite-svelte-icons";
+    import {createMessage, getMessages, retrieveConversation, deleteConversation} from "../conversationService";
+    import {PapperPlaneOutline, TrashBinOutline} from "flowbite-svelte-icons";
     import {page} from "$app/stores";
-    import type { MessageSource, Conversation, Message } from '../../../../types/conversation.js';
+    import type { MessageSource } from '../../../../types/conversation.js';
     import SourceLane from '../../../../components/SourceLane.svelte';
     import TypingIndicator from '../../../../components/TypingIndicator.svelte';
     import { slide } from 'svelte/transition';
 
     $: conversation = $page.data.conversation;
     $: messages = conversation?.messages || [];
-    $: hasMore = $page.data.next !== null;
     $: currentPage = $page.data.page || 1;
     $: isTyping = conversation?.status === 'RUNNING';
     $: if (isTyping) {
+        tick().then(() => scrollToBottom());
+    }
+    // Scroll to bottom when navigating from history
+    $: if ($page.data.fromHistory) {
         tick().then(() => scrollToBottom());
     }
 
@@ -37,7 +39,8 @@
 
     let messageContainer: HTMLDivElement;
 
-    onMount(() => {
+    onMount(async () => {
+        await tick(); // Wait for initial render
         scrollToBottom();
         messageContainer?.addEventListener('scroll', handleScroll);
         refreshIntervalId = setInterval(refreshDocuments, 5000);
@@ -117,6 +120,12 @@
         isSourceLaneOpen = false;
         selectedSource = null;
     }
+
+    async function handleDelete() {
+        if (confirm('Are you sure you want to delete this conversation?')) {
+            await deleteConversation(conversation.id);
+        }
+    }
 </script>
 
 <div class="flex h-[calc(100vh-4rem)] relative bg-gray-50 dark:bg-gray-900">
@@ -130,6 +139,17 @@
                     transition: margin 300ms ease-in-out;
                 "
             >
+                <div class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-xl font-semibold text-gray-900 dark:text-white truncate">
+                            {conversation?.name || 'Untitled Chat'}
+                        </h1>
+                        <Button color="light" class="!p-2" on:click={handleDelete}>
+                            <TrashBinOutline class="w-4 h-4 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"/>
+                        </Button>
+                    </div>
+                </div>
+
                 <div class="flex-1 overflow-y-auto py-4" bind:this={messageContainer}>
                     <div class="space-y-4">
                         {#each messages as message}
