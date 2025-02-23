@@ -1,5 +1,6 @@
 import { goto, invalidateAll } from "$app/navigation";
 import { fetchFromBackend } from "$lib/fetch";
+import type { Conversation } from "../../../types/conversation";
 
 const CONVERSATION_API_URL = "http://127.0.0.1:8000/api/conversations/";
 

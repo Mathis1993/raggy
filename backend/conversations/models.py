@@ -90,17 +90,17 @@ class Message(TrackCreationAndUpdates):
     def add_sources(self, source_nodes: List[ToolOutput]):
         source_document_ids = [source.metadata.get("postgres_doc_id", None) for source in source_nodes]
         source_documents = Document.objects.filter(id__in=set(list(source_document_ids)))
-        source_node_texts = [source.text for source in source_nodes]
-        MessageSourceDocument.create_from_multiple_documents(self, source_documents, excerpts=source_node_texts)
+        MessageSourceDocument.create_from_multiple_documents(
+            self, source_documents, source_nodes=source_nodes
+        )
 
 
 class MessageSourceDocument(TrackCreationAndUpdates):
     message = models.ForeignKey(Message, on_delete=models.CASCADE)
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
 
-    # TODO: lets replace this with just the start and end position of the excerpt, then we can get
-    # the excerpt from the document content and do not store additional data
-    excerpt = models.TextField(default=None, null=True, blank=True)
+    start_char_idx = models.IntegerField(default=0)
+    end_char_idx = models.IntegerField(default=0)
 
     class Meta:
         db_table = "conversations_message_source_document"
@@ -109,10 +109,13 @@ class MessageSourceDocument(TrackCreationAndUpdates):
         return f"{self.message} - {self.document}"
 
     @classmethod
-    def create_from_multiple_documents(cls, message: Message, documents: List[Document], excerpts: List[str]):
-        for document, node_excerpt in zip(documents, excerpts):
+    def create_from_multiple_documents(
+        cls, message: Message, documents: List[Document], source_nodes: List[ToolOutput]
+    ):
+        for document, source_node in zip(documents, source_nodes):
             cls.objects.create(
                 message=message,
                 document=document,
-                excerpt=node_excerpt
+                start_char_idx=source_node.node.start_char_idx,
+                end_char_idx=source_node.node.end_char_idx,
             )

@@ -18,11 +18,37 @@ class DocumentDetailSerializer(serializers.ModelSerializer):
 
 class MessageSourceDocumentSerializer(serializers.ModelSerializer):
     document = DocumentSerializer(read_only=True)
-    excerpt = serializers.CharField(read_only=True)
+    content = serializers.SerializerMethodField()
+    highlighted_content = serializers.SerializerMethodField()
+
+    CONTEXT_CHARS = 100  # Number of characters to include before and after the excerpt
+
+    def get_content(self, obj):
+        """Get the full content with context"""
+        doc_content = obj.document.content
+        if not doc_content:
+            return ""
+
+        start = max(0, obj.start_char_idx - self.CONTEXT_CHARS)
+        end = min(len(doc_content), obj.end_char_idx + self.CONTEXT_CHARS)
+
+        return doc_content[start:end]
+
+    def get_highlighted_content(self, obj):
+        """Get information about which part should be highlighted"""
+        if not obj.document.content:
+            return {"start": 0, "end": 0}
+
+        # Adjust highlight positions relative to the context window
+        context_start = max(0, obj.start_char_idx - self.CONTEXT_CHARS)
+        highlight_start = obj.start_char_idx - context_start
+        highlight_end = obj.end_char_idx - context_start
+
+        return {"start": highlight_start, "end": highlight_end}
 
     class Meta:
         model = MessageSourceDocument
-        fields = ["document", "excerpt"]
+        fields = ["document", "content", "highlighted_content"]
 
 
 class MessageSerializer(serializers.ModelSerializer):

@@ -1,3 +1,5 @@
+import type { Message } from "postcss";
+import type { Conversation } from "../../../../types/conversation";
 import { getMessages, retrieveConversation } from "../conversationService";
 
 export const ssr = false;

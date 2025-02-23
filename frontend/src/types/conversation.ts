@@ -17,7 +17,11 @@ export type Message = {
 
 export type MessageSource = {
     document: ContextDocument;
-    excerpt: string;
+    content: string;
+    highlighted_content: {
+        start: number;
+        end: number;
+    };
 }
 
 export type ContextDocument = {

@@ -69,7 +69,18 @@
         <div class="flex-1 p-4 overflow-y-auto">
             <div class="prose dark:prose-invert max-w-none">
                 <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                    <p class="text-gray-700 dark:text-gray-300">{selectedSource.excerpt}</p>
+                    <p class="text-gray-700 dark:text-gray-300">
+                        {#if selectedSource.content}
+                            {@html selectedSource.content.slice(0, selectedSource.highlighted_content.start)}
+                            <span class="bg-yellow-100 dark:bg-yellow-900">
+                                {@html selectedSource.content.slice(
+                                    selectedSource.highlighted_content.start,
+                                    selectedSource.highlighted_content.end
+                                )}
+                            </span>
+                            {@html selectedSource.content.slice(selectedSource.highlighted_content.end)}
+                        {/if}
+                    </p>
                 </div>
                 
                 {#if selectedSource.document}
