@@ -63,7 +63,7 @@ raggy/
 │   │   ├── stores/           # State management
 │   │   └── types/            # TypeScript type definitions
 │   └── package.json          # Frontend dependencies
-├── docker-compose.yml         # Docker services configuration
+├── compose.yml         # Docker services configuration
 ├── pyproject.toml            # Python dependencies
 └── README.md                 # This file
 ```
@@ -135,9 +135,6 @@ MILVUS_PORT=19530
 
 # OpenAI (for embeddings and chat)
 OPENAI_API_KEY=your_openai_api_key_here
-
-# Python Path
-PYTHONPATH=${PYTHONPATH}:${PWD}/backend
 ```
 
 ### 4. Setup Python Environment
@@ -157,10 +154,10 @@ source .venv/bin/activate  # On Unix/macOS
 
 ```bash
 # Start all required services
-docker-compose up -d
+docker compose up -d
 
 # Verify services are running
-docker-compose ps
+docker compose ps
 ```
 
 This starts:
@@ -177,10 +174,10 @@ This starts:
 cd backend
 
 # Run migrations
-PYTHONPATH=${PWD} uv run python manage.py migrate
+uv run python manage.py migrate
 
 # Create superuser
-PYTHONPATH=${PWD} uv run python manage.py createsuperuser
+uv run python manage.py createsuperuser
 ```
 
 ### 7. Start Backend Services
@@ -188,11 +185,11 @@ PYTHONPATH=${PWD} uv run python manage.py createsuperuser
 ```bash
 # Terminal 1: Start Django server
 cd backend
-PYTHONPATH=${PWD} uv run python manage.py runserver
+uv run python manage.py runserver
 
 # Terminal 2: Start Celery worker
 cd backend
-PYTHONPATH=${PWD} uv run celery --app core worker --loglevel=info --concurrency=1 --pool=solo --queues=celery
+uv run celery --app core worker --loglevel=info --concurrency=1 --pool=solo --queues=celery
 ```
 
 ### 8. Start Frontend
@@ -224,33 +221,11 @@ cd frontend
 npm install <package-name>
 ```
 
-### Running Tests
-
-```bash
-# Backend tests
-cd backend
-PYTHONPATH=${PWD} uv run python manage.py test
-
-# Frontend tests
-cd frontend
-npm run test
-```
-
-### Code Quality
-
-```bash
-# Frontend linting and formatting
-cd frontend
-npm run lint
-npm run format
-```
-
 ## 📚 Learning Resources
 
 ### RAG and Vector Databases
 - [LlamaIndex Documentation](https://docs.llamaindex.ai/)
 - [Milvus Documentation](https://milvus.io/docs/)
-- [Vector Database Concepts](https://milvus.io/docs/vector_database.md)
 
 ### Frontend Development
 - [SvelteKit Documentation](https://kit.svelte.dev/)
@@ -262,18 +237,18 @@ npm run format
 
 1. **Port Conflicts**: If you get port conflicts, check if services are already running:
    ```bash
-   docker-compose down
-   docker-compose up -d
+   docker compose down
+   docker compose up -d
    ```
 
 2. **Milvus Connection Issues**: Ensure Milvus is fully started:
    ```bash
-   docker-compose logs standalone
+   docker compose logs standalone
    ```
 
 3. **Python Path Issues**: Always use the correct PYTHONPATH:
    ```bash
-   PYTHONPATH=${PWD} uv run python manage.py <command>
+   uv run python manage.py <command>
    ```
 
 ### Stopping Services
@@ -281,5 +256,5 @@ npm run format
 ```bash
 # Stop frontend and backend servers (Ctrl+C)
 # Stop Docker services
-docker-compose down
+docker compose down
 ```
