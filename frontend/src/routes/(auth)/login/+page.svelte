@@ -19,7 +19,7 @@
         try {
             await login(email, password);
             addToast('You have been logged in.', 'success')
-            await goto('/');
+            await goto('/conversations');
         } catch (error) {
             addToast('An error occurred during login.', 'error')
             loginError.set(error.message || 'An error occurred during login.');

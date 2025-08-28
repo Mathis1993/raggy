@@ -104,7 +104,7 @@
                     <BarsSolid class="w-4 h-4"/>
                 </Button>
             {/if}
-            <NavBrand href="/" class="text-gray-50 flex items-center">
+            <NavBrand href="/conversations" class="text-gray-50 flex items-center">
                 <svg class="w-8 h-8 mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                      fill="none" viewBox="0 0 24 24">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -142,11 +142,6 @@
                     <SidebarItem class="text-gray-300 hover:bg-gray-700 px-3 py-3 my-1" href="/documents"
                                 active={activeUrl.includes("/documents")} label={sidebarCollapsed ? '' : 'Knowledge Base'}>
                         <BookOpenOutline class="w-6 h-6" slot="icon"/>
-                    </SidebarItem>
-
-                    <SidebarItem class="text-gray-300 hover:bg-gray-700 px-3 py-3 my-1" href="/faq"
-                                active={activeUrl.includes("/faq")} label={sidebarCollapsed ? '' : 'FAQ'}>
-                        <QuestionCircleOutline class="w-6 h-6" slot="icon"/>
                     </SidebarItem>
 
                     <SidebarItem class="text-gray-300 hover:bg-gray-700 px-3 py-3 my-1" href="/settings"
