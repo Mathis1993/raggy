@@ -1,11 +1,13 @@
 from pathlib import Path
-from llama_index.core import Document, download_loader
+
+from llama_index.core import Document
+from llama_index.readers.file import PDFReader
+
 from .base import DocumentExtractor
 
 
 class PDFExtractor(DocumentExtractor):
     def extract(self, source: str) -> Document:
-        PDFReader = download_loader("PDFReader")
         reader = PDFReader(return_full_document=True)
         documents = reader.load_data(file=Path(source))
 
