@@ -120,7 +120,7 @@ brew install uv
 
 ### 3. Configure Environment
 
-Copy the `.env-sample` as `.env` and enter your secrets (e.g. an OpenAI API key and a Sendgrid API key for email verification) inside the backend directory.
+Copy the `.env-sample` as `.env` and enter your secrets (particularly an OpenAI API key, a Sendgrid API key for email communication is optional) inside the backend directory.
 
 
 ### 4. Setup Python Environment
@@ -189,10 +189,10 @@ npm run dev
 
 ## 🌐 Access Points
 
-- **Frontend Application**: http://localhost:5173 (Svelte dev server)
-- **Django Admin**: http://localhost:8000/admin
-- **Django API**: http://localhost:8000/api
-- **Milvus Attu UI**: http://localhost:3000 (Username: `root`, Password: `milvus`)
+- **Frontend Application**: http://127.0.0.1:5173 (Svelte dev server)
+- **Django Admin**: http://127.0.0.1:8000/admin
+- **Django API**: http://127.0.0.1:8000/api
+- **Milvus Attu UI**: http://127.0.0.1:3000 (Username: `root`, Password: `milvus`)
 
 ## 🔧 Development Workflow
 
