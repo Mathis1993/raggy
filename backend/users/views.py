@@ -31,11 +31,11 @@ class LoginView(View):
         password = request.POST.get("password")
         user = authenticate(request, email=email, password=password)
         if user is not None:
-            if not user.email_verified:
-                return JsonResponse(
-                    data={"message": "Please verify your email address before logging in."},
-                    status=http.HTTPStatus.FORBIDDEN
-                )
+            # if not user.email_verified:
+            #     return JsonResponse(
+            #         data={"message": "Please verify your email address before logging in."},
+            #         status=http.HTTPStatus.FORBIDDEN
+            #     )
             login(request, user)
             return JsonResponse({"message": "Login successful"})
         else:
