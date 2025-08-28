@@ -1,258 +1,283 @@
-# Raggy - Advanced RAG System with Django and Milvus
+# Raggy - Learning RAG System with LlamaIndex and Milvus
 
-Raggy is a sophisticated Retrieval-Augmented Generation (RAG) system built with Django and Milvus vector database. It provides a scalable and efficient solution for document processing, embedding generation, and intelligent information retrieval.
+**Raggy** is a **learning-focused** Retrieval-Augmented Generation (RAG) system built to understand the fundamentals of modern AI applications. This side project was created to practice and explore:
 
-## Features
+- **RAG Architecture**: How retrieval-augmented generation works in practice
+- **Vector Databases**: Using Milvus for efficient similarity search and storage
+- **Embeddings**: Understanding how documents are chunked, embedded, and retrieved
+- **Frontend Development**: Learning Svelte as a modern frontend framework
+- **Source Attribution**: Implementing proper quote extraction and source linking
 
-- Document processing and embedding generation
-- Vector similarity search using Milvus
-- RESTful API using Django REST Framework
-- Asynchronous task processing with Celery
-- Caching with Redis
-- Modern frontend interface
-- Docker-based deployment
+> **Note**: This is a **learning project**, not production-ready software. The focus is on understanding RAG concepts, embeddings, and vector search rather than building a polished application.
 
-## Project Structure
+## 🎯 Project Goals
+
+- **Educational**: Deep dive into RAG systems, vector databases, and embeddings
+- **Hands-on Learning**: Practical experience with LlamaIndex, Milvus, and Svelte
+- **Concept Understanding**: Learn how source attribution and quote extraction work
+- **Modern Stack**: Explore contemporary AI development tools and practices
+
+## ✨ Features
+
+### Core RAG Functionality
+- **Document Processing**: Upload and process various document types (PDF, Word, text, websites)
+- **Intelligent Chunking**: Smart document splitting with configurable chunk sizes and overlap
+- **Embedding Generation**: Create vector embeddings using sentence-transformers
+- **Vector Search**: Efficient similarity search using Milvus vector database
+- **Context Retrieval**: Retrieve relevant document chunks for question answering
+
+### Conversation & Chat
+- **Conversation Memory**: Maintain chat history and context across sessions
+- **Source Attribution**: Show which documents were used to answer questions
+- **Quote Extraction**: Display relevant quotes from source documents
+- **Multi-turn Conversations**: Support for follow-up questions and clarifications
+
+### User Experience
+- **Modern UI**: Clean, responsive interface built with Svelte and Tailwind CSS
+- **Real-time Chat**: Interactive chat interface with typing indicators
+- **Document Management**: Upload, view, and manage your knowledge base
+- **Source Visualization**: See which documents contributed to each answer
+
+## 🏗️ Project Structure
 
 ```
 raggy/
-├── backend/           # Django backend application
-│   ├── manage.py     # Django management script
-│   ├── backend/      # Django project configuration
-│   ├── conversations/ # Conversations app
-│   ├── knowledge_base/ # Knowledge base app
-│   └── ...           # Other Django apps
-├── frontend/         # Frontend application
-├── .docker/          # Docker volume mounts and configurations
-├── concepts/         # Project documentation and concepts
-├── docker-compose.yml # Docker services configuration
-├── pyproject.toml    # Python dependencies and project configuration
-└── milvus.py        # Milvus integration utilities
+├── backend/                    # Django backend application
+│   ├── manage.py              # Django management script
+│   ├── backend/               # Django project configuration
+│   ├── conversations/         # Chat and conversation handling
+│   │   ├── engine.py         # LlamaIndex chat engine
+│   │   └── models.py         # Conversation and message models
+│   ├── knowledge_base/        # Document processing and vector storage
+│   │   ├── extractors/       # Document content extractors
+│   │   ├── ingestion/        # Document ingestion pipeline
+│   │   └── vector_store.py   # Milvus vector store integration
+│   ├── users/                # User authentication and management
+│   └── core/                 # Core utilities and Celery tasks
+├── frontend/                  # Svelte frontend application
+│   ├── src/
+│   │   ├── components/       # Reusable UI components
+│   │   ├── routes/           # SvelteKit routes and pages
+│   │   ├── stores/           # State management
+│   │   └── types/            # TypeScript type definitions
+│   └── package.json          # Frontend dependencies
+├── docker-compose.yml         # Docker services configuration
+├── pyproject.toml            # Python dependencies
+└── README.md                 # This file
 ```
 
-## Prerequisites
+## 🛠️ Technology Stack
 
-- Docker and Docker Compose
-- Python 3.12+
-- uv (Python package installer)
+### Backend
+- **Django 5.1**: Web framework and API
+- **Django REST Framework**: RESTful API development
+- **LlamaIndex**: RAG framework for document processing and retrieval
+- **Milvus**: Vector database for similarity search
+- **Celery**: Asynchronous task processing
+- **PostgreSQL**: Primary database
+- **Redis**: Caching and message broker
 
-## Setup Instructions
+### Frontend
+- **SvelteKit**: Modern frontend framework
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first CSS framework
+- **Flowbite**: UI component library
+- **Vite**: Build tool and dev server
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd raggy
-   ```
+### Infrastructure
+- **Docker**: Containerization
+- **Milvus**: Vector database (standalone mode)
+- **MinIO**: Object storage for Milvus
+- **Etcd**: Metadata storage for Milvus
 
-2. **Install uv**
-   ```bash
-   # Using curl (Linux/macOS)
-   curl -LsSf https://astral.sh/uv/install.sh | sh
+## 🚀 Setup Instructions
 
-   # Or using Homebrew (macOS)
-   brew install uv
-   ```
+### Prerequisites
 
-3. **Set up the Python environment**
-   ```bash
-   # Create virtual environment and install dependencies
-   uv venv
-   uv sync
+- **Docker and Docker Compose**
+- **Python 3.12+**
+- **Node.js 18+**
+- **uv** (Python package installer)
 
-   # Optionally activate the virtual environment
-   source .venv/bin/activate  # On Unix/macOS
-   # or
-   .venv\Scripts\activate  # On Windows
+### 1. Clone and Setup
 
-   # To add new dependencies (during development)
-   uv add <package-name>
-   
-   # To run commands without activating venv
-   uv run python your_script.py
-   ```
+```bash
+git clone <repository-url>
+cd raggy
+```
 
-4. **Configure environment variables**
-   Create a `.env` file in the root directory with necessary configurations:
-   ```bash
-   # Database
-   DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
-   
-   # Redis
-   REDIS_URL=redis://localhost:6379/0
-   
-   # Milvus
-   MILVUS_HOST=localhost
-   MILVUS_PORT=19530
-   
-   # Python Path
-   PYTHONPATH=${PYTHONPATH}:${PWD}/backend
-   
-   # Add other required environment variables
-   ```
+### 2. Install uv (Python Package Manager)
 
-5. **Start Docker services**
-   ```bash
-   docker-compose up -d
-   ```
+```bash
+# Using curl (Linux/macOS)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-   This will start the following services:
-   - PostgreSQL (port 5432)
-   - Redis (port 6379)
-   - Milvus standalone (port 19530)
-   - Milvus Attu UI (port 3000)
-   - MinIO (ports 9000, 9001)
-   - Etcd
+# Or using Homebrew (macOS)
+brew install uv
+```
 
-6. **Initialize the database**
-   ```bash
-   # Make sure you're in the backend directory
-   cd backend
-   
-   # Run migrations and create superuser
-   PYTHONPATH=${PWD} uv run python manage.py migrate
-   PYTHONPATH=${PWD} uv run python manage.py createsuperuser
-   ```
+### 3. Configure Environment
 
-7. **Run the development server**
-   ```bash
-   # Make sure you're in the backend directory
-   cd backend
-   
-   # Start the Django development server
-   PYTHONPATH=${PWD} uv run python manage.py runserver
-   ```
+Create a `.env` file in the root directory:
 
-## Running the Application
+```bash
+# Database
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
 
-Follow these steps to run all components of the application:
+# Redis
+REDIS_URL=redis://localhost:6379/0
 
-1. **Start Docker Services**
-   ```bash
-   # Start all required services (PostgreSQL, Redis, Milvus, MinIO, etc.)
-   docker-compose up -d
+# Milvus
+MILVUS_HOST=localhost
+MILVUS_PORT=19530
 
-   # Verify services are running
-   docker-compose ps
-   ```
+# OpenAI (for embeddings and chat)
+OPENAI_API_KEY=your_openai_api_key_here
 
-2. **Start Django Backend Server**
-   ```bash
-   # Navigate to backend directory
-   cd backend
+# Python Path
+PYTHONPATH=${PYTHONPATH}:${PWD}/backend
+```
 
-   # Start Django development server
-   PYTHONPATH=${PWD} uv run python manage.py runserver
-   ```
-   The Django server will be available at http://localhost:8000
+### 4. Setup Python Environment
 
-3. **Start Celery Worker**
-   ```bash
-   # In a new terminal, navigate to backend directory
-   cd backend
+```bash
+# Create virtual environment and install dependencies
+uv venv
+uv sync
 
-   # Start Celery worker
-   PYTHONPATH=${PWD} uv run celery --app core worker --loglevel=info --concurrency=1 --pool=solo --queues=celery
-   ```
+# Activate virtual environment (optional)
+source .venv/bin/activate  # On Unix/macOS
+# or
+.venv\Scripts\activate     # On Windows
+```
 
-4. **Start Frontend Development Server**
-   ```bash
-   # In a new terminal, navigate to frontend directory
-   cd frontend
+### 5. Start Infrastructure Services
 
-   # Install dependencies (if not done already)
-   npm install
+```bash
+# Start all required services
+docker-compose up -d
 
-   # Start development server
-   npm run dev
-   ```
-   The frontend will be available at http://localhost:3000
+# Verify services are running
+docker-compose ps
+```
 
-5. **Access Milvus Attu UI**
-   - Open your browser and navigate to http://localhost:3000
-   - Default credentials:
-     - Username: root
-     - Password: milvus
+This starts:
+- **PostgreSQL** (port 5432)
+- **Redis** (port 6379)
+- **Milvus** (port 19530)
+- **Milvus Attu UI** (port 3000) - Vector database management
+- **MinIO** (ports 9000, 9001) - Object storage
+- **Etcd** - Metadata storage
 
-### Verifying the Setup
+### 6. Initialize Database
 
-1. **Check Backend Status**
-   - Visit http://localhost:8000/admin for Django admin interface
-   - Visit http://localhost:8000/api for API documentation
+```bash
+cd backend
 
-2. **Monitor Celery Tasks**
-   - Check terminal running Celery for task logs
-   - Tasks status will be visible in the console
+# Run migrations
+PYTHONPATH=${PWD} uv run python manage.py migrate
 
-3. **Vector Database Management**
-   - Use Attu UI at http://localhost:3000 to manage Milvus
-   - Monitor collections, partitions, and perform searches
+# Create superuser
+PYTHONPATH=${PWD} uv run python manage.py createsuperuser
+```
 
-### Stopping the Application
+### 7. Start Backend Services
 
-1. Stop the frontend development server with Ctrl+C
-2. Stop the Celery worker with Ctrl+C
-3. Stop the Django server with Ctrl+C
-4. Stop Docker services:
+```bash
+# Terminal 1: Start Django server
+cd backend
+PYTHONPATH=${PWD} uv run python manage.py runserver
+
+# Terminal 2: Start Celery worker
+cd backend
+PYTHONPATH=${PWD} uv run celery --app core worker --loglevel=info --concurrency=1 --pool=solo --queues=celery
+```
+
+### 8. Start Frontend
+
+```bash
+# Terminal 3: Install dependencies and start dev server
+cd frontend
+npm install
+npm run dev
+```
+
+## 🌐 Access Points
+
+- **Frontend Application**: http://localhost:5173 (Svelte dev server)
+- **Django Admin**: http://localhost:8000/admin
+- **Django API**: http://localhost:8000/api
+- **Milvus Attu UI**: http://localhost:3000 (Username: `root`, Password: `milvus`)
+
+## 🔧 Development Workflow
+
+### Adding New Dependencies
+
+```bash
+# Python dependencies
+uv add <package-name>
+
+# Frontend dependencies
+cd frontend
+npm install <package-name>
+```
+
+### Running Tests
+
+```bash
+# Backend tests
+cd backend
+PYTHONPATH=${PWD} uv run python manage.py test
+
+# Frontend tests
+cd frontend
+npm run test
+```
+
+### Code Quality
+
+```bash
+# Frontend linting and formatting
+cd frontend
+npm run lint
+npm run format
+```
+
+## 📚 Learning Resources
+
+### RAG and Vector Databases
+- [LlamaIndex Documentation](https://docs.llamaindex.ai/)
+- [Milvus Documentation](https://milvus.io/docs/)
+- [Vector Database Concepts](https://milvus.io/docs/vector_database.md)
+
+### Frontend Development
+- [SvelteKit Documentation](https://kit.svelte.dev/)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Port Conflicts**: If you get port conflicts, check if services are already running:
    ```bash
    docker-compose down
+   docker-compose up -d
    ```
 
-## Development
+2. **Milvus Connection Issues**: Ensure Milvus is fully started:
+   ```bash
+   docker-compose logs standalone
+   ```
 
-- The backend is built with Django 5.1 and uses Django REST Framework for API development
-- Milvus is used as the vector database for efficient similarity search
-- Celery handles asynchronous tasks with Redis as the message broker
-- PostgreSQL serves as the primary database
+3. **Python Path Issues**: Always use the correct PYTHONPATH:
+   ```bash
+   PYTHONPATH=${PWD} uv run python manage.py <command>
+   ```
 
-## Services
+### Stopping Services
 
-### Milvus Setup
-- Milvus runs in standalone mode for development
-- Attu UI is available at http://localhost:3000 for vector database management
-- MinIO provides object storage for Milvus
-- Etcd handles metadata storage
-
-### Database
-- PostgreSQL stores relational data and metadata
-- Default credentials (for development only):
-  - Database: postgres
-  - User: postgres
-  - Password: postgres
-
-### Caching
-- Redis handles caching and Celery task queue
-- Available on port 6379
-
-## Contributing
-
-1. Create a new branch for your feature
-2. Make your changes
-3. Write tests if applicable
-4. Submit a pull request
-
-## Security Notes
-
-- Default credentials in docker-compose.yml are for development only
-- Configure proper authentication for Milvus in production
-- Use environment variables for sensitive information
-
-## Resources
-
-### Milvus Documentation
-- [Milvus Documentation](https://milvus.io/docs/index.md)
-- [Index Types](https://milvus.io/docs/index.md) - Choose between in-memory and disk index
-
-## ToDo
-
-- [ ] Configure Milvus user authentication
-- [ ] Add production deployment guide
-- [ ] Implement automated testing pipeline
-
-
-
-
-
-
-RUN COMMANDS
-python manage.py runserver
-❯ celery --app  core worker --loglevel=info --concurrency=1 --pool=solo --queues=celery
+```bash
+# Stop frontend and backend servers (Ctrl+C)
+# Stop Docker services
+docker-compose down
+```
