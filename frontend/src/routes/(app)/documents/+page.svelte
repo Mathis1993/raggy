@@ -339,9 +339,6 @@
                                     class="!p-2 border-gray-200">
                                 <EyeOutline class="w-4 h-4 text-gray-500"/>
                             </Button>
-                            <Button outline={true} size="sm" class="!p-2 border-gray-200">
-                                <DotsVerticalOutline class="w-4 h-4 text-gray-500"/>
-                            </Button>
                         </div>
                     </TableBodyCell>
                 </TableBodyRow>
