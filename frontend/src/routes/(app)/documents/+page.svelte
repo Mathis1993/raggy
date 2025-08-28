@@ -66,9 +66,8 @@
     const acceptedFileExtensions = ['.pdf', '.txt', '.doc', '.docx'];
 
     // Filtering, Searching and Paginiation
-    let selectedDocumentType: string = "";
+    let selectedDocumentType: string = "all";
     let searchQuery = "";
-    let documentType = "";
     const debouncedSearch = debounce(filterDocuments, 500);
 
     // Add status color mapping
@@ -85,7 +84,7 @@
         if (type === 'PDF') {
             return FilePdfSolid;
         } else if (type === 'WEBSITE') {
-            return FileSearch;
+            return FileSearchSolid;
         } else {
             return FileSearchSolid;
         }
@@ -109,7 +108,7 @@
 
         // Already loaded the first page, start from the second page
         currentPage++;
-        const response = await getDocuments(documentType, searchQuery, currentPage);
+        const response = await getDocuments(selectedDocumentType, searchQuery, currentPage);
         const newDocuments: ContextDocument[] = response.results;
         const totalDocuments: number = response.count;
         documents = [...documents, ...newDocuments];
@@ -121,8 +120,8 @@
 
     function filterDocuments() {
         let searchParams = new URLSearchParams(window.location.search);
-        if (documentType) {
-            searchParams.set('type', documentType);
+        if (selectedDocumentType && selectedDocumentType !== 'all') {
+            searchParams.set('type', selectedDocumentType);
         } else {
             searchParams.delete('type');
         }
@@ -155,7 +154,8 @@
                 closeModal();
             }
         } catch (error) {
-            errorMessage.set(error.message); // Set the error message from the caught error
+            const errorMessageText = error instanceof Error ? error.message : 'An unknown error occurred';
+            errorMessage.set(errorMessageText); // Set the error message from the caught error
         } finally {
             createProcessIsRunning = false;
         }
@@ -165,7 +165,7 @@
     async function handleCreateFromFileUpload() {
         const fileInput = document.querySelector('#file') as HTMLInputElement;
         errorMessage.set('');
-        if (fileInput?.files?.length > 0) {
+        if (fileInput?.files && fileInput.files.length > 0) {
             try {
                 const file = fileInput.files[0];
                 const document = await createDocumentFromFileUpload(file, documentName);
@@ -175,7 +175,8 @@
                     closeModal();
                 }
             } catch (error) {
-                errorMessage.set(error.message);
+                const errorMessageText = error instanceof Error ? error.message : 'An unknown error occurred';
+                errorMessage.set(errorMessageText);
             }
         }
     }
@@ -198,6 +199,13 @@
 
     onMount(() => {
         refreshIntervalId = setInterval(refreshDocuments, 5000);
+        
+        // Initialize selectedDocumentType from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const typeParam = urlParams.get('type');
+        if (typeParam) {
+            selectedDocumentType = typeParam;
+        }
     });
 
     onDestroy(() => {
@@ -237,31 +245,33 @@
         </div>
     </div>
 
-    <TableHeader divClass="mb-4" divOuterClass="border-0">
+    <TableHeader divOuterClass="border-0">
         <Search name="search" slot="search" size="md" bind:value={searchQuery} on:input={debouncedSearch}/>
-        <Button color="light" class="ml-2">
-            <FilterOutline class="w-4 h-4"/>
-            Filter
-        </Button>
-        <Dropdown class="w-60">
-            <ul class="p-2">
-                <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <Radio name="documentType" bind:group={selectedDocumentType} value='all'
-                           on:change={() => {documentType="all"; filterDocuments()}}>All
-                    </Radio>
-                </li>
-                <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <Radio name="documentType" bind:group={selectedDocumentType} value='website'
-                           on:change={() => {documentType="website"; filterDocuments()}}>Websites
-                    </Radio>
-                </li>
-                <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
-                    <Radio name="documentType" bind:group={selectedDocumentType} value='text'
-                           on:change={() => {documentType="pdf"; filterDocuments()}}>Files
-                    </Radio>
-                </li>
-            </ul>
-        </Dropdown>
+        <div class="flex items-center gap-2">
+            <Button id="filter-menu" color="light" class="ml-2">
+                <FilterOutline class="w-4 h-4"/>
+                Filter
+            </Button>
+            <Dropdown placement="bottom" triggeredBy="#filter-menu" class="w-60">
+                <ul class="p-2">
+                    <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <Radio name="documentType" bind:group={selectedDocumentType} value='all'>All
+                        </Radio>
+                    </li>
+                    <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <Radio name="documentType" bind:group={selectedDocumentType} value='WEBSITE'>Websites
+                        </Radio>
+                    </li>
+                    <li class="rounded p-2 hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <Radio name="documentType" bind:group={selectedDocumentType} value='PDF'>Files
+                        </Radio>
+                    </li>
+                    <li class="mt-2 pt-2 border-t border-gray-200">
+                        <Button size="sm" class="w-full" on:click={filterDocuments}>Apply Filter</Button>
+                    </li>
+                </ul>
+            </Dropdown>
+        </div>
     </TableHeader>
 
     <Table>
@@ -409,7 +419,7 @@
                      on:dragover|preventDefault
                      on:drop|preventDefault={(e) => {
                         const files = e.dataTransfer?.files;
-                        if (files?.length > 0) {
+                        if (files && files.length > 0) {
                             const fileInput = document.getElementById('file');
                             if (fileInput instanceof HTMLInputElement) {
                                 fileInput.files = files;
