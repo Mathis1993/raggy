@@ -144,11 +144,6 @@
                         <BookOpenOutline class="w-6 h-6" slot="icon"/>
                     </SidebarItem>
 
-                    <SidebarItem class="text-gray-300 hover:bg-gray-700 px-3 py-3 my-1" href="/faq"
-                                active={activeUrl.includes("/faq")} label={sidebarCollapsed ? '' : 'FAQ'}>
-                        <QuestionCircleOutline class="w-6 h-6" slot="icon"/>
-                    </SidebarItem>
-
                     <SidebarItem class="text-gray-300 hover:bg-gray-700 px-3 py-3 my-1" href="/settings"
                                 active={activeUrl.includes("/settings")} label={sidebarCollapsed ? '' : 'Project Settings'}>
                         <AdjustmentsVerticalOutline class="w-6 h-6" slot="icon"/>
