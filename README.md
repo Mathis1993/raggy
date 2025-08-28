@@ -120,22 +120,8 @@ brew install uv
 
 ### 3. Configure Environment
 
-Create a `.env` file in the root directory:
+Copy the `.env-sample` as `.env` and enter your secrets (e.g. an OpenAI API key and a Sendgrid API key for email verification) inside the backend directory.
 
-```bash
-# Database
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
-
-# Redis
-REDIS_URL=redis://localhost:6379/0
-
-# Milvus
-MILVUS_HOST=localhost
-MILVUS_PORT=19530
-
-# OpenAI (for embeddings and chat)
-OPENAI_API_KEY=your_openai_api_key_here
-```
 
 ### 4. Setup Python Environment
 
