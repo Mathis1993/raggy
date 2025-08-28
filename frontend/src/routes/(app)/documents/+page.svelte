@@ -147,9 +147,9 @@
         createProcessIsRunning = true;
         errorMessage.set(''); // Reset error message on new submission
         try {
-            let document = await createDocumentFromUrl(documentURL);
-            if (document) {
-                documents.push(document);
+            let response = await createDocumentFromUrl(documentURL);
+            if (response && response.document) {
+                documents.push(response.document);
                 await invalidateAll();
                 closeModal();
             }
@@ -168,9 +168,9 @@
         if (fileInput?.files && fileInput.files.length > 0) {
             try {
                 const file = fileInput.files[0];
-                const document = await createDocumentFromFileUpload(file, documentName);
-                if (document) {
-                    documents.push(document);
+                const response = await createDocumentFromFileUpload(file, documentName);
+                if (response && response.document) {
+                    documents.push(response.document);
                     await invalidateAll();
                     closeModal();
                 }
@@ -214,13 +214,25 @@
 
 
     async function refreshDocuments() {
+        let hasUpdates = false;
         for (let i = 0; i < documents.length; i++) {
-            if (documents[i].status === 'processing') {
-                const updatedDocument = await retrieveDocument(documents[i].id);
-                if (updatedDocument.status !== 'processing') {
-                    documents[i] = updatedDocument;
+            if (documents[i].status === 'PROCESSING') {
+                try {
+                    const updatedDocument = await retrieveDocument(documents[i].id);
+                    if (updatedDocument.status !== 'PROCESSING') {
+                        documents[i] = updatedDocument;
+                        hasUpdates = true;
+                        console.log(`Document ${documents[i].id} status updated to: ${updatedDocument.status}`);
+                    }
+                } catch (error) {
+                    console.error(`Failed to refresh document ${documents[i].id}:`, error);
                 }
             }
+        }
+        
+        // Force reactivity if we have updates
+        if (hasUpdates) {
+            documents = [...documents];
         }
     }
 
@@ -231,10 +243,10 @@
     <div class="flex justify-between items-center mb-4">
         <h5 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Documents</h5>
         <div class="flex items-center gap-2">
-            {#if documents.some(doc => doc.status === 'failed')}
+            {#if documents.some(doc => doc.status === 'FAILED')}
                 <div class="flex items-center text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-lg">
                     <ExclamationCircleOutline class="w-4 h-4 mr-1"/>
-                    {documents.filter(doc => doc.status === 'failed').length} documents indexing failed
+                    {documents.filter(doc => doc.status === 'FAILED').length} documents indexing failed
                     <Button size="xs" color="alternative" class="ml-2">RETRY</Button>
                 </div>
             {/if}
