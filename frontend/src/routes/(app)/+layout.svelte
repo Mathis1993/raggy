@@ -104,7 +104,7 @@
                     <BarsSolid class="w-4 h-4"/>
                 </Button>
             {/if}
-            <NavBrand href="/" class="text-gray-50 flex items-center">
+            <NavBrand href="/conversations" class="text-gray-50 flex items-center">
                 <svg class="w-8 h-8 mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                      fill="none" viewBox="0 0 24 24">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
