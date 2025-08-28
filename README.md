@@ -10,6 +10,8 @@
 
 > **Note**: This is a **learning project**, not production-ready software. The focus is on understanding RAG concepts, embeddings, and vector search rather than building a polished application.
 
+![raggy](https://github.com/user-attachments/assets/3a674ca8-96d7-4eb8-be12-2febe2f88887)
+
 ## 🎯 Project Goals
 
 - **Educational**: Deep dive into RAG systems, vector databases, and embeddings
